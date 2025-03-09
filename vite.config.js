@@ -8,4 +8,8 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    build: {
+        outDir: 'public/build', // Laravel menyimpan hasil build di sini
+        emptyOutDir: true, // Menghapus file lama sebelum build baru
+    }
 });
