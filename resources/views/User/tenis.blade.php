@@ -1,5 +1,4 @@
-@extends('Admin.admin')
+@extends('User.user')
 @section('content')
 
 @endsection
-

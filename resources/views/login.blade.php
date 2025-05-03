@@ -10,14 +10,14 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="{{ asset('lte/plugins/fontawesome-free/css/all.min.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <!-- icheck bootstrap -->
     <link rel="stylesheet" href="{{ asset('lte/plugins/icheck-bootstrap/icheck-bootstrap.min.css') }}">
     <!-- Theme style -->
-    <link rel="stylesheet" href="{{ asset('lte/dist/css/adminlte.min.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
 </head>
 
-<body class="hold-transition login-page">
+<body class="hold-transition login-page" style="background-image: url('{{ asset('img/body-login.png') }}'); background-size: cover; background-repeat: no-repeat; background-position: center;">
     <!-- Preloader -->
     <div class="preloader flex-column justify-content-center align-items-center">
         <img class="animation__shake" src="{{ asset('img/logo.png') }}" alt="AdminLTELogo" height="180"
@@ -28,34 +28,35 @@
         <!-- /.login-logo -->
         <div class="card card-outline card-danger">
             <div class="card-header text-center">
-                <a href="{{ url('/') }}" class="h1"><b style="color: red;" onmouseover="this.style.color='black'" onmouseout="this.style.color='red'">E-Sewa Fasilitas</b></a>
+                <a href="{{ url('/') }}" class="h1"><b style="color: red;"
+                        onmouseover="this.style.color='black'" onmouseout="this.style.color='red'">E-Sewa
+                        Fasilitas</b></a>
             </div>
             <div class="card-body">
                 <h2 class="login-box-msg">DISPORA SEMARANG</h2>
-
-                <form action="#" method="post">
+                <form action="{{ route('login-proses') }}" method="post">
                     @csrf
                     <div class="input-group mt-3">
-                        <input type="text" name="nama" class="form-control" placeholder="Username (Nama KTP)">
+                        <input type="text" name="username" class="form-control" placeholder="Username">
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-user"></span>
                             </div>
                         </div>
                     </div>
-                    @error('nama')
+                    @error('username')
                         <small>{{ $message }}</small>
                     @enderror
 
                     <div class="input-group mt-3">
-                        <input type="text" name="no_ktp" class="form-control" placeholder="Nomor KTP">
+                        <input type="password" name="password" class="form-control" placeholder="Password">
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-lock"></span>
                             </div>
                         </div>
                     </div>
-                    @error('no_ktp')
+                    @error('password')
                         <small>{{ $message }}</small>
                     @enderror
 
@@ -66,7 +67,10 @@
                         </div>
                         <!-- /.col -->
                         <p class="col-6 m-2">
-                            <a href="#" class="text-center" style="color:darkorange">Registrasi Pengguna</a>
+                            <a href="{{ url('/register') }}" class="text-center"
+                                style="color:rgb(59, 63, 75); text-decoration: underline;"
+                                onmouseover="this.style.color='black'"
+                                onmouseout="this.style.color='rgb(28, 33, 47)'">Registrasi Pengguna</a>
                         </p>
                     </div>
                 </form>
@@ -78,25 +82,36 @@
     <!-- /.login-box -->
 
     <!-- jQuery -->
-    <script src="{{ asset('lte/plugins/jquery/jquery.min.js') }}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <!-- Bootstrap 4 -->
-    <script src="{{ asset('lte/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <!-- AdminLTE App -->
-    <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- AdminLTE JS -->
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
     {{-- aler2 --}}
     <script src="{{ asset('lte/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    @if ($message = Session::get('succes'))
+    @if ($message = Session::get('success'))
         <script>
-            Swal.fire('{{ $message }}');
-        </script>
-    @endif
-    @if ($message = Session::get('failed'))
-        <script>
-            Swal.fire('{{ $message }}');
+            Swal.fire({
+                title: "Berhasil!",
+                text: {!! json_encode($message) !!},
+                icon: "success"
+            });
         </script>
     @endif
 
+    @if ($message = Session::get('error'))
+        <script>
+            Swal.fire({
+                title: "Gagal!",
+                text: {!! json_encode($message) !!},
+                icon: "error"
+            });
+        </script>
+    @endif
+
+
 </body>
+
 </html>

@@ -12,8 +12,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Tambahkan middleware global di sini
+        $middleware->append([
+            \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
+            \Illuminate\Session\Middleware\StartSession::class, // Untuk sesi
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class, // Untuk validasi form
+        ]);
+
+        // Middleware alias untuk role-based authentication
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'user' => \App\Http\Middleware\UserMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

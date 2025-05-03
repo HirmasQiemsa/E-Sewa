@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Laravel\Jetstream\HasProfilePhoto;
+// use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 
 class User extends Authenticatable
 {
@@ -16,19 +19,20 @@ class User extends Authenticatable
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
-    use HasProfilePhoto;
+    // use HasProfilePhoto;
     use Notifiable;
     use TwoFactorAuthenticatable;
+    use SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
+
+
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'username', 'name', 'password', 'alamat', 'no_hp', 'role','foto',
     ];
 
     /**
@@ -48,9 +52,6 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $appends = [
-        'profile_photo_url',
-    ];
 
     /**
      * Get the attributes that should be cast.
@@ -63,5 +64,16 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    // Mutator atau accessor untuk url
+    // public function getUserProfilePhotoUrlAttribute()
+    // {
+    //     return $this->profile_photo_path ? asset('storage/' . $this->profile_photo_path) : asset('default-avatar.png');
+    // }
+
+    public function checkouts(): HasMany
+    {
+        return $this->hasMany(Checkout::class);
     }
 }

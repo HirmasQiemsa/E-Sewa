@@ -21,15 +21,22 @@ class CreateNewUser implements CreatesNewUsers
     {
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
+            'alamat' => ['required', 'string', 'max:255'],
+            'no_ktp' => ['required', 'numeric', 'digits:16', 'unique:users'],
+            'no_hp' => ['required', 'numeric', 'unique:users'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => $this->passwordRules(),
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
         ])->validate();
 
         return User::create([
             'name' => $input['name'],
+            'alamat' => $input['alamat'],
+            'no_ktp' => $input['no_ktp'],
+            'no_hp' => $input['no_hp'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
+            'role' => $input['role'] ?? 'user', // Default role adalah "user"
         ]);
     }
 }

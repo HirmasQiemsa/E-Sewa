@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Home - Fasilitas Dispora</title>
+    <title>E-Sewa Fasilitas Dispora</title>
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet"
@@ -101,8 +101,8 @@
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
                         <li class="nav-item active mt-2">
-                            <a href="{{ url('login') }}" class="nav-link active">
-                                <i class="nav-icon fas fa-user"></i>
+                            <a href="{{ route('login') }}" class="nav-link active">
+                                <i class="nav-icon fas fa-users"></i>
                                 <p>
                                     Login / Register
                                 </p>

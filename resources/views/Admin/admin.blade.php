@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Home - Fasilitas Dispora</title>
+    <title>E-Sewa Fasilitas Dispora</title>
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet"
@@ -49,7 +49,7 @@
 </head>
 
 
-<body class="hold-transition sidebar-mini sidebar-collapse layout-fixed" style="padding-bottom: 4%">
+<body class="hold-transition sidebar-mini layout-fixed" style="padding-bottom: 4%">
     <div class="wrapper">
         <!-- Preloader -->
         <div class="preloader flex-column justify-content-center align-items-center">
@@ -81,7 +81,7 @@
         </nav>
 
         <!-- Main Sidebar Container -->
-        <aside class="main-sidebar sidebar-light-danger elevation-4">
+        <aside class="main-sidebar sidebar-dark-danger elevation-4">
             <!-- Sidebar -->
             <div class="sidebar">
                 <!-- SidebarSearch Form -->
@@ -98,16 +98,74 @@
                 </div>
                 <!-- Sidebar Menu -->
                 <nav class="mt-2">
+                    {{-- red --}}
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
                         <li class="nav-item active mt-2">
-                            <a href="{{ url('login') }}" class="nav-link active">
-                                <i class="nav-icon fas fa-user"></i>
+                            <a href="{{ route('admin.dashboard') }}" class="nav-link active bg-danger">
+                                <i class="nav-icon fas fa-database"></i>
                                 <p>
-                                    Admin
+                                    Dashboard
                                 </p>
                             </a>
                         </li>
+                    </ul>
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                        data-accordion="false">
+                        <li class="nav-item active mt-2">
+                            <a href="{{ route('admin.fasilitas.index') }}" class="nav-link active bg-danger">
+                                <i class="nav-icon fas fa-map"></i>
+                                <p>
+                                    Kelola Fasilitas
+                                </p>
+                            </a>
+                        </li>
+                    </ul>
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                        data-accordion="false">
+                        <li class="nav-item active mt-2">
+                            <a href="{{ route('admin.users.index') }}" class="nav-link active bg-danger">
+                                <i class="nav-icon fas fa-users"></i>
+                                <p>
+                                    Kelola User
+                                </p>
+                            </a>
+                        </li>
+                    </ul>
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                        data-accordion="false">
+                        <li class="nav-item active mt-2">
+                            <a href="{{ route('admin.riwayat.index') }}" class="nav-link active bg-danger">
+                                <i class="nav-icon fas fa-history"></i>
+                                <p>
+                                    Riwayat
+                                </p>
+                            </a>
+                        </li>
+
+                        {{-- blue --}}
+                        <li class="nav-item active mt-2">
+                            <a href="#" class="nav-link active bg-primary">
+                                <i class="nav-icon fas fa-user"></i>
+                                <p>
+                                    Admin Profile
+                                </p>
+                            </a>
+                        </li>
+                        <li class="nav-item active mt-2">
+                            <form method="POST" action="{{ route('logout') }}" id="logout-form">
+                                @csrf
+                            <a href="{{ route('logout') }}" class="nav-link active bg-primary" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                <i class="nav-icon fas fa-times-circle"></i>
+                                <p>
+                                    Logout
+                                </p>
+                            </a>
+                            </form>
+                        </li>
+                    </ul>
+                    <ul>
+
                     </ul>
                 </nav>
                 <!-- /.sidebar-menu -->
@@ -126,7 +184,8 @@
     </div>
     <!-- ./wrapper -->
 
-    <!-- jQuery -->
+
+    <!-- jQuery UI 1.11.4 -->
     <script src="{{ asset('lte/jquery/jquery.min.js') }}"></script>
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous">
@@ -137,8 +196,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
     </script>
-    <!-- jQuery UI 1.11.4 -->
-    <script src="{{ asset('lte/jquery-ui/jquery-ui.min.js') }}"></script>
     <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
     <script>
         $.widget.bridge('uibutton', $.ui.button)
@@ -175,6 +232,36 @@
     <!-- SweetAlert2 -->
     <script src="{{ asset('lte/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
     <!-- Page specific script -->
+    <script>
+        $(document).ready(function() {
+            @if (session('success'))
+                toastr.success("{{ session('success') }}");
+            @endif
+            @if ($errors->any())
+                toastr.error("{{ $errors->first() }}");
+            @endif
+
+            // Tooltip bootstrap
+            $('[data-toggle="tooltip"]').tooltip();
+
+            $('.toggle-status').on('change', function() {
+                var scheduleId = $(this).data('id');
+                $.ajax({
+                    url: '/schedules/toggle/' + scheduleId,
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        toastr.success(response.message);
+                    },
+                    error: function(response) {
+                        toastr.error('Terjadi kesalahan saat memperbarui status.');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>
