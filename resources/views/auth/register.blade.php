@@ -11,6 +11,11 @@
             @csrf
 
             <div>
+                <x-label for="username" value="Username" />
+                <x-input id="username" class="block mt-1 w-full" type="text" name="username" :value="old('username')" required autofocus />
+            </div>
+
+            <div>
                 <x-label for="name" value="Nama Lengkap" />
                 <x-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus />
             </div>
@@ -18,11 +23,6 @@
             <div class="mt-4">
                 <x-label for="alamat" value="Alamat" />
                 <x-input id="alamat" class="block mt-1 w-full" type="text" name="alamat" :value="old('alamat')" required />
-            </div>
-
-            <div class="mt-4">
-                <x-label for="no_ktp" value="Nomor KTP" />
-                <x-input id="no_ktp" class="block mt-1 w-full" type="text" name="no_ktp" :value="old('no_ktp')" required />
             </div>
 
             <div class="mt-4">

@@ -1,7 +1,7 @@
 @extends('Admin.admin')
 @section('content')
     <!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper">
+
         <!-- Content Header (Page header) -->
         <div class="content-header">
             <div class="container-fluid">
@@ -38,8 +38,7 @@
 
                         <div class="col-12 col-sm-6 col-md-4">
                             <div class="info-box mb-3">
-                                <span class="info-box-icon bg-success elevation-1"><i
-                                        class="fas fa-history"></i></span>
+                                <span class="info-box-icon bg-success elevation-1"><i class="fas fa-history"></i></span>
 
                                 <div class="info-box-content">
                                     <span class="info-box-text">Riwayat Transaksi</span>
@@ -632,4 +631,5 @@
             <!-- /.content -->
         </div>
         <!-- /.content-wrapper -->
-    @endsection
+    
+@endsection

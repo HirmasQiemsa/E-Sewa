@@ -196,8 +196,8 @@
         </div>
         <!-- /.content-wrapper -->
 
-        <footer class="main-footer" style="position: fixed; bottom: 0; width: 100%; z-index: 10;">
-            <strong>Copyright &copy; 2025 <a href="#"></a>.</strong>
+        <footer class="main-footer bg-dark" style="position: fixed; bottom: 0; width: 100%; z-index: 10;">
+            <strong>Copyright &copy; 2025 <a href="#">E-SEWA</a>.</strong>
             All rights reserved.
         </footer>
     </div>

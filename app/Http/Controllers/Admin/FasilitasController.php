@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Fasilitas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Carbon\Carbon;
+use App\Models\Checkout;
+use App\Models\Fasilitas;
+use App\Models\User;
 
 class FasilitasController extends Controller
 {
-    // Menampilkan Halaman
+// Menampilkan Halaman
     public function index()
     {
         $data = Fasilitas::withTrashed()->get();
@@ -20,7 +23,18 @@ class FasilitasController extends Controller
         return view('Admin.Fasilitas.tambah');
     }
 
-    // Menyimpan fasilitas baru
+
+// Fungsi untuk menghitung durasi penggunaan dalam jam
+    private function hitungDurasi($waktuMulai, $waktuSelesai)
+    {
+        $start = Carbon::createFromFormat('H:i', $waktuMulai);
+        $end = Carbon::createFromFormat('H:i', $waktuSelesai);
+
+        return $end->diffInHours($start);
+    }
+
+
+// Menyimpan fasilitas baru
     public function store(Request $request)
     {
         $request->validate([
@@ -46,15 +60,72 @@ class FasilitasController extends Controller
 
         return redirect()->route('admin.fasilitas.index')->with('success', 'Fasilitas berhasil ditambahkan.');
     }
+// Menyimpan data penggunaan fasilitas
+    public function store_gunakan(Request $request)
+    {
+        // Validasi input
+        $request->validate([
+            'user_id' => 'nullable|exists:users,id',
+            'fasilitas_id' => 'required|exists:fasilitas,id',
+            'tanggal' => 'required|date',
+            'waktu_mulai' => 'required|date_format:H:i',
+            'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai',
+            'harga' => $request->is_event ? 'nullable' : 'required|numeric|min:0',
+            'is_event' => 'nullable|boolean',
+        ]);
 
-    // Menampilkan form edit
+        // Ambil data fasilitas
+        $fasilitas = Fasilitas::findOrFail($request->fasilitas_id);
+
+        // Hitung durasi
+        $mulai = strtotime($request->waktu_mulai);
+        $selesai = strtotime($request->waktu_selesai);
+
+        if ($selesai <= $mulai) {
+            return back()->withErrors(['waktu_selesai' => 'Waktu selesai harus lebih dari waktu mulai']);
+        }
+
+        // Tentukan status dan total harga
+        $isEvent = $request->has('is_event');
+        $status = $isEvent ? 'event' : 'menunggu';
+        $durasi = ($selesai - $mulai) / 3600; // dalam jam
+        $hargaPerJam = Fasilitas::find($request->fasilitas_id)->harga;
+        $totalBayar = $request->has('is_event') ? 0 : ($durasi * $hargaPerJam);
+
+
+        // Simpan data ke database
+        Checkout::create([
+            // 'user_id' => auth()->id(), // Atau $request->user_id jika memang dikirim dari form
+            'user_id' => $request->user_id, // bisa null
+            'fasilitas_id' => $request->fasilitas_id,
+            'tanggal' => $request->tanggal,
+            'jam_mulai' => $request->waktu_mulai,
+            'jam_selesai' => $request->waktu_selesai,
+            'total_bayar' => $totalBayar,
+            'status' => $status,
+        ]);
+
+        return redirect()->route('admin.fasilitas.index')
+            ->with('success', 'Fasilitas telah berhasil digunakan.');
+    }
+
+
+// Menampilkan form edit
     public function edit($id)
     {
         $data = Fasilitas::withTrashed()->findOrFail($id);
         return view('Admin.Fasilitas.edit', compact('data'));
     }
+// Menampilkan form 'gunakan'
+    public function gunakan($id)
+    {
+        $fasilitas = Fasilitas::withTrashed()->findOrFail($id);
+        $users = User::all();
+        return view('Admin.Fasilitas.gunakan', compact('fasilitas','users'));
+    }
 
-    // Memperbarui data fasilitas
+
+// Memperbarui data fasilitas
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -85,7 +156,8 @@ class FasilitasController extends Controller
         return redirect()->route('admin.fasilitas.index')->with('success', 'Fasilitas berhasil diperbarui.');
     }
 
-    // Soft delete
+
+// Soft delete
     public function delete($id)
     {
         $fasilitas = Fasilitas::findOrFail($id);
@@ -94,7 +166,8 @@ class FasilitasController extends Controller
         return redirect()->route('admin.fasilitas.index')->with('success', 'Fasilitas berhasil dihapus.');
     }
 
-    // Restore soft-deleted fasilitas
+
+// Restore soft-deleted fasilitas
     public function restore($id)
     {
         $fasilitas = Fasilitas::withTrashed()->findOrFail($id);
@@ -102,4 +175,6 @@ class FasilitasController extends Controller
 
         return redirect()->route('admin.fasilitas.index')->with('success', 'Fasilitas berhasil dipulihkan.');
     }
+
+
 }

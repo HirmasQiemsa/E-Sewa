@@ -1,6 +1,6 @@
 @extends('Admin.admin')
 @section('content')
-    <div class="content-wrapper">
+
         <!-- Content Header (Page header) -->
         <div class="content-header">
             <div class="container-fluid">
@@ -91,5 +91,5 @@
             </div>
         </section>
         <!-- /.content -->
-    </div>
+    
 @endsection

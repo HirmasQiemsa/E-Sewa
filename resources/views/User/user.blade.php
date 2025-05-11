@@ -34,18 +34,6 @@
     <!-- Toastr -->
     <link rel="stylesheet" href="{{ asset('lte/plugins/toastr/toastr.min.css') }}">
 
-    {{-- <style>
-        .navbar-nav {
-            display: flex;
-            align-items: center;
-            width: 100%;
-        }
-
-        .navbar-nav .nav-item:last-child {
-            margin-left: auto;
-            margin-right: 4%;
-        }
-    </style> --}}
 </head>
 
 
@@ -130,7 +118,7 @@
                                 </p>
                             </a>
                         </li>
-                        
+
                         {{-- logout --}}
                         <li class="nav-item active mt-2">
                             <a href="#" class="nav-link active bg-primary">
@@ -162,11 +150,13 @@
         </aside>
 
         <!-- Content Wrapper. Contains page content -->
+        <div class="content-wrapper">
         @yield('content')
+        </div>
         <!-- /.content-wrapper -->
 
-        <footer class="main-footer" style="position: fixed; bottom: 0; width: 100%; z-index: 10;">
-            <strong>Copyright &copy; 2025 <a href="#"></a>.</strong>
+        <footer class="main-footer bg-dark" style="position: fixed; bottom: 0; width: 100%; z-index: 10;">
+            <strong>Copyright &copy; 2025 <a href="#">E-SEWA</a>.</strong>
             All rights reserved.
         </footer>
     </div>

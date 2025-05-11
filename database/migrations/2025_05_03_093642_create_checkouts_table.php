@@ -13,13 +13,10 @@ return new class extends Migration
     {
         Schema::create('checkouts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('fasilitas_id')->constrained('fasilitas')->onDelete('cascade');
-            $table->date('tanggal');
-            $table->time('jam_mulai');
-            $table->time('jam_selesai');
-            $table->bigInteger('total_bayar');
-            $table->enum('status', ['menunggu', 'dibayar', 'selesai', 'batal','event'])->default('menunggu');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('jadwals_id')->nullable()->constrained()->onDelete('cascade');
+            $table->bigInteger('total_bayar')->default(value: 0);
+            $table->enum('status', ['fee', 'lunas', 'batal',])->default('fee');
             $table->softDeletes();
             $table->timestamps();
         });

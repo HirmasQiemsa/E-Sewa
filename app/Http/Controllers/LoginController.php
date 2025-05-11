@@ -7,10 +7,14 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
+//View Blade
     public function login()
     {
         return view('login');
     }
+
+
+//Proses POS
     public function login_proses(Request $request)
     {
         $request->validate([

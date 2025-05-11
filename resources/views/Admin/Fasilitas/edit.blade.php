@@ -1,6 +1,6 @@
 @extends('Admin.admin')
 @section('content')
-    <div class="content-wrapper">
+
         <!-- Content Header (Page header) -->
         <div class="content-header">
             <div class="container-fluid">
@@ -10,7 +10,7 @@
                     </div><!-- /.col -->
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="{{ '/admin/k-fasilitas' }}">Kelola Fasilitas</a></li>
+                            <li class="breadcrumb-item"><a href="{{ '/fasilitas' }}">Kelola Fasilitas</a></li>
                             <li class="breadcrumb-item active">Edit Fasilitas</li>
                         </ol>
                     </div><!-- /.col -->
@@ -110,5 +110,5 @@
             </div>
         </section>
         <!-- /.content -->
-    </div>
+
 @endsection

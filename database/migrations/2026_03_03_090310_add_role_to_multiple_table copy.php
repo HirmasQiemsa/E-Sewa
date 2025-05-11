@@ -14,6 +14,15 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->string('role')->default('user'); // Default role = user
         });
+        Schema::table('admins', function (Blueprint $table) {
+            $table->string('role')->default('admin'); // Default role = admin
+        });
+        Schema::table('petugas_pembayarans', function (Blueprint $table) {
+            $table->string('role')->default('petugas_pembayaran'); // Default role = petugas_pembayaran
+        });
+        Schema::table('petugas_fasilitas', function (Blueprint $table) {
+            $table->string('role')->default('petugas_fasilitas'); // Default role = petugas_fasilitas
+        });
     }
 
     /**

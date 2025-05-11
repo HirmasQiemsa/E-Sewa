@@ -11,14 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('fasilitas', function (Blueprint $table) {
+        Schema::create('jadwals', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_fasilitas');
-            $table->text('deskripsi')->nullable();
-            $table->string('tipe')->nullable();
-            $table->string('lokasi');
-            $table->integer('harga_sewa')->default(value: 0);
-            $table->enum('ketersediaan', ['aktif', 'nonaktif','maintanace'])->default('aktif');
+            $table->foreignId('fasilitas_id')->nullable()->constrained('fasilitas')->onDelete('cascade');
+            $table->date('tanggal');
+            $table->time('jam_mulai');
+            $table->time('jam_selesai');
+            $table->enum('status', ['tersedia', 'terbooking', 'selesai','batal'])->default('tersedia');
             $table->softDeletes();
             $table->timestamps();
         });
@@ -29,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('fasilitas');
+        Schema::dropIfExists('jadwals');
     }
 };
