@@ -43,7 +43,7 @@
                                     @enderror
                                     <!-- Input tersembunyi untuk id dan harga fasilitas -->
                                     <input type="hidden" name="fasilitas_id" id="fasilitas" value="{{ $fasilitas->id }}">
-                                    <input type="hidden" id="fasilitas_harga" value="{{ $fasilitas->harga }}">
+                                    <input type="hidden" id="fasilitas_harga" value="{{ $fasilitas->harga_sewa }}">
                                 </div>
 
                                 <div class="form-group">

@@ -74,9 +74,9 @@
                                     </div>
                                     <div class="form-group">
                                         <label for="exampleInputHarga1">Harga</label>
-                                        <input type="number" name="harga" min="1" step="1"
+                                        <input type="number" name="harga_sewa" min="1" step="1"
                                             class="form-control" id="exampleInputHarga1" placeholder="Harga"></input>
-                                        @error('harga')
+                                        @error('harga_sewa')
                                             <small>{{ $message }}</small>
                                         @enderror
                                     </div>
@@ -91,5 +91,5 @@
             </div>
         </section>
         <!-- /.content -->
-    
+
 @endsection

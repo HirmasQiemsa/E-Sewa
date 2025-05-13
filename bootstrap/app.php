@@ -23,6 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'user' => \App\Http\Middleware\UserMiddleware::class,
+            'petugas_pembayarans' => \App\Http\Middleware\PetugasPembayaranMiddleware::class,
+            'petugas_fasilitas' => \App\Http\Middleware\PetugasFasilitasMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

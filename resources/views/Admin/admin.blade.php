@@ -34,22 +34,62 @@
     <!-- Toastr -->
     <link rel="stylesheet" href="{{ asset('lte/plugins/toastr/toastr.min.css') }}">
 
-    {{-- <style>
-        .navbar-nav {
-            display: flex;
-            align-items: center;
-            width: 100%;
+    <style>
+        /* Critical CSS for footer positioning */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
         }
 
-        .navbar-nav .nav-item:last-child {
-            margin-left: auto;
-            margin-right: 4%;
+        .wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
-    </style> --}}
+
+        .content-wrapper {
+            flex: 1;
+        }
+
+        .main-footer {
+            height: 60px;
+        }
+
+        /* Fix for pagination in card footers */
+        .card-footer .pagination {
+            margin-bottom: 0 !important;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Remove the default list styling from Laravel pagination */
+        .card-footer .pagination ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+        }
+
+        /* Optimize card footer size */
+        .card-footer.clearfix {
+            padding: 0.75rem;
+            background-color: rgba(0, 0, 0, 0.03);
+            border-top: 1px solid rgba(0, 0, 0, 0.125);
+        }
+
+        /* If you're using Bootstrap 4 pagination styling */
+        .pagination .page-item .page-link {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+    </style>
 </head>
 
 
-<body class="hold-transition sidebar-mini layout-fixed" style="padding-bottom: 4%">
+<body class="hold-transition sidebar-mini layout-fixed">
+
     <div class="wrapper">
         <!-- Preloader -->
         <div class="preloader flex-column justify-content-center align-items-center">
@@ -124,10 +164,10 @@
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
                         <li class="nav-item active mt-2">
-                            <a href="{{ route('admin.users.index') }}" class="nav-link active bg-danger">
-                                <i class="nav-icon fas fa-users"></i>
+                            <a href="{{ route('admin.jadwal.index') }}" class="nav-link active bg-danger">
+                                <i class="nav-icon fas fa-calendar-plus"></i>
                                 <p>
-                                    Kelola User
+                                    Kelola Jadwal
                                 </p>
                             </a>
                         </li>
@@ -155,12 +195,13 @@
                         <li class="nav-item active mt-2">
                             <form method="POST" action="{{ route('logout') }}" id="logout-form">
                                 @csrf
-                            <a href="{{ route('logout') }}" class="nav-link active bg-primary" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                <i class="nav-icon fas fa-times-circle"></i>
-                                <p>
-                                    Logout
-                                </p>
-                            </a>
+                                <a href="{{ route('logout') }}" class="nav-link active bg-primary"
+                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                    <i class="nav-icon fas fa-times-circle"></i>
+                                    <p>
+                                        Logout
+                                    </p>
+                                </a>
                             </form>
                         </li>
                     </ul>
@@ -175,13 +216,20 @@
 
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
-        @yield('content')
+            @yield('content')
         </div>
         <!-- /.content-wrapper -->
 
-        <footer class="main-footer bg-dark" style="position: fixed; bottom: 0; width: 100%; z-index: 10;">
-            <strong>Copyright &copy; 2025 <a href="#">E-SEWA</a>.</strong>
-            All rights reserved.
+        <footer class="main-footer bg-dark">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <strong>Copyright &copy; 2025 <a href="#">E-SEWA</a>.</strong>
+                        All rights reserved.
+                        {{-- <span class="float-right d-none d-sm-inline text-danger"><b>DISPORA SEMARANG</b></span> --}}
+                    </div>
+                </div>
+            </div>
         </footer>
     </div>
     <!-- ./wrapper -->
@@ -261,6 +309,52 @@
                         toastr.error('Terjadi kesalahan saat memperbarui status.');
                     }
                 });
+            });
+
+            // Function to check if footer should be visible
+            function adjustFooterVisibility() {
+                var contentHeight = $('.content-wrapper').height();
+                var windowHeight = $(window).height();
+                var footerHeight = 60; // Exact 60px height
+                var navbarHeight = $('.main-header').outerHeight();
+                var availableHeight = windowHeight - navbarHeight;
+
+                // If content plus footer would overflow the screen
+                if (contentHeight > (availableHeight - footerHeight)) {
+                    // Hide footer when scrolling through content
+                    $(window).scroll(function() {
+                        if ($(window).scrollTop() + windowHeight >= $(document).height() - 10) {
+                            // User has scrolled to bottom, show footer
+                            $('.main-footer').addClass('footer-visible').removeClass('footer-hidden');
+                        } else {
+                            // User is not at bottom, hide footer
+                            $('.main-footer').addClass('footer-hidden').removeClass('footer-visible');
+                        }
+                    });
+
+                    // Initialize as hidden if not at bottom
+                    if ($(window).scrollTop() + windowHeight < $(document).height() - 10) {
+                        $('.main-footer').addClass('footer-hidden').removeClass('footer-visible');
+                    }
+                } else {
+                    // Content is short, footer should always be visible
+                    $('.main-footer').addClass('footer-visible').removeClass('footer-hidden');
+                    // Remove scroll event if previously added
+                    $(window).off('scroll');
+                }
+            }
+
+            // Run on page load
+            adjustFooterVisibility();
+
+            // Run on window resize
+            $(window).resize(function() {
+                adjustFooterVisibility();
+            });
+
+            // Run when new content is added
+            $(document).on('DOMNodeInserted', '.content-wrapper', function() {
+                setTimeout(adjustFooterVisibility, 200);
             });
         });
     </script>

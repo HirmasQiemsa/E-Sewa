@@ -13,6 +13,15 @@ return new class extends Migration
     {
         Schema::create('petugas_pembayarans', function (Blueprint $table) {
             $table->id();
+            $table->string('username')->unique();
+            $table->string('name');
+            $table->string('no_hp')->unique();
+            $table->string('alamat');
+            $table->string('email')->nullable()->unique();
+            $table->string('password');
+            $table->string('foto', 2048)->nullable();
+            $table->string('role')->default('petugas_pembayaran');
+            $table->rememberToken();
             $table->timestamps();
         });
     }

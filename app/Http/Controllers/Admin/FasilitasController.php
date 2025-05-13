@@ -42,7 +42,7 @@ class FasilitasController extends Controller
             'deskripsi' => 'string|max:255',
             'tipe' => 'string|max:255',
             'lokasi' => 'required|string|max:255',
-            'harga' => 'required|integer|min:1',
+            'harga_sewa' => 'required|integer|min:1',
             'foto' => 'required|image|mimes:jpeg,png,jpg,svg|max:2048', // validasi file gambar
         ]);
 
@@ -54,7 +54,7 @@ class FasilitasController extends Controller
             'deskripsi' => $request->deskripsi,
             'tipe' => $request->tipe,
             'lokasi' => $request->lokasi,
-            'harga' => $request->harga,
+            'harga_sewa' => $request->harga_sewa,
             'foto' => $path, // simpan path foto
         ]);
 
@@ -70,7 +70,7 @@ class FasilitasController extends Controller
             'tanggal' => 'required|date',
             'waktu_mulai' => 'required|date_format:H:i',
             'waktu_selesai' => 'required|date_format:H:i|after:waktu_mulai',
-            'harga' => $request->is_event ? 'nullable' : 'required|numeric|min:0',
+            'harga_sewa' => $request->is_event ? 'nullable' : 'required|numeric|min:0',
             'is_event' => 'nullable|boolean',
         ]);
 
@@ -89,7 +89,7 @@ class FasilitasController extends Controller
         $isEvent = $request->has('is_event');
         $status = $isEvent ? 'event' : 'menunggu';
         $durasi = ($selesai - $mulai) / 3600; // dalam jam
-        $hargaPerJam = Fasilitas::find($request->fasilitas_id)->harga;
+        $hargaPerJam = Fasilitas::find($request->fasilitas_id)->harga_sewa;
         $totalBayar = $request->has('is_event') ? 0 : ($durasi * $hargaPerJam);
 
 
@@ -133,13 +133,13 @@ class FasilitasController extends Controller
             'deskripsi' => 'nullable|string|max:255',
             'tipe' => 'nullable|string|max:255',
             'lokasi' => 'required|string|max:255',
-            'harga' => 'required|integer|min:1',
+            'harga_sewa' => 'required|integer|min:1',
             'foto' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
         ]);
 
         $fasilitas = Fasilitas::withTrashed()->findOrFail($id);
 
-        $data = $request->only(['nama_fasilitas', 'deskripsi', 'tipe', 'lokasi', 'harga']);
+        $data = $request->only(['nama_fasilitas', 'deskripsi', 'tipe', 'lokasi', 'harga_sewa']);
 
         if ($request->hasFile('foto')) {
             // Hapus foto lama jika ada

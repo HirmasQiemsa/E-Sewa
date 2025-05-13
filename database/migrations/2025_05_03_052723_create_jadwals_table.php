@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('jadwals', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('fasilitas_id')->nullable()->constrained('fasilitas')->onDelete('cascade');
+            $table->foreignId('fasilitas_id')->constrained()->onDelete('cascade');
             $table->date('tanggal');
             $table->time('jam_mulai');
             $table->time('jam_selesai');
-            $table->enum('status', ['tersedia', 'terbooking', 'selesai','batal'])->default('tersedia');
+            $table->enum('status', ['tersedia', 'terbooking', 'selesai', 'batal'])->default('tersedia');
             $table->softDeletes();
             $table->timestamps();
         });

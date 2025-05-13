@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('username')->unique();
             $table->string('name');
             $table->string('password');
+            $table->string('foto', 2048)->nullable();
+            $table->string('role')->default('admin'); // Default role = admin
             $table->timestamps();
         });
     }

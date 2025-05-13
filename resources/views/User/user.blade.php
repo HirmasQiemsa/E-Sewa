@@ -34,10 +34,35 @@
     <!-- Toastr -->
     <link rel="stylesheet" href="{{ asset('lte/plugins/toastr/toastr.min.css') }}">
 
+    <style>
+        /* Critical CSS for footer positioning */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        .wrapper {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content-wrapper {
+            flex: 1 0 auto;
+            padding-bottom: 60px;
+            /* Exact footer height */
+        }
+
+        .main-footer {
+            flex-shrink: 0;
+            height: 60px;
+            /* Exact height */
+        }
+    </style>
 </head>
 
-
-<body class="hold-transition sidebar-mini sidebar-collapse layout-fixed" style="padding-bottom: 4%">
+<body class="hold-transition sidebar-mini sidebar-collapse layout-fixed">
     <div class="wrapper">
         <!-- Preloader -->
         <div class="preloader flex-column justify-content-center align-items-center">
@@ -51,7 +76,8 @@
             <!-- Left navbar links -->
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center" data-widget="pushmenu" href="{{ route('user.beranda') }}" role="button">
+                    <a class="nav-link d-flex align-items-center" data-widget="pushmenu"
+                        href="{{ route('user.beranda') }}" role="button">
                         <img class="me-2" src="{{ asset('img/logo.png') }}" alt="AdminLTELogo" height="40"
                             width="40">
                         <b style="font-size: 1.5rem; margin-left: 1rem; color: white;"
@@ -59,12 +85,7 @@
                             Fasilitas DISPORA SEMARANG
                         </b>
                     </a>
-
                 </li>
-                {{-- <li class="nav-item ms-auto">
-                    <img class="animation__shake" src="{{ asset('img/logo.png') }}" alt="AdminLTELogo" height="40"
-                        width="40">
-                </li> --}}
             </ul>
         </nav>
 
@@ -92,7 +113,7 @@
                             <a href="{{ route('user.beranda') }}" class="nav-link active bg-danger">
                                 <i class="nav-icon fas fa-book"></i>
                                 <p>
-                                    Fasilitas
+                                    Beranda
                                 </p>
                             </a>
                         </li>
@@ -100,7 +121,7 @@
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
                         <li class="nav-item active mt-2">
-                            <a href="#" class="nav-link active bg-danger">
+                            <a href="{{ route('user.checkout') }}" class="nav-link active bg-danger">
                                 <i class="nav-icon fas fa-shopping-cart"></i>
                                 <p>
                                     Checkout
@@ -119,7 +140,7 @@
                             </a>
                         </li>
 
-                        {{-- logout --}}
+                        <!-- logout -->
                         <li class="nav-item active mt-2">
                             <a href="#" class="nav-link active bg-primary">
                                 <i class="nav-icon fas fa-user"></i>
@@ -131,17 +152,15 @@
                         <li class="nav-item active mt-2">
                             <form method="POST" action="{{ route('logout') }}" id="logout-form">
                                 @csrf
-                            <a href="{{ route('logout') }}" class="nav-link active bg-primary" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                <i class="nav-icon fas fa-times-circle"></i>
-                                <p>
-                                    Logout
-                                </p>
-                            </a>
+                                <a href="{{ route('logout') }}" class="nav-link active bg-primary"
+                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                    <i class="nav-icon fas fa-times-circle"></i>
+                                    <p>
+                                        Logout
+                                    </p>
+                                </a>
                             </form>
                         </li>
-                    </ul>
-                    <ul>
-
                     </ul>
                 </nav>
                 <!-- /.sidebar-menu -->
@@ -151,66 +170,112 @@
 
         <!-- Content Wrapper. Contains page content -->
         <div class="content-wrapper">
-        @yield('content')
+            @yield('content')
         </div>
         <!-- /.content-wrapper -->
 
-        <footer class="main-footer bg-dark" style="position: fixed; bottom: 0; width: 100%; z-index: 10;">
-            <strong>Copyright &copy; 2025 <a href="#">E-SEWA</a>.</strong>
-            All rights reserved.
+        <footer class="main-footer bg-dark">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <strong>Copyright &copy; 2025 <a href="#">E-SEWA</a>.</strong>
+                        All rights reserved.
+                        {{-- <span class="float-right d-none d-sm-inline text-danger"><b>DISPORA SEMARANG</b></span> --}}
+                    </div>
+                </div>
+            </div>
         </footer>
     </div>
     <!-- ./wrapper -->
 
     <!-- jQuery -->
     <script src="{{ asset('lte/jquery/jquery.min.js') }}"></script>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
-        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
-        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
-    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
+
     <!-- jQuery UI 1.11.4 -->
     <script src="{{ asset('lte/jquery-ui/jquery-ui.min.js') }}"></script>
     <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
     <script>
         $.widget.bridge('uibutton', $.ui.button)
     </script>
+
     <!-- Bootstrap 4 -->
     <script src="{{ asset('lte/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <!-- ChartJS -->
-    <script src="{{ asset('lte/chart.js/Chart.min.js') }}"></script>
-    <!-- Sparkline -->
-    <script src="{{ asset('lte/sparklines/sparkline.js') }}"></script>
-    <!-- JQVMap -->
-    <script src="{{ asset('lte/jqvmap/jquery.vmap.min.js') }}"></script>
-    <script src="{{ asset('lte/jqvmap/maps/jquery.vmap.usa.js') }}"></script>
-    <!-- jQuery Knob Chart -->
-    <script src="{{ asset('lte/jquery-knob/jquery.knob.min.js') }}"></script>
-    <!-- daterangepicker -->
-    <script src="{{ asset('lte/moment/moment.min.js') }}"></script>
-    <script src="{{ asset('lte/daterangepicker/daterangepicker.jsalt') }}"></script>
-    <!-- Tempusdominus Bootstrap 4 -->
-    <script src="{{ asset('lte/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') }}"></script>
-    <!-- Summernote -->
-    <script src="{{ asset('lte/summernote/summernote-bs4.min.js') }}"></script>
-    <!-- overlayScrollbars -->
-    <script src="{{ asset('lte/overlayScrollbars/js/jquery.overlayScrollbars.min.js') }}"></script>
+
     <!-- AdminLTE App -->
     <script src="{{ asset('lte/dist/js/adminlte.js') }}"></script>
-    <!-- AdminLTE for demo purposes -->
-    <script src="{{ asset('lte/dist/js/demo.js') }}"></script>
-    <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
-    <script src="{{ asset('lte/dist/js/pages/dashboard.js') }}"></script>
-    <!-- Toastr -->
+
+    <!-- ChartJS, Sparkline, JQVMap -->
+    <script src="{{ asset('lte/chart.js/Chart.min.js') }}"></script>
+    <script src="{{ asset('lte/sparklines/sparkline.js') }}"></script>
+    <script src="{{ asset('lte/jqvmap/jquery.vmap.min.js') }}"></script>
+    <script src="{{ asset('lte/jqvmap/maps/jquery.vmap.usa.js') }}"></script>
+
+    <!-- Additional plugins -->
+    <script src="{{ asset('lte/jquery-knob/jquery.knob.min.js') }}"></script>
+    <script src="{{ asset('lte/moment/moment.min.js') }}"></script>
+    <script src="{{ asset('lte/daterangepicker/daterangepicker.js') }}"></script>
+    <script src="{{ asset('lte/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') }}"></script>
+    <script src="{{ asset('lte/summernote/summernote-bs4.min.js') }}"></script>
+    <script src="{{ asset('lte/overlayScrollbars/js/jquery.overlayScrollbars.min.js') }}"></script>
+
+    <!-- Notification plugins -->
     <script src="{{ asset('lte/plugins/toastr/toastr.min.js') }}"></script>
-    <!-- SweetAlert2 -->
     <script src="{{ asset('lte/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
-    <!-- Page specific script -->
+
+    <!-- Footer visibility check script -->
+    <script>
+        // Footer visibility control
+        $(document).ready(function() {
+            // Function to check if footer should be visible
+            function adjustFooterVisibility() {
+                var contentHeight = $('.content-wrapper').height();
+                var windowHeight = $(window).height();
+                var footerHeight = 60; // Exact 60px height
+                var navbarHeight = $('.main-header').outerHeight();
+                var availableHeight = windowHeight - navbarHeight;
+
+                // If content plus footer would overflow the screen
+                if (contentHeight > (availableHeight - footerHeight)) {
+                    // Hide footer when scrolling through content
+                    $(window).scroll(function() {
+                        if ($(window).scrollTop() + windowHeight >= $(document).height() - 10) {
+                            // User has scrolled to bottom, show footer
+                            $('.main-footer').addClass('footer-visible').removeClass('footer-hidden');
+                        } else {
+                            // User is not at bottom, hide footer
+                            $('.main-footer').addClass('footer-hidden').removeClass('footer-visible');
+                        }
+                    });
+
+                    // Initialize as hidden if not at bottom
+                    if ($(window).scrollTop() + windowHeight < $(document).height() - 10) {
+                        $('.main-footer').addClass('footer-hidden').removeClass('footer-visible');
+                    }
+                } else {
+                    // Content is short, footer should always be visible
+                    $('.main-footer').addClass('footer-visible').removeClass('footer-hidden');
+                    // Remove scroll event if previously added
+                    $(window).off('scroll');
+                }
+            }
+
+            // Run on page load
+            adjustFooterVisibility();
+
+            // Run on window resize
+            $(window).resize(function() {
+                adjustFooterVisibility();
+            });
+
+            // Run when new content is added
+            $(document).on('DOMNodeInserted', '.content-wrapper', function() {
+                setTimeout(adjustFooterVisibility, 200);
+            });
+        });
+    </script>
 </body>
 
 </html>

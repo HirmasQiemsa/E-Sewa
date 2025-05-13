@@ -3,11 +3,11 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\HasFotoUrl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-// use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -19,7 +19,7 @@ class User extends Authenticatable
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
-    // use HasProfilePhoto;
+    use HasFotoUrl;
     use Notifiable;
     use TwoFactorAuthenticatable;
     use SoftDeletes;
@@ -72,8 +72,28 @@ class User extends Authenticatable
     //     return $this->profile_photo_path ? asset('storage/' . $this->profile_photo_path) : asset('default-avatar.png');
     // }
 
-    public function checkouts(): HasMany
-    {
+    // relasi
+    public function checkouts() {
         return $this->hasMany(Checkout::class);
+    }
+
+    /**
+     * Get active checkouts
+     */
+    public function activeCheckouts()
+    {
+        return $this->checkouts()
+                   ->whereIn('status', ['fee', 'lunas'])
+                   ->latest();
+    }
+
+    /**
+     * Get total spending amount
+     */
+    public function getTotalSpendingAttribute()
+    {
+        return $this->checkouts()
+                   ->where('status', 'lunas')
+                   ->sum('total_bayar');
     }
 }

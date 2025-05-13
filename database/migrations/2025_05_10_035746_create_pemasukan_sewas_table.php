@@ -11,12 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('laporan_fasilitas', function (Blueprint $table) {
+        Schema::create('pemasukan_sewas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('checkout_id')->constrained()->onDelete('cascade');
             $table->foreignId('fasilitas_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->decimal('jumlah_jam',5,2);
+            $table->date('tanggal_bayar');
+            $table->bigInteger('jumlah_bayar');
+            $table->enum('metode_pembayaran', ['cash', 'transfer', 'qris', 'lainnya'])->default('cash');
+            $table->string('bukti_pembayaran', 2048)->nullable();
+            $table->enum('status', ['fee', 'lunas'])->default('fee');
+            $table->foreignId('petugas_pembayaran_id')->nullable()->constrained('petugas_pembayarans')->nullOnDelete();
             $table->timestamps();
         });
     }
@@ -26,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('laporan_fasilitas');
+        Schema::dropIfExists('pemasukan_sewas');
     }
 };

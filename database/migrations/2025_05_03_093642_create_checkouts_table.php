@@ -20,6 +20,12 @@ return new class extends Migration
             $table->softDeletes();
             $table->timestamps();
         });
+        Schema::create('checkout_jadwal', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('checkout_id')->constrained()->onDelete('cascade');
+            $table->foreignId('jadwal_id')->constrained()->onDelete('cascade');
+            $table->timestamps();
+        });
     }
 
     /**

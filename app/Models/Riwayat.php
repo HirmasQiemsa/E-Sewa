@@ -2,22 +2,33 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Riwayat extends Model
 {
-    use SoftDeletes;
-    
+    use HasFactory, SoftDeletes;
+
     protected $fillable = [
         'checkout_id',
         'waktu_selesai',
-        'feedback',
+        'feedback'
     ];
 
-    public function checkout(): BelongsTo
+    /**
+     * Define relationship with Checkout model
+     */
+    public function checkout()
     {
         return $this->belongsTo(Checkout::class);
+    }
+
+    /**
+     * Get formatted completion time
+     */
+    public function getFormattedTimeAttribute()
+    {
+        return date('d F Y H:i', strtotime($this->waktu_selesai));
     }
 }

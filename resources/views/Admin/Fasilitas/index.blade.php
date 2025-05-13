@@ -8,6 +8,12 @@
                     <div class="col-sm-6">
                         <h1 class="m-0">Kelola Fasilitas</h1>
                     </div>
+                    <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Fasilitas</li>
+                    </ol>
+                    </div>
                 </div><!-- /.row -->
             </div><!-- /.container-fluid -->
         </div>
@@ -33,7 +39,7 @@
                                             <th>Nama Fasilitas</th>
                                             <th>Tipe</th>
                                             <th>Lokasi</th>
-                                            <th>Tersedia</th>
+                                            <th>Status</th>
                                             <th>Aksi</th>
                                         </tr>
                                     </thead>
@@ -45,7 +51,7 @@
                                                 <td>{{ $d->tipe }}</td>
                                                 <td>{{ $d->lokasi }}</td>
                                                 <td class="text-info">
-                                                    {{ $d->deleted_at ? 'Tidak' : ($d->tersedia ? 'Ya' : 'Tidak') }}</td>
+                                                    {{ $d->deleted_at ? 'Tidak' : ($d->ketersediaan) }}</td>
                                                 <td>
                                                     <div class="flex flex-wrap gap-1">
                                                         @if ($d->deleted_at)
@@ -60,11 +66,11 @@
                                                                 </button>
                                                             </form>
                                                         @else
-                                                            <a href="{{ route('admin.fasilitas.gunakan', ['id' => $d->id]) }}"
+                                                            {{-- <a href="{{ route('admin.fasilitas.gunakan', ['id' => $d->id]) }}"
                                                                 class="btn btn-sm btn-success px-2 text-sm mr-2"
                                                                 title="Gunakan Fasilitas">
                                                                 <i class="fas fa-calendar-plus"></i>
-                                                            </a>
+                                                            </a> --}}
                                                             <a href="{{ route('admin.fasilitas.edit', ['id' => $d->id]) }}"
                                                                 class="btn btn-sm btn-primary px-2 text-sm"
                                                                 title="Edit Data">
@@ -131,5 +137,5 @@
             </div><!-- /.container-fluid -->
         </section>
         <!-- /.content -->
-    
+
 @endsection

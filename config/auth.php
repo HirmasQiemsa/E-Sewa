@@ -44,6 +44,14 @@ return [
             'driver' => 'session',
             'provider' => 'admins',
         ],
+        'petugas_fasilitas' => [
+            'driver' => 'session',
+            'provider' => 'petugas_fasilitas',
+        ],
+        'petugas_pembayaran' => [
+            'driver' => 'session',
+            'provider' => 'petugas_pembayarans',
+        ],
     ],
 
     /*
@@ -69,8 +77,16 @@ return [
             'model' =>  App\Models\User::class,
         ],
         'admins' => [
-        'driver' => 'eloquent',
-        'model' => App\Models\Admin::class,
+            'driver' => 'eloquent',
+            'model' => App\Models\Admin::class,
+        ],
+        'petugas_pembayarans' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\PetugasPembayaran::class,
+        ],
+        'petugas_fasilitas' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\PetugasFasilitas::class,
         ],
     ],
 

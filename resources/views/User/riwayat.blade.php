@@ -1,18 +1,11 @@
 @extends('User.user')
 @section('content')
-
     <!-- Content Header (Page header) -->
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Kelola Pasien</h1>
-                </div><!-- /.col -->
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Admin</a></li>
-                        <li class="breadcrumb-item active">Kelola Pasien</li>
-                    </ol>
+                    <h1 class="m-0">Riwayat Booking</h1>
                 </div><!-- /.col -->
             </div><!-- /.row -->
         </div><!-- /.container-fluid -->
@@ -22,134 +15,133 @@
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
-            <!-- /.List History Pasien -->
-            <div class="row">
-                <a href="#" class="btn btn-primary mb-3">Tambahkan Data</a>
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Pasien Terdaftar Saat Ini</h3>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-history mr-1"></i>
+                        Semua Riwayat Booking
+                    </h3>
 
-                            <div class="card-tools">
-                                <div class="input-group input-group-sm" style="width: 150px;">
-                                    <input type="text" name="table_search" class="form-control float-right"
-                                        placeholder="Search">
-
-                                    <div class="input-group-append">
-                                        <button type="submit" class="btn btn-default">
-                                            <i class="fas fa-search"></i>
-                                        </button>
-                                    </div>
-                                </div>
+                    <div class="card-tools">
+                        <div class="input-group input-group-sm" style="width: 150px;">
+                            <input type="text" name="table_search" id="history-search" class="form-control float-right"
+                                placeholder="Search">
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-default" onclick="searchHistory()">
+                                    <i class="fas fa-search"></i>
+                                </button>
                             </div>
                         </div>
-                        <!-- /.card-header -->
-                        <div class="card-body table-responsive p-0">
-                            <table class="table table-hover text-nowrap">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Nama Pasien</th>
-                                        <th>Alamat</th>
-                                        <th>Nomor RM</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                {{-- <tbody>
-                                    @foreach ($data as $d)
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $d->nama }}</td>
-                                            <td>{{ $d->alamat }}</td>
-                                            <td>{{ $d->no_rm }}</td>
-                                            <td>
-                                                <a href="#"
-                                                    class="btn btn-primary"><i class="fas fa-pen"></i>Edit</a>
-                                                <a data-toggle="modal" data-target="#modal-default{{ $d->id }}"
-                                                    class="btn btn-danger"><i class="fas fa-trash"></i>Hapus</a>
-                                            </td>
-                                        </tr>
-                                        <div class="modal fade" id="modal-default{{ $d->id }}">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <div class="modal-header">
-                                                        <h4 class="modal-title">Konfirmasi Penghapusan Pasien</h4>
-                                                        <button type="button" class="close" data-dismiss="modal"
-                                                            aria-label="Close">
-                                                            <span aria-hidden="true">&times;</span>
-                                                        </button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <p>Benar, Ingin Menghapus data<b> Pasien {{ $d->nama }} ?</b>
-                                                        </p>
-                                                    </div>
-                                                    <div class="modal-footer ">
-                                                        <form action="#"
-                                                            method="POST">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="button" class="btn btn-default"
-                                                                data-dismiss="modal">Kembali</button>
-                                                            <button type="submit"
-                                                                class="btn btn-primary">Hapus</button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                                <!-- /.modal-content -->
-                                            </div>
-                                            <!-- /.modal-dialog -->
-                                        </div>
-                                        <!-- /.modal -->
-                                    @endforeach
-                                </tbody> --}}
-                            </table>
-                        </div>
-                        <!-- /.card-body -->
                     </div>
-                    <!-- /.card -->
                 </div>
-                <div class="col-12" style="color: darkred">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Pasien Tidak Aktif</h3>
-                        </div>
-                        <!-- /.card-header -->
-                        <div class="card-body table-responsive p-0">
-                            <table class="table table-hover text-nowrap">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Nama Pasien</th>
-                                        <th>Alamat</th>
-                                        <th>Nomor RM</th>
-                                        <th>Aksi</th>
-                                    </tr>
-                                </thead>
-                                {{-- <tbody>
-                                    @foreach ($trash as $t)
-                                        <tr>
-                                            <td>{{ $loop->iteration }}</td>
-                                            <td>{{ $t->nama }}</td>
-                                            <td>{{ $t->alamat }}</td>
-                                            <td>{{ $t->no_rm }}</td>
-                                            <td>
-                                                <a href="#"
-                                                    class="btn btn-warning" style="color: black"><i class="fas fa-reply-all"></i> Kembalikan</a>
-                                            </td>
-                                        </tr>
-                                        <!-- /.modal -->
-                                    @endforeach
-                                </tbody> --}}
-                            </table>
-                        </div>
-                        <!-- /.card-body -->
-                    </div>
-                    <!-- /.card -->
+
+                <div class="card-body table-responsive p-0">
+                    <table class="table table-hover text-nowrap">
+                        <thead>
+                            <tr>
+                                <th>No</th>
+                                <th>ID</th>
+                                <th>Tanggal</th>
+                                <th>Fasilitas</th>
+                                <th>Durasi</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($riwayat as $index => $item)
+                                <tr>
+                                    <td>{{ $index + 1 }}</td>
+                                    <td>{{ $item->id }}</td>
+                                    <td>{{ $item->jadwal ? date('d-m-Y', strtotime($item->jadwal->tanggal)) : '-' }}</td>
+                                    <td>{{ $item->jadwal && $item->jadwal->fasilitas ? $item->jadwal->fasilitas->nama_fasilitas : '-' }}</td>
+                                    <td>{{ $item->totalDurasi ?? '-' }} jam</td>
+                                    <td>Rp {{ number_format($item->total_bayar, 0, ',', '.') }}</td>
+                                    <td>
+                                        @if($item->status == 'fee')
+                                            <span class="badge badge-warning">DP</span>
+                                        @elseif($item->status == 'lunas')
+                                            <span class="badge badge-success">Lunas</span>
+                                        @elseif($item->status == 'batal')
+                                            <span class="badge badge-danger">Batal</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('user.checkout.detail', $item->id) }}" class="btn btn-sm btn-info">
+                                            <i class="fas fa-eye"></i> Detail
+                                        </a>
+
+                                        @if($item->status == 'fee')
+                                            <a href="{{ route('user.checkout.pelunasan', $item->id) }}" class="btn btn-sm btn-success">
+                                                <i class="fas fa-money-bill"></i> Lunasi
+                                            </a>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="text-center">Belum ada riwayat booking</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <!-- /.row -->
-        </div><!-- /.container-fluid -->
-    </section>
-    <!-- /.content -->
 
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="info-box bg-success">
+                        <span class="info-box-icon"><i class="fas fa-check"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Booking Lunas</span>
+                            <span class="info-box-number">
+                                {{ $riwayat->where('status', 'lunas')->count() }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="info-box bg-warning">
+                        <span class="info-box-icon"><i class="fas fa-hourglass-half"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Booking DP</span>
+                            <span class="info-box-number">
+                                {{ $riwayat->where('status', 'fee')->count() }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="info-box bg-danger">
+                        <span class="info-box-icon"><i class="fas fa-times"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Booking Dibatalkan</span>
+                            <span class="info-box-number">
+                                {{ $riwayat->where('status', 'batal')->count() }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function searchHistory() {
+            const searchText = document.getElementById('history-search').value.toLowerCase();
+            const rows = document.querySelectorAll('tbody tr');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchText)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
 @endsection

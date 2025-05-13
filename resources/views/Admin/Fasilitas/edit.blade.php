@@ -75,8 +75,8 @@
 
                                     <div class="form-group">
                                         <label>Harga</label>
-                                        <input type="number" name="harga" class="form-control" value="{{ old('harga', $data->harga) }}">
-                                        @error('harga')
+                                        <input type="number" name="harga_sewa" class="form-control" value="{{ old('harga_sewa', $data->harga_sewa) }}">
+                                        @error('harga_sewa')
                                             <small class="text-danger">{{ $message }}</small>
                                         @enderror
                                     </div>
