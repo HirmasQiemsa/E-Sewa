@@ -13,4 +13,9 @@ class PetugasFasilitas extends Model
     protected $fillable = [
         'username', 'name', 'email', 'password', 'role','foto','no_hp','alamat',
     ];
+
+    public function fasilitas() {
+        return $this->hasMany(Fasilitas::class);
+    }
+
 }

@@ -33,8 +33,8 @@ class CheckoutController extends Controller
 
         // Calculate total duration for each checkout
         foreach ($checkouts as $checkout) {
-            // Get all jadwals associated with this checkout
-            $jadwals = Jadwal::where('checkout_id', $checkout->id)->get();
+            // Get all jadwals associated with this checkout using pivot relationship
+            $jadwals = $checkout->jadwals;
 
             // Calculate total duration in hours
             $totalDurasi = 0;
@@ -90,11 +90,14 @@ class CheckoutController extends Controller
                 'status' => 'fee', // DP paid status
             ]);
 
-            // 2. Update jadwal status and link to checkout
+            // 2. Attach jadwals to checkout using pivot and update jadwal status
             foreach ($jadwals as $jadwal) {
+                // Attach jadwal to checkout
+                $checkout->jadwals()->attach($jadwal->id);
+
+                // Update jadwal status separately
                 $jadwal->update([
-                    'status' => 'terbooking',
-                    'checkout_id' => $checkout->id
+                    'status' => 'terbooking'
                 ]);
             }
 
@@ -106,7 +109,6 @@ class CheckoutController extends Controller
                 'jumlah_bayar' => $request->dp_value,
                 'metode_pembayaran' => 'transfer', // Default assumption
                 'status' => 'fee',
-
             ]);
 
             // Commit transaction
@@ -134,7 +136,7 @@ class CheckoutController extends Controller
         // Calculate remaining payment (50%)
         $sisaPembayaran = $checkout->total_bayar * 0.5;
 
-        return view('User.pelunasan', compact('checkout', 'sisaPembayaran'));
+        return view('User.Checkout.pelunasan', compact('checkout', 'sisaPembayaran'));
     }
 
     /**
@@ -143,11 +145,16 @@ class CheckoutController extends Controller
     public function prosesLunasi(Request $request, $id)
     {
         $checkout = Checkout::where('id', $id)
-                          ->where('user_id', Auth::id())
-                          ->where('status', 'fee')
-                          ->firstOrFail();
+                        ->where('user_id', Auth::id())
+                        ->where('status', 'fee')
+                        ->firstOrFail();
 
-        // Calculate remaining payment (50%)
+        // Validate request
+        $request->validate([
+            'metode_pembayaran' => 'required|in:transfer',
+        ]);
+
+        // Calculate remaining payment
         $sisaPembayaran = $checkout->total_bayar * 0.5;
 
         DB::beginTransaction();
@@ -163,14 +170,14 @@ class CheckoutController extends Controller
                 'fasilitas_id' => $checkout->jadwal->fasilitas_id,
                 'tanggal_bayar' => now(),
                 'jumlah_bayar' => $sisaPembayaran,
-                'metode_pembayaran' => $request->metode_pembayaran ?? 'cash',
-                'status' => 'lunas',
-                'keterangan' => 'Pelunasan pembayaran'
+                'metode_pembayaran' => $request->metode_pembayaran,
+                'status' => 'lunas'
+                // Hapus field 'keterangan' yang tidak ada dalam tabel
             ]);
 
             DB::commit();
             return redirect()->route('user.checkout')
-                ->with('success', 'Pembayaran berhasil dilunasi!');
+                ->with('success', 'Pembayaran berhasil dilunasi! Terima kasih atas transaksi Anda.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
@@ -187,17 +194,17 @@ class CheckoutController extends Controller
                           ->where('user_id', Auth::id())
                           ->firstOrFail();
 
-        // Get all jadwals for this checkout
-        $jadwals = Jadwal::where('checkout_id', $checkout->id)
-                        ->orderBy('jam_mulai', 'asc')
-                        ->get();
+        // Get all jadwals for this checkout using pivot relationship
+        $jadwals = $checkout->jadwals()
+                          ->orderBy('jam_mulai', 'asc')
+                          ->get();
 
         // Get payment history
         $pembayaran = PemasukanSewa::where('checkout_id', $checkout->id)
                                  ->orderBy('tanggal_bayar', 'asc')
                                  ->get();
 
-        return view('User.detail_checkout', compact('checkout', 'jadwals', 'pembayaran'));
+        return view('User.Checkout.detail_checkout', compact('checkout', 'jadwals', 'pembayaran'));
     }
 
     /**
@@ -217,14 +224,20 @@ class CheckoutController extends Controller
                 'status' => 'batal'
             ]);
 
-            // 2. Free up jadwals
-            Jadwal::where('checkout_id', $checkout->id)
-                 ->update([
-                     'status' => 'tersedia',
-                     'checkout_id' => null
-                 ]);
+            // 2. Get all jadwals before detaching to update their status
+            $jadwals = $checkout->jadwals;
 
-            // 3. Create cancellation record in riwayat
+            // 3. Detach all jadwals from checkout (remove pivot relationships)
+            $checkout->jadwals()->detach();
+
+            // 4. Update each jadwal's status back to available
+            foreach ($jadwals as $jadwal) {
+                $jadwal->update([
+                    'status' => 'tersedia'
+                ]);
+            }
+
+            // 5. Create cancellation record in riwayat
             Riwayat::create([
                 'checkout_id' => $checkout->id,
                 'waktu_selesai' => now(),

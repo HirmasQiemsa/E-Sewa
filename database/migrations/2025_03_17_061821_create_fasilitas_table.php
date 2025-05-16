@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('lokasi');
             $table->integer('harga_sewa')->default(value: 0);
             $table->enum('ketersediaan', ['aktif', 'nonaktif','maintanace'])->default('aktif');
+            $table->foreignId('petugas_fasilitas_id')->nullable()->constrained('petugas_fasilitas')->nullOnDelete();
             $table->softDeletes();
             $table->timestamps();
         });

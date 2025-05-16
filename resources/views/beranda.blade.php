@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>E-Sewa Fasilitas Dispora</title>
+    <title>E-Sewa Dispora Semarang</title>
 
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet"
@@ -68,7 +68,7 @@
                             width="40">
                         <b style="font-size: 1.5rem; margin-left: 1rem; color: white;"
                             onmouseover="this.style.color='yellow'" onmouseout="this.style.color='white'">E-Sewa
-                            Fasilitas DISPORA SEMARANG
+                            DISPORA SEMARANG
                         </b>
                     </a>
 
@@ -121,18 +121,9 @@
             <div class="content-header">
                 <div class="container-fluid">
                     <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <h1 class="m-0">Tersedia Saat Ini</h1>
+                        <div class="col-12 text-center">
+                            <h1 class="m-0">Fasilitas Tersedia Saat Ini</h1>
                         </div>
-                        <!-- /.col -->
-                        {{-- <div class="col-sm-6">
-                            <ol class="breadcrumb float-sm-right mr-4">
-                                <li class="breadcrumb-item">
-                                    <a class="btn btn-outline-success" href="#" role="button">Login</a>
-                                </li>
-                            </ol>
-                        </div> --}}
-                        <!-- /.col -->
                     </div><!-- /.row -->
                 </div><!-- /.container-fluid -->
             </div>
@@ -153,7 +144,7 @@
                                 <div class="icon">
                                     <i class="ion ion-ios-football"></i>
                                 </div>
-                                <a href="#" class="small-box-footer">Booking Now <i
+                                <a href="{{ route('login') }}" class="small-box-footer">Booking Now <i
                                         class="fas fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
@@ -168,7 +159,7 @@
                                 <div class="icon">
                                     <i class="ion ion-ios-tennisball"></i>
                                 </div>
-                                <a href="#" class="small-box-footer">Booking now <i
+                                <a href="{{ route('login') }}" class="small-box-footer">Booking now <i
                                         class="fas fa-arrow-circle-right"></i></a>
                             </div>
                         </div>
@@ -183,7 +174,7 @@
                                 <div class="icon">
                                     <i class="fas fa-volleyball-ball"></i>
                                 </div>
-                                <a href="#" class="small-box-footer">Booking Now <i
+                                <a href="{{ route('login') }}" class="small-box-footer">Booking Now <i
                                         class="fas fa-arrow-circle-right"></i></a>
                             </div>
                         </div>

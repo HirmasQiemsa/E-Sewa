@@ -33,7 +33,7 @@ class LoginController extends Controller
 
         // Coba login sebagai User
         if (Auth::guard('web')->attempt($request->only('username', 'password'))) {
-            return redirect()->intended(route('user.beranda'))->with('success', 'Selamat datang, User!');
+            return redirect()->intended(route('user.fasilitas'))->with('success', 'Selamat datang, User!');
         }
 
         // Jika gagal

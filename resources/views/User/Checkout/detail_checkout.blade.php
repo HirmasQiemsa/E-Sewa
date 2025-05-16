@@ -32,11 +32,11 @@
                             </h3>
 
                             <div class="card-tools">
-                                <span class="badge
-                                    @if($checkout->status == 'fee') badge-warning
+                                <span
+                                    class="badge
+                                    @if ($checkout->status == 'fee') badge-warning
                                     @elseif($checkout->status == 'lunas') badge-success
-                                    @elseif($checkout->status == 'batal') badge-danger
-                                    @endif">
+                                    @elseif($checkout->status == 'batal') badge-danger @endif">
                                     {{ ucfirst($checkout->status) }}
                                 </span>
                             </div>
@@ -50,12 +50,17 @@
                                         {{ date('d F Y', strtotime($checkout->jadwal->tanggal)) }}
                                     </p>
 
-                                    <strong><i class="fas fa-map-marker-alt mr-1"></i> Fasilitas</strong>
+                                    <strong><i class="fas fa-map-marker-alt mr-1"></i> Fasilitas Dipilih</strong>
                                     <p class="text-muted">
                                         {{ $checkout->jadwal->fasilitas->nama_fasilitas }}
                                         ({{ $checkout->jadwal->fasilitas->tipe }})
                                         <br>
                                         <small>{{ $checkout->jadwal->fasilitas->lokasi }}</small>
+                                    </p>
+
+                                    <strong><i class="fas fa-check-circle mr-1"></i> Include</strong>
+                                    <p class="text-muted">
+                                        {{ $checkout->jadwal->fasilitas->deskripsi }}
                                     </p>
 
                                     <strong><i class="fas fa-money-bill mr-1"></i> Total Biaya</strong>
@@ -100,11 +105,12 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($jadwals as $index => $jadwal)
+                                    @foreach ($jadwals as $index => $jadwal)
                                         <tr>
                                             <td>{{ $index + 1 }}</td>
                                             <td>{{ date('d/m/Y', strtotime($jadwal->tanggal)) }}</td>
-                                            <td>{{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }}</td>
+                                            <td>{{ substr($jadwal->jam_mulai, 0, 5) }} -
+                                                {{ substr($jadwal->jam_selesai, 0, 5) }}</td>
                                             <td>{{ $jadwal->durasi }} jam</td>
                                         </tr>
                                     @endforeach
@@ -151,13 +157,23 @@
                             </table>
                         </div>
 
-                        @if($checkout->status == 'fee')
-                            <div class="card-footer">
+                        {{-- @if ($checkout->status == 'fee')
+                            <div class="card-footer d-flex justify-content-end">
+                                @if ($checkout->status == 'fee')
+                                    <button type="button" class="btn btn-danger mr-auto"
+                                        onclick="confirmCancel({{ $checkout->id }})">
+                                        <i class="fas fa-times"></i> Batalkan Booking
+                                    </button>
+                                @endif
+
                                 <a href="{{ route('user.checkout.pelunasan', $checkout->id) }}" class="btn btn-success">
                                     <i class="fas fa-money-bill"></i> Lunasi Pembayaran
                                 </a>
+
                             </div>
-                        @endif
+                        @endif --}}
+
+
                     </div>
                 </div>
 
@@ -170,12 +186,6 @@
                                     <i class="fas fa-arrow-left"></i> Kembali
                                 </a>
 
-                                @if($checkout->status == 'fee')
-                                    <button type="button" class="btn btn-danger"
-                                        onclick="confirmCancel({{ $checkout->id }})">
-                                        <i class="fas fa-times"></i> Batalkan Booking
-                                    </button>
-                                @endif
                             </div>
                         </div>
                     </div>
@@ -185,7 +195,8 @@
     </section>
 
     <!-- Modal Konfirmasi Batal -->
-    <div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel" aria-hidden="true">
+    <div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">

@@ -17,7 +17,8 @@ class Fasilitas extends Model
         'lokasi',
         'foto',
         'harga_sewa',
-        'ketersediaan'
+        'ketersediaan',
+        'petugas_fasilitas_id'
     ];
 
     // Mutator atau accessor untuk url

@@ -73,27 +73,22 @@ class User extends Authenticatable
     // }
 
     // relasi
-    public function checkouts() {
-        return $this->hasMany(Checkout::class);
+    // Each facility has many schedules
+    public function jadwals() {
+        return $this->hasMany(Jadwal::class);
     }
 
-    /**
-     * Get active checkouts
-     */
-    public function activeCheckouts()
-    {
-        return $this->checkouts()
-                   ->whereIn('status', ['fee', 'lunas'])
-                   ->latest();
-    }
+    // Method to check availability on a specific date
+    public function isAvailableOn($date) {
+        if ($this->ketersediaan !== 'aktif') {
+            return false;
+        }
 
-    /**
-     * Get total spending amount
-     */
-    public function getTotalSpendingAttribute()
-    {
-        return $this->checkouts()
-                   ->where('status', 'lunas')
-                   ->sum('total_bayar');
+        $availableSlots = $this->jadwals()
+                          ->where('tanggal', $date)
+                          ->where('status', 'tersedia')
+                          ->count();
+
+        return $availableSlots > 0;
     }
 }

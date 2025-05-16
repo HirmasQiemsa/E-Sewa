@@ -42,13 +42,13 @@
             <div class="mt-4">
                 <x-label for="password" value="Password" />
                 <x-input id="password" class="block mt-1 w-full" type="password" name="password" required />
-                <small id="passwordHelp" class="text-xs text-gray-500">Minimal 8 karakter</small>
+                <small id="passwordHelp" class="text-xs text-gray-500">Minimal 6 karakter</small>
             </div>
 
-            <div class="mt-4">
+            {{-- <div class="mt-4">
                 <x-label for="password_confirmation" value="Konfirmasi Password" />
                 <x-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation" required />
-            </div>
+            </div> --}}
 
             <div class="flex items-center justify-end mt-4">
                 <a class="underline text-sm text-gray-600 hover:text-gray-900" href="{{ url('/login') }}">

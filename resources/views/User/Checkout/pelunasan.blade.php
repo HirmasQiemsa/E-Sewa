@@ -21,6 +21,14 @@
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
+            <!-- Alert untuk notifikasi -->
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    {{ session('error') }}
+                </div>
+            @endif
+
             <div class="row">
                 <!-- Form Pelunasan -->
                 <div class="col-md-6">
@@ -29,7 +37,7 @@
                             <h3 class="card-title">Form Pelunasan</h3>
                         </div>
 
-                        <form action="{{ route('user.checkout.proses-lunasi', $checkout->id) }}" method="POST">
+                        <form id="pelunasanForm" action="{{ route('user.checkout.proses-lunasi', $checkout->id) }}" method="POST">
                             @csrf
                             <div class="card-body">
                                 <!-- Informasi Booking -->
@@ -77,21 +85,19 @@
                                 <div class="form-group">
                                     <label>Metode Pembayaran</label>
                                     <select name="metode_pembayaran" class="form-control" required>
-                                        <option value="cash">Cash</option>
                                         <option value="transfer">Transfer Bank</option>
                                     </select>
                                 </div>
 
                                 <div class="alert alert-info">
                                     <h5><i class="icon fas fa-info"></i> Informasi Pembayaran</h5>
-                                    <p>Silakan lakukan pembayaran langsung ke petugas di tempat.</p>
-                                    <p>Jika memilih transfer bank, silakan transfer ke rekening:</p>
-                                    <p><strong>Bank BCA: 1234567890</strong> a.n. DISPORA Semarang</p>
+                                    <p>Silakan transfer ke rekening:</p>
+                                    <p class="mb-0"><strong>Bank BCA: 1234567890</strong> a.n. DISPORA Semarang</p>
                                 </div>
                             </div>
 
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-success">Konfirmasi Pelunasan</button>
+                                <button type="submit" id="submitBtn" class="btn btn-success">Konfirmasi Pelunasan</button>
                                 <a href="{{ route('user.checkout') }}" class="btn btn-secondary">Kembali</a>
                             </div>
                         </form>
@@ -102,7 +108,7 @@
                 <div class="col-md-6">
                     <div class="card card-info">
                         <div class="card-header">
-                            <h3 class="card-title">Detail Jadwal</h3>
+                            <h3 class="card-title"><i class="fas fa-calendar mr-2"></i>Detail Jadwal</h3>
                         </div>
 
                         <div class="card-body">
@@ -128,17 +134,21 @@
                             </div>
 
                             <div class="mt-4">
-                                <h5>Informasi Fasilitas</h5>
-                                <p><strong>Nama:</strong> {{ $checkout->jadwal->fasilitas->nama_fasilitas }}</p>
-                                <p><strong>Tipe:</strong> {{ $checkout->jadwal->fasilitas->tipe }}</p>
-                                <p><strong>Lokasi:</strong> {{ $checkout->jadwal->fasilitas->lokasi }}</p>
-                                <p><strong>Harga Per Jam:</strong> Rp {{ number_format($checkout->jadwal->fasilitas->harga_sewa, 0, ',', '.') }}</p>
+                                <h5><i class="fas fa-info-circle mr-2"></i>Informasi Fasilitas</h5>
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <p><strong>Nama:</strong> {{ $checkout->jadwal->fasilitas->nama_fasilitas }}</p>
+                                        <p><strong>Tipe:</strong> {{ $checkout->jadwal->fasilitas->tipe }}</p>
+                                        <p><strong>Lokasi:</strong> {{ $checkout->jadwal->fasilitas->lokasi }}</p>
+                                        <p class="mb-0"><strong>Harga Per Jam:</strong> Rp {{ number_format($checkout->jadwal->fasilitas->harga_sewa, 0, ',', '.') }}</p>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="alert alert-warning mt-4">
                                 <h5><i class="icon fas fa-exclamation-triangle"></i> Perhatian!</h5>
                                 <p>Silakan lunasi pembayaran sebelum jadwal penggunaan fasilitas.</p>
-                                <p>Jika terlambat membayar, booking dapat dibatalkan oleh sistem.</p>
+                                <p class="mb-0">Jika terlambat membayar, booking dapat dibatalkan oleh sistem.</p>
                             </div>
                         </div>
                     </div>
@@ -146,4 +156,32 @@
             </div>
         </div>
     </section>
+
+    <!-- Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-body text-center p-4">
+                    <div class="spinner-border text-success mb-3" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <h5>Sedang memproses pembayaran...</h5>
+                    <p class="mb-0 text-muted">Mohon tunggu sebentar</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Handle form submission
+            $('#pelunasanForm').on('submit', function() {
+                // Show loading modal
+                $('#loadingModal').modal('show');
+                // Disable submit button to prevent multiple submissions
+                $('#submitBtn').prop('disabled', true);
+                return true;
+            });
+        });
+    </script>
 @endsection

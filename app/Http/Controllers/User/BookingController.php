@@ -8,20 +8,22 @@ use App\Models\Fasilitas;
 use App\Models\Jadwal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BookingController extends Controller
 {
+
     /**
      * Display futsal facilities
      */
     public function futsal()
     {
-        $fasilitas = Fasilitas::where('tipe', 'futsal')
-                             ->where('ketersediaan', 'aktif')
-                             ->whereNull('deleted_at')
-                             ->get();
+        $fasilitas = Fasilitas::whereRaw('LOWER(nama_fasilitas) = ?', [strtolower('Lapangan Futsal')])
+                      ->where('ketersediaan', 'aktif')
+                      ->whereNull('deleted_at')
+                      ->get();
 
-        return view('User.Booking.futsal', compact('fasilitas'));
+        return view('User.Fasilitas.futsal', compact('fasilitas'));
     }
 
     /**
@@ -29,12 +31,12 @@ class BookingController extends Controller
      */
     public function tenis()
     {
-        $fasilitas = Fasilitas::where('tipe', 'tenis')
-                             ->where('ketersediaan', 'aktif')
-                             ->whereNull('deleted_at')
-                             ->get();
+        $fasilitas = Fasilitas::whereRaw('LOWER(nama_fasilitas) = ?', [strtolower('tenis')])
+                      ->where('ketersediaan', 'aktif')
+                      ->whereNull('deleted_at')
+                      ->get();
 
-        return view('User.Booking.tenis', compact('fasilitas'));
+        return view('User.Fasilitas.tenis', compact('fasilitas'));
     }
 
     /**
@@ -42,12 +44,12 @@ class BookingController extends Controller
      */
     public function voli()
     {
-        $fasilitas = Fasilitas::where('tipe', 'voli')
-                             ->where('ketersediaan', 'aktif')
-                             ->whereNull('deleted_at')
-                             ->get();
+        $fasilitas = Fasilitas::whereRaw('LOWER(nama_fasilitas) = ?', [strtolower('voli')])
+                      ->where('ketersediaan', 'aktif')
+                      ->whereNull('deleted_at')
+                      ->get();
 
-        return view('User.Booking.voli', compact('fasilitas'));
+        return view('User.Fasilitas.voli', compact('fasilitas'));
     }
 
     /**
@@ -59,6 +61,18 @@ class BookingController extends Controller
                           ->where('user_id', Auth::id())
                           ->latest()
                           ->get();
+
+        // Get active facilities
+        $fasilitas = Fasilitas::where('ketersediaan', 'aktif')
+                             ->whereNull('deleted_at')
+                             ->get();
+
+        // Get user's checkouts
+        $checkouts = Checkout::with(['jadwal.fasilitas'])
+                           ->where('user_id', Auth::id())
+                           ->whereIn('status', ['fee', 'lunas']) // Only show active bookings
+                           ->latest()
+                           ->get();
 
         // Calculate duration for each booking
         foreach ($riwayat as $item) {
@@ -80,6 +94,6 @@ class BookingController extends Controller
             $item->totalDurasi = $totalDurasi;
         }
 
-        return view('User.riwayat', compact('riwayat'));
+        return view('User.Checkout.riwayat', compact('riwayat','fasilitas','checkouts'));
     }
 }

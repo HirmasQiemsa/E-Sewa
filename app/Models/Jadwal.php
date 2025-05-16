@@ -24,40 +24,28 @@ class Jadwal extends Model
     /**
      * Define relationship with Fasilitas model
      */
-    public function fasilitas()
-    {
+// Each schedule belongs to a facility
+    public function fasilitas() {
         return $this->belongsTo(Fasilitas::class);
     }
 
-    /**
-     * Define relationship with Checkout model
-     */
-    public function checkout()
-    {
+    // Each schedule can belong to a checkout
+    public function checkout() {
         return $this->belongsTo(Checkout::class);
     }
 
     /**
-     * Get the formatted date
+     * The checkouts that belong to the jadwal.
      */
-    public function getFormattedDateAttribute()
+    public function checkouts()
     {
-        return date('d F Y', strtotime($this->tanggal));
+        return $this->belongsToMany(Checkout::class, 'checkout_jadwal')
+                    ->using(CheckoutJadwal::class)
+                    ->withTimestamps();
     }
 
-    /**
-     * Get the formatted time
-     */
-    public function getFormattedTimeAttribute()
-    {
-        return substr($this->jam_mulai, 0, 5) . ' - ' . substr($this->jam_selesai, 0, 5);
-    }
-
-    /**
-     * Calculate duration in hours
-     */
-    public function getDurasiAttribute()
-    {
+    // Calculate duration in hours
+    public function getDurasiAttribute() {
         $mulaiParts = explode(':', $this->jam_mulai);
         $selesaiParts = explode(':', $this->jam_selesai);
 

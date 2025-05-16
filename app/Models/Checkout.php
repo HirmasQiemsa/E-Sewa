@@ -20,48 +20,36 @@ class Checkout extends Model
     /**
      * Define relationship with User model
      */
-    public function user()
-    {
+     // Each checkout belongs to a user
+    public function user() {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Define relationship with Jadwal model
-     */
-    public function jadwal()
-    {
+    // Each checkout has one main jadwal (for reference)
+    public function jadwal() {
         return $this->belongsTo(Jadwal::class, 'jadwals_id');
     }
 
-    /**
-     * Define relationship with all jadwals
-     */
+    // Each checkout has many associated jadwals
     public function jadwals()
     {
-        return $this->hasMany(Jadwal::class, 'checkout_id');
+        return $this->belongsToMany(Jadwal::class, 'checkout_jadwal')
+                    ->using(CheckoutJadwal::class)
+                    ->withTimestamps();
     }
 
-    /**
-     * Define relationship with PemasukanSewa model
-     */
-    public function pembayaran()
-    {
+    // Each checkout can have multiple payments
+    public function pembayaran() {
         return $this->hasMany(PemasukanSewa::class);
     }
 
-    /**
-     * Define relationship with Riwayat model
-     */
-    public function riwayat()
-    {
+    // Each checkout has one history record
+    public function riwayat() {
         return $this->hasOne(Riwayat::class);
     }
 
-    /**
-     * Calculate remaining payment
-     */
-    public function getSisaPembayaranAttribute()
-    {
+    // Calculate remaining payment
+    public function getSisaPembayaranAttribute() {
         if ($this->status === 'lunas') {
             return 0;
         }

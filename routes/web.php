@@ -9,19 +9,17 @@ use App\Http\Controllers\Admin\JadwalController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogoutController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\BerandaController;
 use App\Http\Controllers\User\CheckoutController;
-use App\Http\Controllers\User\ProfileUserController;
 use App\Http\Controllers\User\BookingController;
+use App\Http\Controllers\User\UserController;
 
 
 // as Guest //
 Route::get('/laravel', function () {
     return view('welcome');
 });
-Route::get('/', function () {
-    return view('beranda');
-});
+Route::get('/', [BerandaController::class, 'index']);
 Route::get('/register', function () {
     return view('auth.register');
 })->name('register');
@@ -47,7 +45,7 @@ Route::middleware(['auth:petugas_pembayarans', 'petugas_pembayarans'])->name('pe
 Route::middleware(['auth:admin', 'admin'])->name('admin.')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard'); //
     // Fasilitas (CRUD + restore)
-    Route::get('/fasilitas', [FasilitasController::class, 'index'])->name('fasilitas.index');
+    Route::get('/petugas/fasilitas', [FasilitasController::class, 'index'])->name('fasilitas.index');
     Route::get('/fasilitas/tambah', [FasilitasController::class, 'tambah'])->name('fasilitas.tambah');
     Route::post('/fasilitas/tambah', [FasilitasController::class, 'store'])->name('fasilitas.store');
     Route::post('/fasilitas/gunakan', [FasilitasController::class, 'store_gunakan'])->name('fasilitas.storeG');
@@ -74,15 +72,16 @@ Route::middleware(['auth:admin', 'admin'])->name('admin.')->group(function () {
 
 // USER //
 Route::middleware(['auth:web', 'user:user'])->name('user.')->group(function () {
-    Route::get('/beranda', [UserController::class, 'beranda'])->name('beranda');
+    // Fasilitas
+    Route::get('/fasilitas', [UserController::class, 'beranda'])->name('fasilitas');
+    // Profile
+    Route::get('/user/profile', [UserController::class, 'edit'])->name('edit');
+    // Riwayat
+    Route::get('/riwayat', [BookingController::class, 'riwayat'])->name('riwayat');
     // Booking
     Route::get('/lapangan-tenis', [BookingController::class, 'tenis'])->name('tenis');
     Route::get('/lapangan-voli', [BookingController::class, 'voli'])->name('voli');
     Route::get('/lapangan-futsal', [BookingController::class, 'futsal'])->name('futsal');
-    // Riwayat
-    Route::get('/riwayat', [BookingController::class, 'riwayat'])->name('riwayat');
-    // Profile
-    Route::get('/user/profile', [ProfileUserController::class, 'edit'])->name('edit');
     // Checkout
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
     Route::post('/checkout/store', [CheckoutController::class, 'store'])->name('checkout.store');

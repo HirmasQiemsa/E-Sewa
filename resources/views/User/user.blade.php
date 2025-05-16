@@ -77,7 +77,7 @@
             <ul class="navbar-nav">
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center" data-widget="pushmenu"
-                        href="{{ route('user.beranda') }}" role="button">
+                        href="{{ route('user.fasilitas') }}" role="button">
                         <img class="me-2" src="{{ asset('img/logo.png') }}" alt="AdminLTELogo" height="40"
                             width="40">
                         <b style="font-size: 1.5rem; margin-left: 1rem; color: white;"
@@ -110,29 +110,29 @@
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
                         <li class="nav-item active mt-2">
-                            <a href="{{ route('user.beranda') }}" class="nav-link active bg-danger">
+                            <a href="{{ route('user.fasilitas') }}" class="nav-link active bg-danger">
                                 <i class="nav-icon fas fa-book"></i>
                                 <p>
-                                    Beranda
+                                    Fasilitas
                                 </p>
                             </a>
                         </li>
                     </ul>
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                    {{-- <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
                         <li class="nav-item active mt-2">
                             <a href="{{ route('user.checkout') }}" class="nav-link active bg-danger">
-                                <i class="nav-icon fas fa-shopping-cart"></i>
+                                <i class="nav-icon fas fa-cart-plus"></i>
                                 <p>
                                     Checkout
                                 </p>
                             </a>
                         </li>
-                    </ul>
+                    </ul> --}}
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
                         <li class="nav-item active mt-2">
-                            <a href="#" class="nav-link active bg-danger">
+                            <a href="{{ route('user.riwayat') }}" class="nav-link active bg-danger">
                                 <i class="nav-icon fas fa-history"></i>
                                 <p>
                                     Riwayat

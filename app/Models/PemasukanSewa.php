@@ -16,22 +16,20 @@ class PemasukanSewa extends Model
         'jumlah_bayar',
         'metode_pembayaran',
         'status',
-        'keterangan'
+        'keterangan',
+        'petugas_pembayaran_id'
     ];
 
     /**
      * Define relationship with Checkout model
      */
-    public function checkout()
-    {
+    // Each payment belongs to a checkout
+    public function checkout() {
         return $this->belongsTo(Checkout::class);
     }
 
-    /**
-     * Define relationship with Fasilitas model
-     */
-    public function fasilitas()
-    {
+    // Each payment is associated with a facility
+    public function fasilitas() {
         return $this->belongsTo(Fasilitas::class);
     }
 

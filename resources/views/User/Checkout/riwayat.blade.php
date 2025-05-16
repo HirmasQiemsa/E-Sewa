@@ -5,162 +5,21 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Checkout Fasilitas</h1>
-                </div>
-            </div>
-        </div>
+                    <h1 class="m-0">Riwayat Booking Saya</h1>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
     </div>
+    <!-- /.content-header -->
 
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
-            <!-- Notification area -->
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible fade show">
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible fade show">
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    {{ session('error') }}
-                </div>
-            @endif
-
             <div class="row">
-                <!-- Form Booking Fasilitas -->
-                <div class="col-md-4">
-                    <div class="card card-dark">
-                        <div class="card-header">
-                            <h3 class="card-title">Form Booking Lapangan</h3>
-                        </div>
-                        <!-- form start -->
-                        <form action="{{ route('user.checkout.store') }}" method="POST" id="checkoutForm">
-                            @csrf
-                            <div class="card-body">
-                                <!-- Pilihan Fasilitas -->
-                                <div class="form-group">
-                                    <label for="fasilitas_id">Pilih Tipe</label>
-                                    <select name="fasilitas_id" id="fasilitas_id" class="form-control" required>
-                                        <option value="">-- Pilih Lapangan --</option>
-                                        @foreach ($fasilitas as $f)
-                                            <option value="{{ $f->id }}"
-                                                data-harga="{{ $f->harga_sewa }}"
-                                                data-lokasi="{{ $f->lokasi }}"
-                                                data-deskripsi="{{ $f->deskripsi }}">
-                                                {{ $f->nama_fasilitas }} - {{ $f->tipe }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    @error('fasilitas_id')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-
-                                <!-- Tanggal Booking -->
-                                <div class="form-group">
-                                    <label for="tanggal_booking">Tanggal Booking</label>
-                                    <input type="date" name="tanggal_booking" id="tanggal_booking" class="form-control"
-                                        min="{{ date('Y-m-d') }}" required>
-                                    @error('tanggal_booking')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-
-                                <!-- Informasi Hari -->
-                                <div class="form-group">
-                                    <label for="hari">Hari</label>
-                                    <input type="text" id="hari" class="form-control" readonly>
-                                </div>
-
-                                <!-- Informasi Lokasi -->
-                                <div class="form-group">
-                                    <label for="lokasi">Lokasi</label>
-                                    <input type="text" id="lokasi" class="form-control" readonly>
-                                </div>
-
-                                <!-- Jadwal yang tersedia -->
-                                <div class="form-group">
-                                    <label>Pilih Jadwal</label>
-                                    <div id="jadwal-loading" class="text-center d-none mb-2">
-                                        <div class="spinner-border text-primary" role="status">
-                                            <span class="sr-only">Loading...</span>
-                                        </div>
-                                    </div>
-                                    <div id="jadwal-container" class="border p-3 rounded"
-                                        style="max-height: 200px; overflow-y: auto;">
-                                        <div class="text-center py-3 text-muted">
-                                            Silahkan pilih lapangan dan tanggal terlebih dahulu
-                                        </div>
-                                    </div>
-                                    @error('jadwal_ids')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-
-                                <!-- Jadwal yang dipilih -->
-                                <div class="form-group">
-                                    <label>Jadwal Yang Dipilih</label>
-                                    <div id="selected-jadwal" class="border p-2 rounded" style="min-height: 50px;">
-                                        <div id="no-selected" class="text-center py-2 text-muted">
-                                            Belum ada jadwal yang dipilih
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Informasi Include -->
-                                <div class="form-group">
-                                    <label><i class="fas fa-info-circle"></i> Include</label>
-                                    <div id="deskripsi-container" class="p-2 border rounded bg-light">
-                                        <p id="deskripsi" class="mb-0 text-muted">Pilih lapangan untuk melihat fasilitas yang tersedia</p>
-                                    </div>
-                                </div>
-
-                                <!-- Informasi Harga per Jam -->
-                                <div class="form-group">
-                                    <label for="harga_per_jam">Harga per Jam</label>
-                                    <input type="text" id="harga_per_jam" class="form-control" readonly>
-                                </div>
-
-                                <!-- Total Durasi -->
-                                <div class="form-group">
-                                    <label for="total_durasi">Total Durasi</label>
-                                    <input type="text" id="total_durasi" class="form-control" readonly>
-                                    <input type="hidden" name="total_durasi" id="total_durasi_value">
-                                </div>
-
-                                <!-- Total Bayar -->
-                                <div class="form-group">
-                                    <label for="total_bayar_display">Total Bayar</label>
-                                    <input type="text" id="total_bayar_display" class="form-control" readonly>
-                                    <input type="hidden" name="total_bayar" id="total_bayar_value">
-                                </div>
-
-                                <!-- DP 50% -->
-                                <div class="form-group">
-                                    <label for="dp_display">DP (50%)</label>
-                                    <input type="text" id="dp_display" class="form-control" readonly>
-                                    <input type="hidden" name="dp_value" id="dp_value">
-                                    <small class="text-info">*DP 50% langsung tercatat sebagai pembayaran awal</small>
-                                </div>
-                            </div>
-
-                            <div class="card-footer">
-                                <button type="submit" id="submit-btn" class="btn btn-primary btn-block" disabled>
-                                    <i class="fas fa-calendar-check mr-2"></i>Booking Sekarang
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
                 <!-- Daftar Booking -->
-                <div class="col-md-8">
+                <div class="col-md-12">
                     <div class="card card-warning">
                         <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-shopping-cart mr-2"></i> List Booking Saya</h3>
                             <div class="card-tools">
                                 <div class="input-group input-group-sm" style="width: 150px;">
                                     <input type="text" id="booking-search" class="form-control float-right"
@@ -208,15 +67,15 @@
                                             </td>
                                             <td>
                                                 <a href="{{ route('user.checkout.detail', $checkout->id) }}"
-                                                    class="btn btn-sm btn-info" title="Lihat Detail">
+                                                    class="btn btn-sm btn-info">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                                 @if ($checkout->status == 'fee')
                                                     <a href="{{ route('user.checkout.pelunasan', $checkout->id) }}"
-                                                        class="btn btn-sm btn-success" title="Lunasi Pembayaran">
+                                                        class="btn btn-sm btn-success">
                                                         <i class="fas fa-money-bill"></i>
                                                     </a>
-                                                    <button type="button" class="btn btn-sm btn-danger" title="Batalkan Pesanan"
+                                                    <button type="button" class="btn btn-sm btn-danger ml-2"
                                                         onclick="confirmCancel({{ $checkout->id }})">
                                                         <i class="fas fa-times"></i>
                                                     </button>
@@ -242,14 +101,14 @@
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header bg-danger">
+                <div class="modal-header">
                     <h5 class="modal-title" id="cancelModalLabel">Konfirmasi Pembatalan</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p><i class="fas fa-exclamation-triangle text-warning mr-2"></i>Apakah Anda yakin ingin membatalkan booking ini? DP tidak akan dikembalikan.</p>
+                    <p>Apakah Anda yakin ingin membatalkan booking ini? DP tidak akan dikembalikan.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -278,9 +137,6 @@
             // Event listeners
             document.getElementById('fasilitas_id').addEventListener('change', handleFasilitasChange);
             document.getElementById('tanggal_booking').addEventListener('change', handleTanggalChange);
-
-            // Setup search functionality
-            setupSearch();
         });
 
         // Format mata uang Rupiah
@@ -302,47 +158,11 @@
         // Handler saat fasilitas berubah
         function handleFasilitasChange() {
             const select = document.getElementById('fasilitas_id');
-            if (!select.value) {
-                resetFormFields();
-                return;
-            }
-
             const selectedOption = select.options[select.selectedIndex];
 
-            // Update lokasi
             document.getElementById('lokasi').value = selectedOption.dataset.lokasi || '';
-
-            // Update harga
             hargaPerJam = parseInt(selectedOption.dataset.harga) || 0;
             document.getElementById('harga_per_jam').value = formatRupiah(hargaPerJam);
-
-            // Update deskripsi/include
-            const deskripsiElement = document.getElementById('deskripsi');
-            const deskripsiText = selectedOption.dataset.deskripsi || 'Tidak ada informasi tambahan';
-
-            // Format deskripsi dengan bullet points jika ada pemisah koma
-            if (deskripsiText.includes(',')) {
-                const items = deskripsiText.split(',').map(item => item.trim()).filter(item => item);
-                if (items.length > 0) {
-                    let htmlContent = '<ul class="mb-0 pl-3">';
-                    items.forEach(item => {
-                        htmlContent += `<li>${item}</li>`;
-                    });
-                    htmlContent += '</ul>';
-                    deskripsiElement.innerHTML = htmlContent;
-                } else {
-                    deskripsiElement.textContent = deskripsiText;
-                }
-            } else {
-                deskripsiElement.textContent = deskripsiText;
-            }
-
-            // Hapus kelas text-muted jika ada deskripsi
-            if (deskripsiText && deskripsiText !== 'Tidak ada informasi tambahan') {
-                deskripsiElement.classList.remove('text-muted');
-            } else {
-                deskripsiElement.classList.add('text-muted');
-            }
 
             // Reset jadwal
             resetJadwalSelections();
@@ -352,15 +172,6 @@
             if (tanggal) {
                 loadJadwal();
             }
-        }
-
-        // Reset all form fields
-        function resetFormFields() {
-            document.getElementById('lokasi').value = '';
-            document.getElementById('harga_per_jam').value = '';
-            document.getElementById('deskripsi').innerHTML = 'Pilih lapangan untuk melihat fasilitas yang tersedia';
-            document.getElementById('deskripsi').classList.add('text-muted');
-            resetJadwalSelections();
         }
 
         // Handler saat tanggal berubah
@@ -602,8 +413,9 @@
             $('#cancelModal').modal('show');
         }
 
-        // Setup search functionality
-        function setupSearch() {
+        // Enhanced search functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up search functionality
             const searchInput = document.getElementById('booking-search');
 
             // Search as you type
@@ -611,14 +423,19 @@
                 searchBookings();
             });
 
-            // Search on Enter key
+            // Search when pressing Enter
             searchInput.addEventListener('keypress', function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     searchBookings();
                 }
             });
-        }
+
+            // Make sure the button works
+            document.querySelector('.card-tools button').addEventListener('click', function() {
+                searchBookings();
+            });
+        });
 
         // Improved search bookings function
         function searchBookings() {
@@ -628,8 +445,6 @@
             let hasResults = false;
 
             rows.forEach(row => {
-                if (row.id === 'no-results-row') return;
-
                 const text = row.textContent.toLowerCase();
                 if (text.includes(searchText)) {
                     row.style.display = '';
@@ -640,19 +455,27 @@
             });
 
             // Handle no results
-            const noResultsRow = document.getElementById('no-results-row');
             if (!hasResults && searchText) {
-                if (!noResultsRow) {
-                    const newRow = document.createElement('tr');
-                    newRow.id = 'no-results-row';
-                    newRow.innerHTML = `<td colspan="7" class="text-center">
-                        Tidak ditemukan hasil untuk "<b>${searchText}</b>"
-                        <button class="btn btn-sm btn-outline-secondary ml-2" onclick="clearSearch()">Reset</button>
-                    </td>`;
-                    tableBody.appendChild(newRow);
+                // If there's no existing "no results" row
+                if (!document.getElementById('no-results-row')) {
+                    // Remove any previous no-results message
+                    const existing = tableBody.querySelector('.no-results-row');
+                    if (existing) tableBody.removeChild(existing);
+
+                    // Create new row
+                    const noResultsRow = document.createElement('tr');
+                    noResultsRow.id = 'no-results-row';
+                    noResultsRow.className = 'no-results-row';
+                    noResultsRow.innerHTML =
+                        `<td colspan="7" class="text-center">Tidak ditemukan hasil untuk "${searchText}" <button class="btn btn-sm btn-outline-secondary ml-2" onclick="clearSearch()">Reset</button></td>`;
+                    tableBody.appendChild(noResultsRow);
                 }
-            } else if (noResultsRow) {
-                noResultsRow.remove();
+            } else {
+                // Remove no results message if it exists
+                const noResultsRow = document.getElementById('no-results-row');
+                if (noResultsRow) {
+                    tableBody.removeChild(noResultsRow);
+                }
             }
         }
 
