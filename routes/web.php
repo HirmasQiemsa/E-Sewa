@@ -76,8 +76,9 @@ Route::middleware(['auth:web', 'user:user'])->name('user.')->group(function () {
     Route::get('/fasilitas', [UserController::class, 'beranda'])->name('fasilitas');
     // Profile
     Route::get('/user/profile', [UserController::class, 'edit'])->name('edit');
-    // Riwayat
+    // Riwayat dan Bukti Pembayaran
     Route::get('/riwayat', [BookingController::class, 'riwayat'])->name('riwayat');
+    Route::get('/riwayat/receipt/{id}', [BookingController::class, 'downloadReceipt'])->name('riwayat.receipt');
     // Booking
     Route::get('/lapangan-tenis', [BookingController::class, 'tenis'])->name('tenis');
     Route::get('/lapangan-voli', [BookingController::class, 'voli'])->name('voli');

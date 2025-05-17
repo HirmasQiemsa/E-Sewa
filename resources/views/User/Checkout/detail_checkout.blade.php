@@ -9,7 +9,12 @@
                 </div><!-- /.col -->
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('user.checkout') }}">Checkout</a></li>
+                        <!-- Dynamic breadcrumb based on source -->
+                        <li class="breadcrumb-item">
+                            <a href="{{ request()->query('source') === 'riwayat' ? route('user.riwayat') : route('user.checkout') }}">
+                                {{ request()->query('source') === 'riwayat' ? 'Riwayat' : 'Checkout' }}
+                            </a>
+                        </li>
                         <li class="breadcrumb-item active">Detail</li>
                     </ol>
                 </div><!-- /.col -->
@@ -157,23 +162,13 @@
                             </table>
                         </div>
 
-                        {{-- @if ($checkout->status == 'fee')
+                        @if ($checkout->status == 'fee')
                             <div class="card-footer d-flex justify-content-end">
-                                @if ($checkout->status == 'fee')
-                                    <button type="button" class="btn btn-danger mr-auto"
-                                        onclick="confirmCancel({{ $checkout->id }})">
-                                        <i class="fas fa-times"></i> Batalkan Booking
-                                    </button>
-                                @endif
-
                                 <a href="{{ route('user.checkout.pelunasan', $checkout->id) }}" class="btn btn-success">
                                     <i class="fas fa-money-bill"></i> Lunasi Pembayaran
                                 </a>
-
                             </div>
-                        @endif --}}
-
-
+                        @endif
                     </div>
                 </div>
 
@@ -182,10 +177,17 @@
                     <div class="card">
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
-                                <a href="{{ route('user.checkout') }}" class="btn btn-secondary">
-                                    <i class="fas fa-arrow-left"></i> Kembali
+                                <!-- Dynamic back button based on source -->
+                                <a href="{{ request()->query('source') === 'riwayat' ? route('user.riwayat') : route('user.checkout') }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Kembali ke {{ request()->query('source') === 'riwayat' ? 'Riwayat' : 'Checkout' }}
                                 </a>
 
+                                @if ($checkout->status == 'fee')
+                                    <button type="button" class="btn btn-danger"
+                                        onclick="confirmCancel({{ $checkout->id }})">
+                                        <i class="fas fa-times"></i> Batalkan Booking
+                                    </button>
+                                @endif
                             </div>
                         </div>
                     </div>

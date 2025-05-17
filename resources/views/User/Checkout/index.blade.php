@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Checkout Fasilitas</h1>
+                    <h1 class="m-0">Booking Fasilitas</h1>
                 </div>
             </div>
         </div>
@@ -15,14 +15,14 @@
     <section class="content">
         <div class="container-fluid">
             <!-- Notification area -->
-            @if(session('success'))
+            @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show">
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
                     {{ session('success') }}
                 </div>
             @endif
 
-            @if(session('error'))
+            @if (session('error'))
                 <div class="alert alert-danger alert-dismissible fade show">
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
                     {{ session('error') }}
@@ -31,7 +31,7 @@
 
             <div class="row">
                 <!-- Form Booking Fasilitas -->
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="card card-dark">
                         <div class="card-header">
                             <h3 class="card-title">Form Booking Lapangan</h3>
@@ -42,14 +42,12 @@
                             <div class="card-body">
                                 <!-- Pilihan Fasilitas -->
                                 <div class="form-group">
-                                    <label for="fasilitas_id">Pilih Tipe</label>
+                                    <label for="fasilitas_id">Pilih Tipe Lapangan</label>
                                     <select name="fasilitas_id" id="fasilitas_id" class="form-control" required>
                                         <option value="">-- Pilih Lapangan --</option>
                                         @foreach ($fasilitas as $f)
-                                            <option value="{{ $f->id }}"
-                                                data-harga="{{ $f->harga_sewa }}"
-                                                data-lokasi="{{ $f->lokasi }}"
-                                                data-deskripsi="{{ $f->deskripsi }}">
+                                            <option value="{{ $f->id }}" data-harga="{{ $f->harga_sewa }}"
+                                                data-lokasi="{{ $f->lokasi }}" data-deskripsi="{{ $f->deskripsi }}">
                                                 {{ $f->nama_fasilitas }} - {{ $f->tipe }}
                                             </option>
                                         @endforeach
@@ -59,20 +57,24 @@
                                     @enderror
                                 </div>
 
-                                <!-- Tanggal Booking -->
-                                <div class="form-group">
-                                    <label for="tanggal_booking">Tanggal Booking</label>
-                                    <input type="date" name="tanggal_booking" id="tanggal_booking" class="form-control"
-                                        min="{{ date('Y-m-d') }}" required>
-                                    @error('tanggal_booking')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
-                                </div>
-
-                                <!-- Informasi Hari -->
-                                <div class="form-group">
-                                    <label for="hari">Hari</label>
-                                    <input type="text" id="hari" class="form-control" readonly>
+                                <!-- Tanggal dan Hari Booking (side by side) -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="tanggal_booking">Tanggal Booking</label>
+                                            <input type="date" name="tanggal_booking" id="tanggal_booking"
+                                                class="form-control" min="{{ date('Y-m-d') }}" required>
+                                            @error('tanggal_booking')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="hari">Hari</label>
+                                            <input type="text" id="hari" class="form-control" readonly>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <!-- Informasi Lokasi -->
@@ -114,37 +116,46 @@
                                 <div class="form-group">
                                     <label><i class="fas fa-info-circle"></i> Include</label>
                                     <div id="deskripsi-container" class="p-2 border rounded bg-light">
-                                        <p id="deskripsi" class="mb-0 text-muted">Pilih lapangan untuk melihat fasilitas yang tersedia</p>
+                                        <p id="deskripsi" class="mb-0 text-muted">Pilih lapangan untuk melihat fasilitas
+                                            yang tersedia</p>
                                     </div>
                                 </div>
 
-                                <!-- Informasi Harga per Jam -->
-                                <div class="form-group">
-                                    <label for="harga_per_jam">Harga per Jam</label>
-                                    <input type="text" id="harga_per_jam" class="form-control" readonly>
+                                <!-- Informasi Harga dan Durasi side by side -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="harga_per_jam">Harga per Jam</label>
+                                            <input type="text" id="harga_per_jam" class="form-control" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="total_durasi">Total Durasi</label>
+                                            <input type="text" id="total_durasi" class="form-control" readonly>
+                                            <input type="hidden" name="total_durasi" id="total_durasi_value">
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <!-- Total Durasi -->
-                                <div class="form-group">
-                                    <label for="total_durasi">Total Durasi</label>
-                                    <input type="text" id="total_durasi" class="form-control" readonly>
-                                    <input type="hidden" name="total_durasi" id="total_durasi_value">
+                                <!-- Total Bayar dan DP side by side -->
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="total_bayar_display">Total Bayar</label>
+                                            <input type="text" id="total_bayar_display" class="form-control" readonly>
+                                            <input type="hidden" name="total_bayar" id="total_bayar_value">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="dp_display">DP (50%)</label>
+                                            <input type="text" id="dp_display" class="form-control" readonly>
+                                            <input type="hidden" name="dp_value" id="dp_value">
+                                        </div>
+                                    </div>
                                 </div>
-
-                                <!-- Total Bayar -->
-                                <div class="form-group">
-                                    <label for="total_bayar_display">Total Bayar</label>
-                                    <input type="text" id="total_bayar_display" class="form-control" readonly>
-                                    <input type="hidden" name="total_bayar" id="total_bayar_value">
-                                </div>
-
-                                <!-- DP 50% -->
-                                <div class="form-group">
-                                    <label for="dp_display">DP (50%)</label>
-                                    <input type="text" id="dp_display" class="form-control" readonly>
-                                    <input type="hidden" name="dp_value" id="dp_value">
-                                    <small class="text-info">*DP 50% langsung tercatat sebagai pembayaran awal</small>
-                                </div>
+                                <small class="text-info mb-3">*DP 50% langsung tercatat sebagai pembayaran awal</small>
                             </div>
 
                             <div class="card-footer">
@@ -157,7 +168,7 @@
                 </div>
 
                 <!-- Daftar Booking -->
-                <div class="col-md-8">
+                <div class="col-md-6">
                     <div class="card card-warning">
                         <div class="card-header">
                             <h3 class="card-title"><i class="fas fa-shopping-cart mr-2"></i> List Booking Saya</h3>
@@ -179,23 +190,21 @@
                                 <thead>
                                     <tr>
                                         <th>No</th>
-                                        <th>Tanggal</th>
-                                        <th>Fasilitas</th>
-                                        <th>Durasi</th>
+                                        <th>Hari</th>
+                                        <th>Tgl. Booking</th>
                                         <th>Total</th>
                                         <th>Status</th>
-                                        <th>Aksi</th>
+                                        <th class="text-center">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($checkouts as $index => $checkout)
                                         <tr>
                                             <td>{{ $index + 1 }}</td>
-                                            <td>{{ $checkout->jadwal ? date('d-m-Y', strtotime($checkout->jadwal->tanggal)) : '-' }}
+                                            <td>{{ $checkout->jadwal ? date('l', strtotime($checkout->jadwal->tanggal)) : '-' }}
                                             </td>
-                                            <td>{{ $checkout->jadwal && $checkout->jadwal->fasilitas ? $checkout->jadwal->fasilitas->nama_fasilitas : '-' }}
+                                            <td>{{ $checkout->jadwal ? date('d/m/Y', strtotime($checkout->jadwal->tanggal)) : '-' }}
                                             </td>
-                                            <td>{{ $checkout->totalDurasi ?? '-' }} jam</td>
                                             <td>Rp {{ number_format($checkout->total_bayar, 0, ',', '.') }}</td>
                                             <td>
                                                 @if ($checkout->status == 'fee')
@@ -206,26 +215,31 @@
                                                     <span class="badge badge-danger">Batal</span>
                                                 @endif
                                             </td>
-                                            <td>
-                                                <a href="{{ route('user.checkout.detail', $checkout->id) }}"
-                                                    class="btn btn-sm btn-info" title="Lihat Detail">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                @if ($checkout->status == 'fee')
-                                                    <a href="{{ route('user.checkout.pelunasan', $checkout->id) }}"
-                                                        class="btn btn-sm btn-success" title="Lunasi Pembayaran">
-                                                        <i class="fas fa-money-bill"></i>
-                                                    </a>
-                                                    <button type="button" class="btn btn-sm btn-danger" title="Batalkan Pesanan"
-                                                        onclick="confirmCancel({{ $checkout->id }})">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                @endif
+                                            <td class="text-center">
+                                                <div class="btn-toolbar justify-content-center">
+                                                    <div class="btn-group">
+                                                        <a href="{{ route('user.checkout.detail', ['id' => $checkout->id, 'source' => 'checkout']) }}"
+                                                            class="btn btn-xs btn-info" title="Lihat Detail">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                        @if ($checkout->status == 'fee')
+                                                            <a href="{{ route('user.checkout.pelunasan', $checkout->id) }}"
+                                                                class="btn btn-xs btn-success" title="Lunasi Pembayaran">
+                                                                <i class="fas fa-money-bill"></i>
+                                                            </a>
+                                                            <button type="button" class="btn btn-xs btn-danger"
+                                                                title="Batalkan Pesanan"
+                                                                onclick="confirmCancel({{ $checkout->id }})">
+                                                                <i class="fas fa-times"></i>
+                                                            </button>
+                                                        @endif
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="7" class="text-center">Belum ada booking aktif</td>
+                                            <td colspan="6" class="text-center">Belum ada booking aktif</td>
                                         </tr>
                                     @endforelse
                                 </tbody>
@@ -249,7 +263,8 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p><i class="fas fa-exclamation-triangle text-warning mr-2"></i>Apakah Anda yakin ingin membatalkan booking ini? DP tidak akan dikembalikan.</p>
+                    <p><i class="fas fa-exclamation-triangle text-warning mr-2"></i>Apakah Anda yakin ingin membatalkan
+                        booking ini? DP tidak akan dikembalikan.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -464,10 +479,10 @@
                 });
         }
 
-        // Create jadwal item element
+        // Create jadwal item element with improved button position
         function createJadwalItem(jadwal, isBooked) {
             const jadwalItem = document.createElement('div');
-            jadwalItem.className = 'form-check mb-2';
+            jadwalItem.className = 'form-check mb-2 d-flex align-items-center';
 
             const checkboxId = `jadwal-${jadwal.id}`;
 
@@ -485,21 +500,37 @@
             // Durasi selalu dalam jam penuh
             const durasi = selesaiJam - mulaiJam;
 
-            jadwalItem.innerHTML = `
-                <input class="form-check-input" type="checkbox" id="${checkboxId}"
-                    value="${jadwal.id}"
-                    data-jam-mulai="${jamMulaiDisplay}"
-                    data-jam-selesai="${jamSelesaiDisplay}"
-                    data-durasi="${durasi}"
-                    ${isBooked ? 'disabled' : ''}
-                    onchange="toggleJadwal(this)">
-                <label class="form-check-label" for="${checkboxId}">
-                    <span class="mr-2">${jamMulaiDisplay} - ${jamSelesaiDisplay} (${durasi} jam)</span>
-                    ${isBooked ?
-                        '<span class="badge badge-danger">Sudah Dibooking</span>' :
-                        '<span class="badge badge-success">Tersedia</span>'}
-                </label>
-            `;
+            // Create checkbox and label first
+            const checkbox = document.createElement('input');
+            checkbox.className = 'form-check-input';
+            checkbox.type = 'checkbox';
+            checkbox.id = checkboxId;
+            checkbox.value = jadwal.id;
+            checkbox.dataset.jamMulai = jamMulaiDisplay;
+            checkbox.dataset.jamSelesai = jamSelesaiDisplay;
+            checkbox.dataset.durasi = durasi;
+            checkbox.disabled = isBooked;
+            checkbox.onchange = function() {
+                toggleJadwal(this);
+            };
+
+            const label = document.createElement('label');
+            label.className = 'form-check-label w-100 d-flex justify-content-between align-items-center';
+            label.htmlFor = checkboxId;
+
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'ml-2';
+            timeSpan.textContent = `${jamMulaiDisplay} - ${jamSelesaiDisplay} (${durasi} jam)`;
+
+            const statusBadge = document.createElement('span');
+            statusBadge.className = isBooked ? 'badge badge-danger ml-2' : 'badge badge-success ml-2';
+            statusBadge.textContent = isBooked ? 'Sudah Dibooking' : 'Tersedia';
+
+            label.appendChild(timeSpan);
+            label.appendChild(statusBadge);
+
+            jadwalItem.appendChild(checkbox);
+            jadwalItem.appendChild(label);
 
             return jadwalItem;
         }
@@ -528,7 +559,7 @@
             updateTotalHarga();
         }
 
-        // Update tampilan jadwal yang dipilih
+        // Update tampilan jadwal yang dipilih with improved layout
         function updateSelectedJadwalDisplay() {
             const selectedJadwalContainer = document.getElementById('selected-jadwal');
 
@@ -547,14 +578,27 @@
             selectedJadwals.forEach(jadwal => {
                 const badgeItem = document.createElement('div');
                 badgeItem.className = 'badge badge-info p-2 m-1 d-flex align-items-center';
-                badgeItem.innerHTML = `
-                    <span>${jadwal.jamMulai} - ${jadwal.jamSelesai} (${jadwal.durasi} jam)</span>
-                    <button type="button" class="btn btn-xs btn-danger ml-1"
-                        onclick="removeJadwal(${jadwal.id})">
-                        <i class="fas fa-times"></i>
-                    </button>
-                    <input type="hidden" name="jadwal_ids[]" value="${jadwal.id}">
-                `;
+
+                const timeSpan = document.createElement('span');
+                timeSpan.textContent = `${jadwal.jamMulai} - ${jadwal.jamSelesai} (${jadwal.durasi} jam)`;
+
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn btn-xs btn-danger ml-2';
+                removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                removeBtn.onclick = function() {
+                    removeJadwal(jadwal.id);
+                };
+
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'jadwal_ids[]';
+                hiddenInput.value = jadwal.id;
+
+                badgeItem.appendChild(timeSpan);
+                badgeItem.appendChild(removeBtn);
+                badgeItem.appendChild(hiddenInput);
+
                 selectedJadwalContainer.appendChild(badgeItem);
             });
         }
@@ -605,6 +649,7 @@
         // Setup search functionality
         function setupSearch() {
             const searchInput = document.getElementById('booking-search');
+            if (!searchInput) return;
 
             // Search as you type
             searchInput.addEventListener('input', function() {
@@ -645,7 +690,7 @@
                 if (!noResultsRow) {
                     const newRow = document.createElement('tr');
                     newRow.id = 'no-results-row';
-                    newRow.innerHTML = `<td colspan="7" class="text-center">
+                    newRow.innerHTML = `<td colspan="6" class="text-center">
                         Tidak ditemukan hasil untuk "<b>${searchText}</b>"
                         <button class="btn btn-sm btn-outline-secondary ml-2" onclick="clearSearch()">Reset</button>
                     </td>`;
