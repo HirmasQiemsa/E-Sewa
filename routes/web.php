@@ -75,7 +75,10 @@ Route::middleware(['auth:web', 'user:user'])->name('user.')->group(function () {
     // Fasilitas
     Route::get('/fasilitas', [UserController::class, 'beranda'])->name('fasilitas');
     // Profile
-    Route::get('/user/profile', [UserController::class, 'edit'])->name('edit');
+    Route::get('/profile', [UserController::class, 'profile'])->name('profile');
+    Route::put('/profile/update', [UserController::class, 'updateProfile'])->name('update');
+    Route::put('/profile/update-account', [UserController::class, 'updateAccount'])->name('update-account');
+    Route::put('/profile/update-password', [UserController::class, 'updatePassword'])->name('update-password');
     // Riwayat dan Bukti Pembayaran
     Route::get('/riwayat', [BookingController::class, 'riwayat'])->name('riwayat');
     Route::get('/riwayat/receipt/{id}', [BookingController::class, 'downloadReceipt'])->name('riwayat.receipt');
