@@ -10,7 +10,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="{{ route('petugas_fasilitas.dashboard') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Tambah Jadwal Fasilitas</li>
+                        <li class="breadcrumb-item active">Kelola Jadwal</li>
                     </ol>
                 </div>
             </div>
@@ -31,6 +31,7 @@
                         <!-- /.card-header -->
                         <div class="card-body">
                             <form id="jadwalGeneratorForm">
+                                @csrf
                                 <!-- Pilih Fasilitas -->
                                 <div class="form-group">
                                     <label for="fasilitas_id">Pilih Fasilitas</label>
@@ -189,15 +190,14 @@
                         <div class="card-header">
                             <h3 class="card-title">Jadwal Tersedia</h3>
                             <div class="card-tools">
-                                <div class="input-group input-group-sm" style="width: 250px;">
-                                    <input type="text" name="table_search" class="form-control float-right"
-                                        placeholder="Cari">
+                                <form action="{{ route('petugas_fasilitas.jadwal.index') }}" method="GET" class="input-group input-group-sm" style="width: 250px;">
+                                    <input type="text" name="search" class="form-control float-right" placeholder="Cari" value="{{ request('search') }}">
                                     <div class="input-group-append">
                                         <button type="submit" class="btn btn-default">
                                             <i class="fas fa-search"></i>
                                         </button>
                                     </div>
-                                </div>
+                                </form>
                             </div>
                         </div>
                         <!-- /.card-header -->
@@ -220,7 +220,7 @@
                                             <td>{{ $jadwal->fasilitas->nama_fasilitas }} - {{ $jadwal->fasilitas->tipe }}
                                             </td>
                                             <td>{{ \Carbon\Carbon::parse($jadwal->tanggal)->format('d M Y') }}</td>
-                                            <td>{{ $jadwal->jam_mulai }} - {{ $jadwal->jam_selesai }}</td>
+                                            <td>{{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }}</td>
                                             <td>
                                                 @if ($jadwal->status == 'tersedia')
                                                     <span class="badge badge-success">Tersedia</span>
@@ -233,8 +233,14 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <button class="btn btn-xs btn-primary">Edit</button>
-                                                <button class="btn btn-xs btn-danger">Hapus</button>
+                                                <a href="{{ route('petugas_fasilitas.jadwal.edit', $jadwal->id) }}" class="btn btn-xs btn-primary">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </a>
+                                                @if($jadwal->status != 'terbooking')
+                                                <button type="button" class="btn btn-xs btn-danger" onclick="confirmDelete({{ $jadwal->id }})">
+                                                    <i class="fas fa-trash"></i> Hapus
+                                                </button>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
@@ -280,11 +286,46 @@
         </div>
     </div>
 
+    <!-- Modal Konfirmasi Hapus -->
+    <div class="modal fade" id="deleteModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger">
+                    <h4 class="modal-title">Konfirmasi Hapus Jadwal</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Anda yakin ingin menghapus jadwal ini?</p>
+                    <p>Jadwal yang sudah dihapus tidak dapat dikembalikan.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
+                    <form id="deleteForm" method="POST" action="">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">Hapus</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Javascript untuk form generator -->
     <script>
-        // Perbaiki koneksi antara button generate dan confirmation modal
+        // Event handler saat dokumen siap
         document.addEventListener('DOMContentLoaded', function() {
-            // Tambahkan event listener untuk generate button
+            // Setup tombol preview
+            const previewButton = document.getElementById('previewButton');
+            if (previewButton) {
+                previewButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    generatePreview();
+                });
+            }
+
+            // Setup tombol generate
             const generateButton = document.getElementById('generateButton');
             if (generateButton) {
                 generateButton.addEventListener('click', function(e) {
@@ -315,6 +356,16 @@
                     // Submit form
                     submitGenerateJadwal();
                 });
+            }
+
+            // Setup validasi tanggal
+            document.getElementById('tanggal_mulai').addEventListener('change', validateDayCheckboxes);
+            document.getElementById('tanggal_selesai').addEventListener('change', validateDayCheckboxes);
+
+            // Set tanggal default ke hari ini
+            const today = new Date().toISOString().split('T')[0];
+            if (!document.getElementById('tanggal_mulai').value) {
+                document.getElementById('tanggal_mulai').value = today;
             }
         });
 
@@ -351,7 +402,7 @@
             return true;
         }
 
-        // Perbaiki fungsi untuk submit data ke server
+        // Submit data jadwal ke server
         function submitGenerateJadwal() {
             // Kumpulkan data form
             const formData = new FormData();
@@ -379,7 +430,7 @@
             });
 
             // Kirim data ke server dengan fetch API
-            fetch('{{ route('admin.jadwal.generate') }}', {
+            fetch('{{ route('petugas_fasilitas.jadwal.generate') }}', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -482,240 +533,7 @@
             return totalJadwal;
         }
 
-        // Perbaikan fungsi generatePreview()
-        function generatePreview() {
-            const fasilitas = document.getElementById('fasilitas_id');
-            const tanggalMulai = document.getElementById('tanggal_mulai').value;
-            const tanggalSelesai = document.getElementById('tanggal_selesai').value;
-            const jamBuka = document.getElementById('jam_buka').value;
-            const jamTutup = document.getElementById('jam_tutup').value;
-            const durasiSlot = parseInt(document.getElementById('durasi_slot').value);
-
-            // Validasi inputs
-            if (!fasilitas.value || !tanggalMulai || !tanggalSelesai || !jamBuka || !jamTutup) {
-                Swal.fire('Error', 'Mohon lengkapi semua field', 'error');
-                return;
-            }
-
-            // Get selected days
-            const selectedDays = [];
-            document.querySelectorAll('input[name="hari[]"]:checked').forEach(function(checkbox) {
-                selectedDays.push(parseInt(checkbox.value));
-            });
-
-            if (selectedDays.length === 0) {
-                Swal.fire('Error', 'Pilih minimal satu hari', 'error');
-                return;
-            }
-
-            // Tampilkan loading
-            document.getElementById('previewContainer').innerHTML =
-                '<div class="text-center py-4"><i class="fas fa-spinner fa-spin fa-2x"></i><p class="mt-2">Menghasilkan preview...</p></div>';
-
-            // Gunakan setTimeout untuk proses di background (mencegah browser freeze jika banyak data)
-            setTimeout(() => {
-                try {
-                    // Generate preview data
-                    const jadwalPreview = generateJadwalData(
-                        tanggalMulai,
-                        tanggalSelesai,
-                        jamBuka,
-                        jamTutup,
-                        durasiSlot,
-                        selectedDays,
-                        fasilitas.options[fasilitas.selectedIndex].text
-                    );
-
-                    // Update preview container
-                    const previewContainer = document.getElementById('previewContainer');
-                    const totalJadwalPreview = document.getElementById('totalJadwalPreview');
-
-                    if (jadwalPreview.length > 0) {
-                        totalJadwalPreview.textContent = `${jadwalPreview.length} jadwal akan dibuat`;
-
-                        // Batasi preview untuk performa
-                        const maxPreviewItems = 100;
-                        const shownItems = jadwalPreview.slice(0, maxPreviewItems);
-
-                        let html = `
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Fasilitas</th>
-                            <th>Tanggal</th>
-                            <th>Hari</th>
-                            <th>Jam</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                `;
-
-                        shownItems.forEach(function(jadwal) {
-                            html += `
-                    <tr>
-                        <td>${jadwal.fasilitas}</td>
-                        <td>${jadwal.tanggal}</td>
-                        <td>${jadwal.hari}</td>
-                        <td>${jadwal.jam_mulai} - ${jadwal.jam_selesai}</td>
-                    </tr>
-                    `;
-                        });
-
-                        // Jika jumlah jadwal melebihi yang ditampilkan, tambahkan catatan
-                        if (jadwalPreview.length > maxPreviewItems) {
-                            html += `
-                    <tr>
-                        <td colspan="4" class="text-center text-muted">
-                            <em>...dan ${jadwalPreview.length - maxPreviewItems} jadwal lainnya</em>
-                        </td>
-                    </tr>
-                    `;
-                        }
-
-                        html += `
-                    </tbody>
-                </table>
-                `;
-
-                        previewContainer.innerHTML = html;
-                    } else {
-                        previewContainer.innerHTML =
-                            '<p class="text-center text-warning py-3">Tidak ada jadwal yang dapat dibuat dengan kriteria tersebut</p>';
-                        totalJadwalPreview.textContent = '0 jadwal akan dibuat';
-                    }
-                } catch (error) {
-                    console.error('Error generating preview:', error);
-                    Swal.fire('Error', 'Terjadi kesalahan saat menghasilkan preview', 'error');
-                }
-            }, 100);
-        }
-
-        // Tambahkan fungsi untuk memvalidasi checkbox hari berdasarkan rentang tanggal
-        function validateDayCheckboxes() {
-            const tanggalMulai = new Date(document.getElementById('tanggal_mulai').value);
-            const tanggalSelesai = new Date(document.getElementById('tanggal_selesai').value);
-
-            if (!tanggalMulai || !tanggalSelesai || isNaN(tanggalMulai) || isNaN(tanggalSelesai)) {
-                // Jika tanggal tidak valid, aktifkan semua checkbox
-                document.querySelectorAll('input[name="hari[]"]').forEach(function(checkbox) {
-                    checkbox.disabled = false;
-                });
-                return;
-            }
-
-            // Temukan hari apa saja yang ada dalam rentang tanggal
-            const daysInRange = new Set();
-            let currentDate = new Date(tanggalMulai);
-
-            while (currentDate <= tanggalSelesai) {
-                daysInRange.add(currentDate.getDay()); // 0 = Minggu, 1 = Senin, dsb.
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-
-            // Update status disabled checkbox berdasarkan hari yang tersedia
-            document.querySelectorAll('input[name="hari[]"]').forEach(function(checkbox) {
-                const day = parseInt(checkbox.value);
-                if (daysInRange.has(day)) {
-                    checkbox.disabled = false;
-                    // Tambahkan class untuk styling (opsional)
-                    checkbox.parentElement.classList.remove('text-muted');
-                } else {
-                    checkbox.disabled = true;
-                    checkbox.checked = false; // Uncheck jika dinonaktifkan
-                    // Tambahkan class untuk styling (opsional)
-                    checkbox.parentElement.classList.add('text-muted');
-                }
-            });
-        }
-
-        // Hubungkan ke event change pada input tanggal
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('tanggal_mulai').addEventListener('change', validateDayCheckboxes);
-            document.getElementById('tanggal_selesai').addEventListener('change', validateDayCheckboxes);
-        });
-
-        // Perbaikan fungsi generateJadwalData
-        function generateJadwalData(tanggalMulai, tanggalSelesai, jamBuka, jamTutup, durasiSlot, selectedDays,
-            fasilitasText) {
-            // Pastikan semua parameter dikonversi ke format yang benar
-            const startDate = new Date(tanggalMulai);
-            const endDate = new Date(tanggalSelesai);
-            const daysOfWeek = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-
-            console.log("Generating preview with parameters:", {
-                tanggalMulai,
-                tanggalSelesai,
-                jamBuka,
-                jamTutup,
-                durasiSlot,
-                selectedDays
-            }); // Debug log
-
-            const jadwalData = [];
-
-            // Validasi data sebelum memproses
-            if (!startDate || !endDate || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-                console.error("Invalid date format");
-                return [];
-            }
-
-            let currentDate = new Date(startDate);
-
-            // Untuk setiap hari dalam rentang
-            while (currentDate <= endDate) {
-                // Cek apakah hari ini dipilih
-                if (selectedDays.includes(currentDate.getDay())) {
-                    const dateFormatted = currentDate.toISOString().split('T')[0];
-                    const dayName = daysOfWeek[currentDate.getDay()];
-
-                    // Parse jam buka & tutup
-                    const [startHour, startMin] = jamBuka.split(':').map(Number);
-                    const [endHour, endMin] = jamTutup.split(':').map(Number);
-
-                    let currentHour = startHour;
-                    let currentMin = startMin;
-
-                    // Untuk setiap slot dalam hari
-                    while ((currentHour < endHour) || (currentHour === endHour && currentMin < endMin)) {
-                        const slotStartTime =
-                            `${currentHour.toString().padStart(2, '0')}:${currentMin.toString().padStart(2, '0')}`;
-
-                        // Hitung waktu akhir slot
-                        let endSlotHour = currentHour + durasiSlot;
-                        let endSlotMin = currentMin;
-
-                        // Cek apakah melebihi jam tutup
-                        if (endSlotHour > endHour || (endSlotHour === endHour && endSlotMin > endMin)) {
-                            break;
-                        }
-
-                        const slotEndTime =
-                            `${endSlotHour.toString().padStart(2, '0')}:${endSlotMin.toString().padStart(2, '0')}`;
-
-                        // Tambahkan ke data jadwal
-                        jadwalData.push({
-                            fasilitas: fasilitasText,
-                            tanggal: dateFormatted,
-                            hari: dayName,
-                            jam_mulai: slotStartTime,
-                            jam_selesai: slotEndTime
-                        });
-
-                        // Pindah ke slot berikutnya
-                        currentHour = endSlotHour;
-                        currentMin = endSlotMin;
-                    }
-                }
-
-                // Pindah ke hari berikutnya
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-
-            console.log(`Generated ${jadwalData.length} schedule items`); // Debug log
-            return jadwalData;
-        }
-
-        // Perbaikan untuk preview jadwal
+        // Generate preview jadwal
         function generatePreview() {
             try {
                 const fasilitas = document.getElementById('fasilitas_id');
@@ -725,19 +543,9 @@
                 const jamTutup = document.getElementById('jam_tutup').value;
                 const durasiSlot = parseInt(document.getElementById('durasi_slot').value);
 
-                // Debug log
-                console.log("Form values:", {
-                    fasilitas: fasilitas.value,
-                    tanggalMulai,
-                    tanggalSelesai,
-                    jamBuka,
-                    jamTutup,
-                    durasiSlot
-                });
-
                 // Validasi inputs
                 if (!fasilitas.value || !tanggalMulai || !tanggalSelesai || !jamBuka || !jamTutup) {
-                    alert('Mohon lengkapi semua field');
+                    Swal.fire('Error', 'Mohon lengkapi semua field', 'error');
                     return;
                 }
 
@@ -748,14 +556,14 @@
                 });
 
                 if (selectedDays.length === 0) {
-                    alert('Pilih minimal satu hari');
+                    Swal.fire('Error', 'Pilih minimal satu hari', 'error');
                     return;
                 }
 
                 // Tampilkan loading
                 const previewContainer = document.getElementById('previewContainer');
                 previewContainer.innerHTML =
-                    '<div class="text-center p-4"><i class="fas fa-spinner fa-spin fa-3x"></i><p class="mt-3">Memuat preview...</p></div>';
+                    '<div class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x"></i><p class="mt-3">Memuat preview...</p></div>';
 
                 // Beri waktu untuk loading indicator
                 setTimeout(() => {
@@ -831,63 +639,122 @@
                 }, 500);
             } catch (error) {
                 console.error("Error in preview generation:", error);
-                alert('Terjadi kesalahan saat membuat preview jadwal: ' + error.message);
+                Swal.fire('Error', 'Terjadi kesalahan saat membuat preview jadwal: ' + error.message, 'error');
             }
         }
 
-        // Submit jadwal generation to server
-        function submitGenerateJadwal() {
-            const formData = new FormData(document.getElementById('jadwalGeneratorForm'));
+        // Validasi checkbox hari berdasarkan rentang tanggal
+        function validateDayCheckboxes() {
+            const tanggalMulai = new Date(document.getElementById('tanggal_mulai').value);
+            const tanggalSelesai = new Date(document.getElementById('tanggal_selesai').value);
 
-            // Collect checkbox values manually
-            const selectedDays = [];
-            document.querySelectorAll('input[name="hari[]"]:checked').forEach(function(checkbox) {
-                selectedDays.push(checkbox.value);
-            });
-            formData.delete('hari[]'); // Remove the original entries
-            selectedDays.forEach(value => formData.append('hari[]', value));
-
-            // Send to server
-            fetch('{{ route('admin.jadwal.generate') }}', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    $('#confirmGenerateModal').modal('hide');
-
-                    if (data.success) {
-                        Swal.fire({
-                            title: 'Berhasil!',
-                            text: `${data.count} jadwal berhasil dibuat`,
-                            icon: 'success',
-                            confirmButtonText: 'OK'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location.reload();
-                            }
-                        });
-                    } else {
-                        Swal.fire({
-                            title: 'Error!',
-                            text: data.message || 'Terjadi kesalahan saat membuat jadwal',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'Terjadi kesalahan pada server',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
+            if (!tanggalMulai || !tanggalSelesai || isNaN(tanggalMulai) || isNaN(tanggalSelesai)) {
+                // Jika tanggal tidak valid, aktifkan semua checkbox
+                document.querySelectorAll('input[name="hari[]"]').forEach(function(checkbox) {
+                    checkbox.disabled = false;
                 });
+                return;
+            }
+
+            // Temukan hari apa saja yang ada dalam rentang tanggal
+            const daysInRange = new Set();
+            let currentDate = new Date(tanggalMulai);
+
+            while (currentDate <= tanggalSelesai) {
+                daysInRange.add(currentDate.getDay()); // 0 = Minggu, 1 = Senin, dsb.
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            // Update status disabled checkbox berdasarkan hari yang tersedia
+            document.querySelectorAll('input[name="hari[]"]').forEach(function(checkbox) {
+                const day = parseInt(checkbox.value);
+                if (daysInRange.has(day)) {
+                    checkbox.disabled = false;
+                    // Tambahkan class untuk styling (opsional)
+                    checkbox.parentElement.classList.remove('text-muted');
+                } else {
+                    checkbox.disabled = true;
+                    checkbox.checked = false; // Uncheck jika dinonaktifkan
+                    // Tambahkan class untuk styling (opsional)
+                    checkbox.parentElement.classList.add('text-muted');
+                }
+            });
+        }
+
+        // Generate data jadwal berdasarkan parameter
+        function generateJadwalData(tanggalMulai, tanggalSelesai, jamBuka, jamTutup, durasiSlot, selectedDays, fasilitasText) {
+            // Pastikan semua parameter dikonversi ke format yang benar
+            const startDate = new Date(tanggalMulai);
+            const endDate = new Date(tanggalSelesai);
+            const daysOfWeek = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+            const jadwalData = [];
+
+            // Validasi data sebelum memproses
+            if (!startDate || !endDate || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+                console.error("Invalid date format");
+                return [];
+            }
+
+            let currentDate = new Date(startDate);
+
+            // Untuk setiap hari dalam rentang
+            while (currentDate <= endDate) {
+                // Cek apakah hari ini dipilih
+                if (selectedDays.includes(currentDate.getDay())) {
+                    const dateFormatted = currentDate.toISOString().split('T')[0];
+                    const dayName = daysOfWeek[currentDate.getDay()];
+
+                    // Parse jam buka & tutup
+                    const [startHour, startMin] = jamBuka.split(':').map(Number);
+                    const [endHour, endMin] = jamTutup.split(':').map(Number);
+
+                    let currentHour = startHour;
+                    let currentMin = startMin;
+
+                    // Untuk setiap slot dalam hari
+                    while ((currentHour < endHour) || (currentHour === endHour && currentMin < endMin)) {
+                        const slotStartTime =
+                            `${currentHour.toString().padStart(2, '0')}:${currentMin.toString().padStart(2, '0')}`;
+
+                        // Hitung waktu akhir slot
+                        let endSlotHour = currentHour + durasiSlot;
+                        let endSlotMin = currentMin;
+
+                        // Cek apakah melebihi jam tutup
+                        if (endSlotHour > endHour || (endSlotHour === endHour && endSlotMin > endMin)) {
+                            break;
+                        }
+
+                        const slotEndTime =
+                            `${endSlotHour.toString().padStart(2, '0')}:${endSlotMin.toString().padStart(2, '0')}`;
+
+                        // Tambahkan ke data jadwal
+                        jadwalData.push({
+                            fasilitas: fasilitasText,
+                            tanggal: dateFormatted,
+                            hari: dayName,
+                            jam_mulai: slotStartTime,
+                            jam_selesai: slotEndTime
+                        });
+
+                        // Pindah ke slot berikutnya
+                        currentHour = endSlotHour;
+                        currentMin = endSlotMin;
+                    }
+                }
+
+                // Pindah ke hari berikutnya
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            return jadwalData;
+        }
+
+        // Konfirmasi hapus jadwal
+        function confirmDelete(id) {
+            document.getElementById('deleteForm').action = '{{ route("petugas_fasilitas.jadwal.destroy", ":id") }}'.replace(':id', id);
+            $('#deleteModal').modal('show');
         }
     </script>
 @endsection

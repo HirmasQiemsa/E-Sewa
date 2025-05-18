@@ -86,12 +86,12 @@ Route::middleware(['auth:petugas_fasilitas', 'petugas_fasilitas'])->name('petuga
     // Jadwal Management
     Route::prefix('jadwal')->name('jadwal.')->group(function () {
         Route::get('/', [PetugasFasilitasJadwalController::class, 'index'])->name('index');
+        Route::post('/generate', [PetugasFasilitasJadwalController::class, 'generate'])->name('generate');
         Route::get('/create', [PetugasFasilitasJadwalController::class, 'create'])->name('create');
         Route::post('/store', [PetugasFasilitasJadwalController::class, 'store'])->name('store');
         Route::get('/{id}/edit', [PetugasFasilitasJadwalController::class, 'edit'])->name('edit');
         Route::put('/{id}', [PetugasFasilitasJadwalController::class, 'update'])->name('update');
         Route::delete('/{id}', [PetugasFasilitasJadwalController::class, 'destroy'])->name('destroy');
-        Route::get('/{id}/detail', [PetugasFasilitasJadwalController::class, 'show'])->name('detail');
     });
 
     // Kelola Booking

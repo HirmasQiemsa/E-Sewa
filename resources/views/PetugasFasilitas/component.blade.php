@@ -271,8 +271,9 @@
 
                         <!-- Kelola Fasilitas dengan submenu -->
                         <li
-                            class="nav-item {{ request()->routeIs('petugas_fasilitas.fasilitas.*') ? 'menu-open' : '' }}">
-                            <a href="#" class="nav-link bg-danger">
+                            class="nav-item {{ request()->routeIs('petugas_fasilitas.fasilitas.*') || request()->routeIs('petugas_fasilitas.jadwal.*') ? 'menu-open' : '' }}">
+                            <a href="#"
+                                class="nav-link {{ request()->routeIs('petugas_fasilitas.fasilitas.*') || request()->routeIs('petugas_fasilitas.jadwal.*') ? 'active' : '' }} bg-danger">
                                 <i class="nav-icon fas fa-map-marker-alt"></i>
                                 <p>
                                     Kelola Fasilitas
@@ -282,55 +283,22 @@
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
                                     <a href="{{ route('petugas_fasilitas.fasilitas.index') }}"
-                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.fasilitas.index','petugas_fasilitas.fasilitas.edit','petugas_fasilitas.fasilitas.create') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.fasilitas.index', 'petugas_fasilitas.fasilitas.edit', 'petugas_fasilitas.fasilitas.create') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Daftar Fasilitas</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="#"
-                                        class="nav-link {{ request()->routeIs('#') ? 'active' : '' }}">
+                                    <a href="{{ route('petugas_fasilitas.jadwal.index') }}"
+                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.jadwal.index', 'petugas_fasilitas.jadwal.create', 'petugas_fasilitas.jadwal.edit') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Daftar Jadwal</p>
                                     </a>
                                 </li>
-                                {{-- <li class="nav-item">
-                                    <a href="{{ route('petugas_fasilitas.fasilitas.maintenance') }}"
-                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.fasilitas.maintenance') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Fasilitas Maintenance</p>
-                                    </a>
-                                </li> --}}
                             </ul>
                         </li>
 
-                        <!-- Kelola Jadwal dengan submenu -->
-                        {{-- <li
-                            class="nav-item {{ request()->routeIs('petugas_fasilitas.jadwal.*') ? 'menu-open' : '' }}">
-                            <a href="#" class="nav-link bg-danger">
-                                <i class="nav-icon fas fa-calendar-alt"></i>
-                                <p>
-                                    Kelola Jadwal
-                                    <i class="fas fa-angle-left right"></i>
-                                </p>
-                            </a>
-                            <ul class="nav nav-treeview">
-                                <li class="nav-item">
-                                    <a href="{{ route('petugas_fasilitas.jadwal.index') }}"
-                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.jadwal.index') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Daftar Jadwal</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('petugas_fasilitas.jadwal.create') }}"
-                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.jadwal.create') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Tambah Jadwal</p>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li> --}}
+
 
                         <!-- Kelola Booking dengan submenu -->
                         <li
@@ -360,16 +328,7 @@
                             </ul>
                         </li>
 
-                        <!-- Log Aktivitas -->
-                        {{-- <li class="nav-item">
-                            <a href="{{ route('petugas_fasilitas.activities') }}"
-                                class="nav-link {{ request()->routeIs('petugas_fasilitas.activities') ? 'active' : '' }} bg-danger">
-                                <i class="nav-icon fas fa-history"></i>
-                                <p>
-                                    Log Aktivitas
-                                </p>
-                            </a>
-                        </li> --}}
+
 
                         <!-- Profile (Blue) -->
                         <li class="nav-item mt-2">

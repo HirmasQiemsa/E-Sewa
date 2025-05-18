@@ -31,9 +31,16 @@ class Fasilitas extends Model
     /**
      * Define relationship with Jadwal model
      */
+    
     public function jadwals()
     {
         return $this->hasMany(Jadwal::class);
+    }
+    /* Define relationship with PetugasFasilitas model
+     */
+    public function petugasFasilitas()
+    {
+        return $this->belongsTo(PetugasFasilitas::class);
     }
 
     /**
