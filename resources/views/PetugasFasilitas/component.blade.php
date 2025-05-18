@@ -84,9 +84,67 @@
             font-size: 0.875rem;
             line-height: 1.5;
         }
+
+        /* User profile in sidebar */
+        .user-profile {
+            padding: 20px 10px;
+            margin-bottom: 10px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-profile .image {
+            position: relative;
+            display: inline-block;
+            width: 80px;
+            height: 80px;
+            margin-bottom: 10px;
+        }
+
+        .user-profile .image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-profile .info {
+            margin-top: 5px;
+        }
+
+        .user-profile .info h6 {
+            color: #fff;
+            margin-bottom: 5px;
+            font-weight: 700;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-profile .info p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0;
+            font-size: 0.8rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-profile .btn-edit-profile {
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            margin-top: 5px;
+        }
+
+        /* Perbaikan dropdown sidebar */
+        .nav-sidebar .nav-item.menu-is-opening .nav-link .right,
+        .nav-sidebar .nav-item.menu-open .nav-link .right {
+            transform: rotate(-90deg);
+        }
     </style>
 </head>
-
 
 <body class="hold-transition sidebar-mini layout-fixed">
 
@@ -111,102 +169,202 @@
                             Fasilitas DISPORA SEMARANG
                         </b>
                     </a>
-
                 </li>
-                {{-- <li class="nav-item ms-auto">
-                    <img class="animation__shake" src="{{ asset('img/logo.png') }}" alt="AdminLTELogo" height="40"
-                        width="40">
-                </li> --}}
+            </ul>
+
+            <!-- Right navbar links -->
+            <ul class="navbar-nav ml-auto">
+                <!-- Notifications Dropdown Menu -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-toggle="dropdown" href="#">
+                        <i class="far fa-bell"></i>
+                        <span class="badge badge-warning navbar-badge">3</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                        <span class="dropdown-item dropdown-header">3 Notifikasi</span>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-calendar mr-2"></i> 3 jadwal baru hari ini
+                            <span class="float-right text-muted text-sm">12:00</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item dropdown-footer">Lihat Semua Notifikasi</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+                        <i class="fas fa-expand-arrows-alt"></i>
+                    </a>
+                </li>
             </ul>
         </nav>
 
         <!-- Main Sidebar Container -->
         <aside class="main-sidebar sidebar-dark-danger elevation-4">
+            <!-- User Profile -->
+            <div class="user-profile">
+                <div class="image">
+                    <!-- Tampilkan foto petugas jika ada, jika tidak ada tampilkan default -->
+                    <img src="{{ Auth::guard('petugas_fasilitas')->user()->foto
+                        ? asset('storage/' . Auth::guard('petugas_fasilitas')->user()->foto)
+                        : asset('img/default-user.png') }}"
+                        alt="Petugas Profile" class="img-circle elevation-2">
+                </div>
+                <div class="info">
+                    <h6>{{ Auth::guard('petugas_fasilitas')->user()->name ?? 'Petugas Fasilitas' }}</h6>
+                    <p>Petugas Fasilitas</p>
+                </div>
+            </div>
+
             <!-- Sidebar -->
             <div class="sidebar">
-                <!-- SidebarSearch Form -->
-                <div class="form-inline">
-                    <div class="input-group" data-widget="sidebar-search">
-                        <input class="form-control form-control-sidebar mt-4" type="search" placeholder="Search"
-                            aria-label="Search">
-                        <div class="input-group-append">
-                            <button class="btn btn-sidebar mt-4">
-                                <i class="fas fa-search fa-fw "></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
                 <!-- Sidebar Menu -->
                 <nav class="mt-2">
-                    {{-- red --}}
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
-                        <li class="nav-item active mt-2">
-                            <a href="{{ route('petugas_fasilitas.dashboard') }}" class="nav-link active bg-danger">
+                        <li class="nav-item">
+                            <a href="{{ route('petugas_fasilitas.dashboard') }}"
+                                class="nav-link {{ request()->routeIs('petugas_fasilitas.dashboard') ? 'active' : '' }} bg-danger">
                                 <i class="nav-icon fas fa-database"></i>
                                 <p>
                                     Dashboard
                                 </p>
                             </a>
                         </li>
-                    </ul>
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                        data-accordion="false">
-                        <li class="nav-item active mt-2">
-                            <a href="#" class="nav-link active bg-danger">
-                                <i class="nav-icon fas fa-map"></i>
+
+                        <!-- Kelola Fasilitas dengan submenu -->
+                        <li
+                            class="nav-item {{ request()->routeIs('petugas_fasilitas.fasilitas.*') ? 'menu-open' : '' }}">
+                            <a href="#" class="nav-link bg-danger">
+                                <i class="nav-icon fas fa-map-marker-alt"></i>
                                 <p>
                                     Kelola Fasilitas
+                                    <i class="fas fa-angle-left right"></i>
                                 </p>
                             </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ route('petugas_fasilitas.fasilitas.index') }}"
+                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.fasilitas.index') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Daftar Fasilitas</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('petugas_fasilitas.fasilitas.create') }}"
+                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.fasilitas.create') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Daftar Jadwal</p>
+                                    </a>
+                                </li>
+                                {{-- <li class="nav-item">
+                                    <a href="{{ route('petugas_fasilitas.fasilitas.maintenance') }}"
+                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.fasilitas.maintenance') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Fasilitas Maintenance</p>
+                                    </a>
+                                </li> --}}
+                            </ul>
                         </li>
-                    </ul>
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                        data-accordion="false">
-                        <li class="nav-item active mt-2">
-                            <a href="#" class="nav-link active bg-danger">
-                                <i class="nav-icon fas fa-calendar-plus"></i>
+
+                        <!-- Kelola Jadwal dengan submenu -->
+                        {{-- <li
+                            class="nav-item {{ request()->routeIs('petugas_fasilitas.jadwal.*') ? 'menu-open' : '' }}">
+                            <a href="#" class="nav-link bg-danger">
+                                <i class="nav-icon fas fa-calendar-alt"></i>
                                 <p>
                                     Kelola Jadwal
+                                    <i class="fas fa-angle-left right"></i>
                                 </p>
                             </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ route('petugas_fasilitas.jadwal.index') }}"
+                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.jadwal.index') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Daftar Jadwal</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('petugas_fasilitas.jadwal.create') }}"
+                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.jadwal.create') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Tambah Jadwal</p>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li> --}}
+
+                        <!-- Kelola Booking dengan submenu -->
+                        <li
+                            class="nav-item {{ request()->routeIs('petugas_fasilitas.booking.*') ? 'menu-open' : '' }}">
+                            <a href="#" class="nav-link bg-danger">
+                                <i class="nav-icon fas fa-calendar-alt"></i>
+                                <p>
+                                    Kelola Booking
+                                    <i class="fas fa-angle-left right"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ route('petugas_fasilitas.booking.today') }}"
+                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.booking.today') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Booking Hari Ini</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('petugas_fasilitas.booking.upcoming') }}"
+                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.booking.upcoming') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Booking Mendatang</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('petugas_fasilitas.booking.history') }}"
+                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.booking.history') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Riwayat Booking</p>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
-                    </ul>
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                        data-accordion="false">
-                        <li class="nav-item active mt-2">
-                            <a href="#" class="nav-link active bg-danger">
+
+                        <!-- Log Aktivitas -->
+                        <li class="nav-item">
+                            <a href="{{ route('petugas_fasilitas.activities') }}"
+                                class="nav-link {{ request()->routeIs('petugas_fasilitas.activities') ? 'active' : '' }} bg-danger">
                                 <i class="nav-icon fas fa-history"></i>
                                 <p>
-                                    Riwayat
+                                    Log Aktivitas
                                 </p>
                             </a>
                         </li>
 
-                        {{-- blue --}}
-                        <li class="nav-item active mt-2">
-                            <a href="#" class="nav-link active bg-primary">
-                                <i class="nav-icon fas fa-user"></i>
+                        <!-- Profile (Blue) -->
+                        <li class="nav-item mt-2">
+                            <a href="{{ route('petugas_fasilitas.profile.edit') }}"
+                                class="nav-link {{ request()->routeIs('petugas_fasilitas.profile.*') ? 'active' : '' }} bg-primary">
+                                <i class="nav-icon fas fa-user-cog"></i>
                                 <p>
-                                    Profile Petugas
+                                    Pengaturan Profil
                                 </p>
                             </a>
                         </li>
-                        <li class="nav-item active mt-2">
+
+                        <!-- Logout (Blue) -->
+                        <li class="nav-item">
                             <form method="POST" action="{{ route('logout') }}" id="logout-form">
                                 @csrf
-                                <a href="{{ route('logout') }}" class="nav-link active bg-primary"
+                                <a href="{{ route('logout') }}" class="nav-link bg-primary"
                                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                    <i class="nav-icon fas fa-times-circle"></i>
+                                    <i class="nav-icon fas fa-sign-out-alt"></i>
                                     <p>
                                         Logout
                                     </p>
                                 </a>
                             </form>
                         </li>
-                    </ul>
-                    <ul>
-
                     </ul>
                 </nav>
                 <!-- /.sidebar-menu -->
@@ -226,7 +384,6 @@
                     <div class="col-12">
                         <strong>Copyright &copy; 2025 <a href="#">E-SEWA</a>.</strong>
                         All rights reserved.
-                        {{-- <span class="float-right d-none d-sm-inline text-danger"><b>DISPORA SEMARANG</b></span> --}}
                     </div>
                 </div>
             </div>
@@ -237,15 +394,9 @@
 
     <!-- jQuery UI 1.11.4 -->
     <script src="{{ asset('lte/jquery/jquery.min.js') }}"></script>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
-        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
-        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
-    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
     <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
     <script>
         $.widget.bridge('uibutton', $.ui.button)
@@ -264,7 +415,7 @@
     <script src="{{ asset('lte/jquery-knob/jquery.knob.min.js') }}"></script>
     <!-- daterangepicker -->
     <script src="{{ asset('lte/moment/moment.min.js') }}"></script>
-    <script src="{{ asset('lte/daterangepicker/daterangepicker.jsalt') }}"></script>
+    <script src="{{ asset('lte/daterangepicker/daterangepicker.js') }}"></script>
     <!-- Tempusdominus Bootstrap 4 -->
     <script src="{{ asset('lte/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') }}"></script>
     <!-- Summernote -->
@@ -294,13 +445,16 @@
             // Tooltip bootstrap
             $('[data-toggle="tooltip"]').tooltip();
 
+            // Toggle status dengan AJAX
             $('.toggle-status').on('change', function() {
                 var scheduleId = $(this).data('id');
                 $.ajax({
-                    url: '/schedules/toggle/' + scheduleId,
+                    url: '/petugas-fasilitas/fasilitas/' + scheduleId + '/toggle-status',
                     method: 'POST',
                     data: {
-                        _token: '{{ csrf_token() }}'
+                        _token: '{{ csrf_token() }}',
+                        _method: 'PUT',
+                        status: $(this).prop('checked') ? 'aktif' : 'nonaktif'
                     },
                     success: function(response) {
                         toastr.success(response.message);
@@ -355,6 +509,34 @@
             // Run when new content is added
             $(document).on('DOMNodeInserted', '.content-wrapper', function() {
                 setTimeout(adjustFooterVisibility, 200);
+            });
+
+            // Memperbaiki button collapse di card
+            $('.card .card-tools [data-card-widget="collapse"]').on('click', function(e) {
+                e.preventDefault(); // Mencegah default behavior
+
+                var $card = $(this).closest('.card');
+                var $cardBody = $card.find('.card-body');
+                var $cardFooter = $card.find('.card-footer');
+                var $icon = $(this).find('i');
+
+                if ($cardBody.is(':visible')) {
+                    $cardBody.slideUp('fast');
+                    $cardFooter.slideUp('fast', function() {
+                        $card.addClass('collapsed-card');
+                    });
+                    $icon.removeClass('fa-minus').addClass('fa-plus');
+                } else {
+                    $card.removeClass('collapsed-card');
+                    $cardBody.slideDown('fast');
+                    $cardFooter.slideDown('fast');
+                    $icon.removeClass('fa-plus').addClass('fa-minus');
+                }
+            });
+
+            // Memperbaiki button remove di card
+            $('.card .card-tools [data-card-widget="remove"]').on('click', function() {
+                $(this).closest('.card').fadeOut();
             });
         });
     </script>

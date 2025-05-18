@@ -32,7 +32,8 @@
                         <div class="icon">
                             <i class="fas fa-basketball-ball"></i>
                         </div>
-                        <a href="{{ route('petugas_fasilitas.fasilitas.index') }}" class="small-box-footer">Lihat Detail <i class="fas fa-arrow-circle-right"></i></a>
+                        <a href="{{ route('petugas_fasilitas.fasilitas.index') }}" class="small-box-footer">Lihat Detail <i
+                                class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
                 <!-- ./col -->
@@ -46,7 +47,8 @@
                         <div class="icon">
                             <i class="fas fa-calendar-check"></i>
                         </div>
-                        <a href="{{ route('petugas_fasilitas.booking.today') }}" class="small-box-footer">Lihat Detail <i class="fas fa-arrow-circle-right"></i></a>
+                        <a href="{{ route('petugas_fasilitas.booking.today') }}" class="small-box-footer">Lihat Detail <i
+                                class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
                 <!-- ./col -->
@@ -60,7 +62,8 @@
                         <div class="icon">
                             <i class="fas fa-tools"></i>
                         </div>
-                        <a href="{{ route('petugas_fasilitas.fasilitas.maintenance') }}" class="small-box-footer">Lihat Detail <i class="fas fa-arrow-circle-right"></i></a>
+                        <a href="{{ route('petugas_fasilitas.fasilitas.maintenance') }}" class="small-box-footer">Lihat
+                            Detail <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
                 <!-- ./col -->
@@ -115,11 +118,12 @@
                                         <tr>
                                             <td>{{ $jadwal->id }}</td>
                                             <td>{{ $jadwal->fasilitas->nama_fasilitas }}</td>
-                                            <td>{{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }}</td>
+                                            <td>{{ substr($jadwal->jam_mulai, 0, 5) }} -
+                                                {{ substr($jadwal->jam_selesai, 0, 5) }}</td>
                                             <td>{{ $jadwal->durasi }} jam</td>
                                             <td>{{ $jadwal->checkouts->first()->user->name ?? 'N/A' }}</td>
                                             <td>
-                                                @if($jadwal->status == 'tersedia')
+                                                @if ($jadwal->status == 'tersedia')
                                                     <span class="badge badge-success">Tersedia</span>
                                                 @elseif($jadwal->status == 'terbooking')
                                                     <span class="badge badge-warning">Terbooking</span>
@@ -130,7 +134,8 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <a href="{{ route('petugas_fasilitas.jadwal.detail', $jadwal->id) }}" class="btn btn-sm btn-info">
+                                                <a href="{{ route('petugas_fasilitas.jadwal.detail', $jadwal->id) }}"
+                                                    class="btn btn-sm btn-info">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                             </td>
@@ -145,7 +150,8 @@
                         </div>
                         <!-- /.card-body -->
                         <div class="card-footer clearfix">
-                            <a href="{{ route('petugas_fasilitas.booking.today') }}" class="btn btn-sm btn-secondary float-right">Lihat Semua</a>
+                            <a href="{{ route('petugas_fasilitas.booking.today') }}"
+                                class="btn btn-sm btn-secondary float-right">Lihat Semua</a>
                         </div>
                     </div>
                     <!-- /.card -->
@@ -240,7 +246,8 @@
                             </div>
                         </div>
                         <div class="card-footer clearfix">
-                            <a href="{{ route('petugas_fasilitas.activities') }}" class="btn btn-sm btn-secondary float-right">Lihat Semua Aktivitas</a>
+                            <a href="{{ route('petugas_fasilitas.activities') }}"
+                                class="btn btn-sm btn-secondary float-right">Lihat Semua Aktivitas</a>
                         </div>
                     </div>
                 </div>
@@ -250,39 +257,43 @@
 
     <!-- Script untuk chart fasilitas -->
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Data untuk chart
-        var ctx = document.getElementById('facilitiesChart').getContext('2d');
-        var facilitiesChart = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Aktif', 'Non-Aktif', 'Maintenance'],
-                datasets: [{
-                    data: [
-                        {{ $fasilitasAktif ?? 0 }},
-                        {{ $fasilitasNonaktif ?? 0 }},
-                        {{ $fasilitasMaintenance ?? 0 }}
-                    ],
-                    backgroundColor: [
-                        '#28a745', // Success/Aktif
-                        '#6c757d', // Secondary/Non-aktif
-                        '#ffc107'  // Warning/Maintenance
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                legend: {
-                    position: 'bottom',
-                    labels: {
-                        boxWidth: 12
+        // Perbaikan script chart
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if the chart canvas exists
+            var ctx = document.getElementById('facilitiesChart');
+            if (ctx) {
+                ctx = ctx.getContext('2d');
+                var facilitiesChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Aktif', 'Non-Aktif', 'Maintenance'],
+                        datasets: [{
+                            data: [
+                                {{ $fasilitasAktif ?? 0 }},
+                                {{ $fasilitasNonaktif ?? 0 }},
+                                {{ $fasilitasMaintenance ?? 0 }}
+                            ],
+                            backgroundColor: [
+                                '#28a745', // Success/Aktif
+                                '#6c757d', // Secondary/Non-aktif
+                                '#ffc107' // Warning/Maintenance
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12
+                            }
+                        },
+                        cutoutPercentage: 70
                     }
-                },
-                cutoutPercentage: 70
+                });
             }
         });
-    });
     </script>
 @endsection

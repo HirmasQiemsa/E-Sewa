@@ -19,88 +19,85 @@ class DashboardController extends Controller
      * Menampilkan dashboard petugas fasilitas
      */
     public function index()
-    {
-        // Ambil data tanggal hari ini
-        $today = Carbon::today()->format('Y-m-d');
+{
+    // Ambil data tanggal hari ini
+    $today = Carbon::today()->format('Y-m-d');
 
-        // Hitung total fasilitas
-        $totalFasilitas = Fasilitas::count();
+    // 1. Hitung total fasilitas dan statusnya
+    $totalFasilitas = Fasilitas::count();
+    $fasilitasAktif = Fasilitas::where('ketersediaan', 'aktif')->count();
+    $fasilitasNonaktif = Fasilitas::where('ketersediaan', 'nonaktif')->count();
+    $fasilitasMaintenance = Fasilitas::where('ketersediaan', 'maintanace')->count();
 
-        // Hitung fasilitas berdasarkan status
-        $fasilitasAktif = Fasilitas::where('ketersediaan', 'aktif')->count();
-        $fasilitasNonaktif = Fasilitas::where('ketersediaan', 'nonaktif')->count();
-        $fasilitasMaintenance = Fasilitas::where('ketersediaan', 'maintanace')->count(); // Note: typo in DB schema
+    // 2. Hitung booking hari ini
+    $bookingHariIni = Jadwal::where('tanggal', $today)
+                          ->where('status', 'terbooking')
+                          ->count();
 
-        // Hitung booking hari ini
-        $bookingHariIni = Jadwal::where('tanggal', $today)
-                              ->where('status', 'terbooking')
-                              ->count();
+    // 3. Hitung total user
+    $totalUser = User::count();
 
-        // Hitung total user
-        $totalUser = User::count();
-
-        // Ambil jadwal hari ini dengan relasi
-        $jadwalsToday = Jadwal::with(['fasilitas', 'checkouts.user'])
+    // 4. Ambil jadwal hari ini dengan relasi
+    $jadwalsToday = Jadwal::with(['fasilitas', 'checkouts.user'])
                           ->where('tanggal', $today)
                           ->orderBy('jam_mulai', 'asc')
-                          ->take(10) // Batasi 10 data saja untuk dashboard
+                          ->take(10)
                           ->get();
 
-        // Tambahkan perhitungan durasi untuk setiap jadwal
-        foreach ($jadwalsToday as $jadwal) {
-            $mulaiParts = explode(':', $jadwal->jam_mulai);
-            $selesaiParts = explode(':', $jadwal->jam_selesai);
-            $mulaiJam = (int)$mulaiParts[0];
-            $selesaiJam = (int)$selesaiParts[0];
-            $jadwal->durasi = $selesaiJam - $mulaiJam;
-        }
-
-        // Ambil aktivitas terbaru (kita buat query untuk aktivitas booking)
-        $recentActivities = $this->getRecentActivities();
-
-        // Kembalikan data ke view
-        return view('PetugasFasilitas.dashboard', compact(
-            'totalFasilitas',
-            'fasilitasAktif',
-            'fasilitasNonaktif',
-            'fasilitasMaintenance',
-            'bookingHariIni',
-            'totalUser',
-            'jadwalsToday',
-            'recentActivities'
-        ));
+    // 5. Hitung durasi untuk setiap jadwal
+    foreach ($jadwalsToday as $jadwal) {
+        $mulaiParts = explode(':', $jadwal->jam_mulai);
+        $selesaiParts = explode(':', $jadwal->jam_selesai);
+        $mulaiJam = (int)$mulaiParts[0];
+        $selesaiJam = (int)$selesaiParts[0];
+        $jadwal->durasi = $selesaiJam - $mulaiJam;
     }
 
-    /**
-     * Mendapatkan data aktivitas terbaru
-     */
-    private function getRecentActivities()
-    {
-        // Karena tidak ada tabel activities, kita gunakan data checkout sebagai representasi aktivitas
-        $checkouts = Checkout::with(['jadwals.fasilitas', 'user'])
-                    ->orderBy('created_at', 'desc')
-                    ->take(8)
-                    ->get();
+    // 6. Ambil aktivitas terbaru
+    $recentActivities = $this->getRecentActivities();
 
-        // Format data untuk tampilan di UI
-        $activities = $checkouts->map(function ($checkout) {
-            // Ambil fasilitas dari jadwal pertama terkait checkout ini
-            $jadwal = $checkout->jadwals->first();
-            $fasilitas = $jadwal ? $jadwal->fasilitas : null;
+    // Kembalikan data ke view
+    return view('PetugasFasilitas.dashboard', compact(
+        'totalFasilitas',
+        'fasilitasAktif',
+        'fasilitasNonaktif',
+        'fasilitasMaintenance',
+        'bookingHariIni',
+        'totalUser',
+        'jadwalsToday',
+        'recentActivities'
+    ));
+}
 
-            return (object)[
-                'id' => $checkout->id,
-                'created_at' => $checkout->created_at,
-                'user' => $checkout->user,
-                'fasilitas' => $fasilitas,
-                'description' => $this->getActivityDescription($checkout),
-                'status' => $this->getActivityStatus($checkout),
-                'status_color' => $this->getActivityStatusColor($checkout)
-            ];
-        });
+/**
+ * Mendapatkan data aktivitas terbaru
+ */
+private function getRecentActivities()
+{
+    // Karena tidak ada tabel activities, gunakan checkout sebagai representasi aktivitas
+    $checkouts = Checkout::with(['jadwals.fasilitas', 'user'])
+                ->orderBy('created_at', 'desc')
+                ->take(8)
+                ->get();
 
-        return $activities;
-    }
+    // Format data untuk tampilan di UI
+    $activities = $checkouts->map(function ($checkout) {
+        $jadwal = $checkout->jadwals->first();
+        $fasilitas = $jadwal ? $jadwal->fasilitas : null;
+
+        return (object)[
+            'id' => $checkout->id,
+            'created_at' => $checkout->created_at,
+            'user' => $checkout->user,
+            'fasilitas' => $fasilitas,
+            'description' => $this->getActivityDescription($checkout),
+            'status' => $this->getActivityStatus($checkout),
+            'status_color' => $this->getActivityStatusColor($checkout)
+        ];
+    });
+
+    return $activities;
+}
 
     /**
      * Mendapatkan deskripsi aktivitas berdasarkan status checkout
