@@ -28,6 +28,9 @@ class DashboardController extends Controller
     $fasilitasAktif = Fasilitas::where('ketersediaan', 'aktif')->count();
     $fasilitasNonaktif = Fasilitas::where('ketersediaan', 'nonaktif')->count();
     $fasilitasMaintenance = Fasilitas::where('ketersediaan', 'maintanace')->count();
+    $fasilitasTergunakan = Fasilitas::whereHas('jadwals', function($query) {
+        $query->whereIn('status', ['terbooking', 'selesai']);
+    })->count();
 
     // 2. Hitung booking hari ini
     $bookingHariIni = Jadwal::where('tanggal', $today)
@@ -62,6 +65,7 @@ class DashboardController extends Controller
         'fasilitasAktif',
         'fasilitasNonaktif',
         'fasilitasMaintenance',
+        'fasilitasTergunakan',
         'bookingHariIni',
         'totalUser',
         'jadwalsToday',

@@ -94,13 +94,12 @@ Route::middleware(['auth:petugas_fasilitas', 'petugas_fasilitas'])->name('petuga
         Route::get('/{id}/detail', [PetugasFasilitasJadwalController::class, 'show'])->name('detail');
     });
 
-    // Booking Management
+    // Kelola Booking
     Route::prefix('booking')->name('booking.')->group(function () {
-        Route::get('/today', [PetugasFasilitasBookingController::class, 'today'])->name('today');
-        Route::get('/upcoming', [PetugasFasilitasBookingController::class, 'upcoming'])->name('upcoming');
-        Route::get('/history', [PetugasFasilitasBookingController::class, 'history'])->name('history');
+        Route::get('/', [PetugasFasilitasBookingController::class, 'daftarBooking'])->name('daftar');
         Route::get('/{id}/detail', [PetugasFasilitasBookingController::class, 'show'])->name('detail');
         Route::put('/{id}/update-status', [PetugasFasilitasBookingController::class, 'updateStatus'])->name('update-status');
+        Route::put('/{id}/cancel', [PetugasFasilitasBookingController::class, 'cancelBooking'])->name('cancel');
     });
 
     // Activity Log

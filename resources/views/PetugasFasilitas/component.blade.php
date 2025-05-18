@@ -34,6 +34,7 @@
     <!-- Toastr -->
     <link rel="stylesheet" href="{{ asset('lte/plugins/toastr/toastr.min.css') }}">
 
+
     <style>
         /* Critical CSS for footer positioning */
         html,
@@ -307,21 +308,14 @@
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="{{ route('petugas_fasilitas.booking.today') }}"
-                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.booking.today') ? 'active' : '' }}">
+                                    <a href="{{ route('petugas_fasilitas.booking.daftar') }}"
+                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.booking.daftar') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Booking Hari Ini</p>
+                                        <p>Daftar Booking</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{{ route('petugas_fasilitas.booking.upcoming') }}"
-                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.booking.upcoming') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Booking Mendatang</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="{{ route('petugas_fasilitas.booking.history') }}"
+                                    <a href="#"
                                         class="nav-link {{ request()->routeIs('petugas_fasilitas.booking.history') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Riwayat Booking</p>
@@ -331,7 +325,7 @@
                         </li>
 
                         <!-- Log Aktivitas -->
-                        <li class="nav-item">
+                        {{-- <li class="nav-item">
                             <a href="{{ route('petugas_fasilitas.activities') }}"
                                 class="nav-link {{ request()->routeIs('petugas_fasilitas.activities') ? 'active' : '' }} bg-danger">
                                 <i class="nav-icon fas fa-history"></i>
@@ -339,7 +333,7 @@
                                     Log Aktivitas
                                 </p>
                             </a>
-                        </li>
+                        </li> --}}
 
                         <!-- Profile (Blue) -->
                         <li class="nav-item mt-2">
@@ -405,7 +399,9 @@
     <script src="{{ asset('lte/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- ChartJS -->
-    <script src="{{ asset('lte/chart.js/Chart.min.js') }}"></script>
+    <script src="{{ asset('lte/plugins/chart.js/Chart.min.js') }}"></script>
+    <!-- Chart.js dari CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
     <!-- Sparkline -->
     <script src="{{ asset('lte/sparklines/sparkline.js') }}"></script>
     <!-- JQVMap -->
@@ -422,8 +418,8 @@
     <script src="{{ asset('lte/summernote/summernote-bs4.min.js') }}"></script>
     <!-- overlayScrollbars -->
     <script src="{{ asset('lte/overlayScrollbars/js/jquery.overlayScrollbars.min.js') }}"></script>
-    <!-- AdminLTE App -->
-    <script src="{{ asset('lte/dist/js/adminlte.js') }}"></script>
+    <!-- AdminLTE -->
+    <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="{{ asset('lte/dist/js/demo.js') }}"></script>
     <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
@@ -512,32 +508,41 @@
             });
 
             // Memperbaiki button collapse di card
-            $('.card .card-tools [data-card-widget="collapse"]').on('click', function(e) {
-                e.preventDefault(); // Mencegah default behavior
-
-                var $card = $(this).closest('.card');
-                var $cardBody = $card.find('.card-body');
-                var $cardFooter = $card.find('.card-footer');
-                var $icon = $(this).find('i');
-
-                if ($cardBody.is(':visible')) {
-                    $cardBody.slideUp('fast');
-                    $cardFooter.slideUp('fast', function() {
-                        $card.addClass('collapsed-card');
-                    });
-                    $icon.removeClass('fa-minus').addClass('fa-plus');
-                } else {
-                    $card.removeClass('collapsed-card');
-                    $cardBody.slideDown('fast');
-                    $cardFooter.slideDown('fast');
-                    $icon.removeClass('fa-plus').addClass('fa-minus');
-                }
+            // Solusi 1: Hentikan propagasi event untuk mencegah konflik
+            $(document).on('click', '[data-card-widget="collapse"]', function(event) {
+                event.stopPropagation();
             });
 
-            // Memperbaiki button remove di card
-            $('.card .card-tools [data-card-widget="remove"]').on('click', function() {
-                $(this).closest('.card').fadeOut();
-            });
+            // Solusi 2: Reinisialisasi card widgets
+            setTimeout(function() {
+                $('.card-tools [data-card-widget="collapse"]').each(function() {
+                    try {
+                        // Hapus event handler yang ada
+                        $(this).off('click');
+
+                        // Tambahkan event handler baru
+                        $(this).on('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            var $card = $(this).closest('.card');
+                            $card.find('.card-body, .card-footer').slideToggle('fast');
+
+                            // Toggle ikon
+                            var $icon = $(this).find('i.fa, i.fas');
+                            if ($icon.hasClass('fa-minus')) {
+                                $icon.removeClass('fa-minus').addClass('fa-plus');
+                            } else {
+                                $icon.removeClass('fa-plus').addClass('fa-minus');
+                            }
+                        });
+                    } catch (error) {
+                        console.error('Error reinitializing card widget:', error);
+                    }
+                });
+            }, 500);
+
+
         });
     </script>
 </body>

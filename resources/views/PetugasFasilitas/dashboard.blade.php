@@ -47,7 +47,7 @@
                         <div class="icon">
                             <i class="fas fa-calendar-check"></i>
                         </div>
-                        <a href="{{ route('petugas_fasilitas.booking.today') }}" class="small-box-footer">Lihat Detail <i
+                        <a href="{{ route('petugas_fasilitas.booking.daftar') }}" class="small-box-footer">Lihat Detail <i
                                 class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
@@ -56,13 +56,13 @@
                     <!-- small box -->
                     <div class="small-box bg-warning">
                         <div class="inner">
-                            <h3>{{ $fasilitasMaintenance ?? 0 }}</h3>
-                            <p>Fasilitas Maintenance</p>
+                            <h3>{{ $fasilitasTergunakan ?? 0 }}</h3>
+                            <p>Fasilitas Tergunakan</p>
                         </div>
                         <div class="icon">
-                            <i class="fas fa-tools"></i>
+                            <i class="fas fa-building"></i>
                         </div>
-                        <a href="{{ route('petugas_fasilitas.fasilitas.maintenance') }}" class="small-box-footer">Lihat
+                        <a href="#" class="small-box-footer">Lihat
                             Detail <i class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
@@ -150,46 +150,43 @@
                         </div>
                         <!-- /.card-body -->
                         <div class="card-footer clearfix">
-                            <a href="{{ route('petugas_fasilitas.booking.today') }}"
-                                class="btn btn-sm btn-secondary float-right">Lihat Semua</a>
+                            <a href="{{ route('petugas_fasilitas.booking.daftar') }}" class="btn btn-sm btn-primary ml-2">
+                                <i class="fas fa-list"></i> Lihat Semua Booking
+                            </a>
                         </div>
                     </div>
                     <!-- /.card -->
                 </div>
 
+                <!-- Status Fasilitas Chart Card -->
                 <div class="col-md-4">
-                    <!-- Ringkasan Fasilitas -->
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-chart-pie mr-1"></i>
-                                Status Fasilitas
-                            </h3>
+                            <h3 class="card-title">Status Fasilitas</h3>
                             <div class="card-tools">
-                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <!-- Perbaikan tombol collapse -->
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse"
+                                    data-toggle="tooltip" title="Collapse">
                                     <i class="fas fa-minus"></i>
                                 </button>
                             </div>
                         </div>
                         <div class="card-body">
-                            <div class="chart-container" style="position: relative; height:250px;">
-                                <canvas id="facilitiesChart"></canvas>
+                            <div class="chart-container">
+                                <canvas id="facilityStatusChart"
+                                    style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
                             </div>
-                        </div>
-                        <div class="card-footer">
-                            <div class="row">
-                                <div class="col-sm-6">
-                                    <div class="description-block">
-                                        <h5 class="description-header text-success">{{ $fasilitasAktif ?? 0 }}</h5>
-                                        <span class="description-text">AKTIF</span>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="description-block">
-                                        <h5 class="description-header text-warning">{{ $fasilitasNonaktif ?? 0 }}</h5>
-                                        <span class="description-text">NON-AKTIF</span>
-                                    </div>
-                                </div>
+
+                            <div class="mt-4 text-center">
+                                <span class="mr-3">
+                                    <i class="fas fa-circle text-success"></i> Aktif ({{ $fasilitasAktif }})
+                                </span>
+                                <span class="mr-3">
+                                    <i class="fas fa-circle text-danger"></i> Non-aktif ({{ $fasilitasNonaktif }})
+                                </span>
+                                <span>
+                                    <i class="fas fa-circle text-warning"></i> Maintenance ({{ $fasilitasMaintenance }})
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -255,44 +252,54 @@
         </div>
     </section>
 
-    <!-- Script untuk chart fasilitas -->
+    <!-- Script untuk chart status fasilitas -->
     <script>
-        // Perbaikan script chart
         document.addEventListener('DOMContentLoaded', function() {
-            // Check if the chart canvas exists
-            var ctx = document.getElementById('facilitiesChart');
-            if (ctx) {
-                ctx = ctx.getContext('2d');
-                var facilitiesChart = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Aktif', 'Non-Aktif', 'Maintenance'],
+            // Ensure jQuery and Chart are loaded
+            if (window.jQuery && typeof Chart !== 'undefined') {
+                var ctx = document.getElementById('facilityStatusChart');
+
+                if (ctx) {
+                    // Data untuk chart
+                    var data = {
+                        labels: ['Aktif', 'Non-aktif', 'Maintenance'],
                         datasets: [{
-                            data: [
-                                {{ $fasilitasAktif ?? 0 }},
-                                {{ $fasilitasNonaktif ?? 0 }},
-                                {{ $fasilitasMaintenance ?? 0 }}
+                            data: [{{ $fasilitasAktif }}, {{ $fasilitasNonaktif }},
+                                {{ $fasilitasMaintenance }}
                             ],
-                            backgroundColor: [
-                                '#28a745', // Success/Aktif
-                                '#6c757d', // Secondary/Non-aktif
-                                '#ffc107' // Warning/Maintenance
-                            ],
-                            borderWidth: 0
+                            backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
+                            hoverOffset: 4
                         }]
-                    },
-                    options: {
+                    };
+
+                    // Opsi chart
+                    var options = {
                         responsive: true,
                         maintainAspectRatio: false,
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                boxWidth: 12
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
                             }
                         },
-                        cutoutPercentage: 70
-                    }
-                });
+                        animation: {
+                            animateScale: true
+                        }
+                    };
+
+                    // Inisialisasi chart
+                    var facilityChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: data,
+                        options: options
+                    });
+
+                    // Debug info
+                    console.log('Chart initialized with data:', data);
+                } else {
+                    console.error('Canvas element not found');
+                }
+            } else {
+                console.error('jQuery or Chart.js not loaded');
             }
         });
     </script>
