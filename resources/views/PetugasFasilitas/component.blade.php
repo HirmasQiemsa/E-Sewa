@@ -92,6 +92,7 @@
             margin-bottom: 10px;
             text-align: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
         }
 
         .user-profile .image {
@@ -100,6 +101,7 @@
             width: 80px;
             height: 80px;
             margin-bottom: 10px;
+            transition: all 0.3s ease;
         }
 
         .user-profile .image img {
@@ -109,34 +111,68 @@
             border-radius: 50%;
             border: 3px solid rgba(255, 255, 255, 0.2);
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
         }
 
         .user-profile .info {
             margin-top: 5px;
+            transition: all 0.3s ease;
         }
 
+        /* Enhanced text styling */
         .user-profile .info h6 {
             color: #fff;
-            margin-bottom: 5px;
-            font-weight: 700;
+            margin-bottom: 8px;
+            /* Increased bottom margin */
+            font-weight: 800;
+            /* Extra bold */
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            /* Text shadow for better readability */
         }
 
-        .user-profile .info p {
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 0;
+        /* Role badge styling */
+        .user-profile .info .role-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            background-color: rgba(255, 255, 255, 0.15);
+            /* Semi-transparent white */
+            color: #ffffff;
+            border-radius: 4px;
+            /* Slightly rounded corners */
             font-size: 0.8rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            font-weight: 500;
+            margin: 0 auto;
+            cursor: default;
+            /* Show default cursor to indicate non-clickable */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            /* Subtle border */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            /* Subtle shadow */
         }
 
-        .user-profile .btn-edit-profile {
-            font-size: 0.75rem;
-            padding: 2px 8px;
-            margin-top: 5px;
+        /* Specifically handle collapsed state */
+        .sidebar-mini.sidebar-collapse .user-profile {
+            padding: 10px 0;
+            display: flex;
+            justify-content: center;
+            border-bottom: none;
+        }
+
+        .sidebar-mini.sidebar-collapse .user-profile .image {
+            width: 2.2rem;
+            height: 2.2rem;
+            margin-bottom: 0;
+        }
+
+        .sidebar-mini.sidebar-collapse .user-profile .image img {
+            border-width: 1px;
+        }
+
+        .sidebar-mini.sidebar-collapse .user-profile .info {
+            display: none;
         }
 
         /* Perbaikan dropdown sidebar */
@@ -213,7 +249,7 @@
                 </div>
                 <div class="info">
                     <h6>{{ Auth::guard('petugas_fasilitas')->user()->name ?? 'Petugas Fasilitas' }}</h6>
-                    <p>Petugas Fasilitas</p>
+                    <span class="role-badge">Petugas Fasilitas</span>
                 </div>
             </div>
 
@@ -246,14 +282,14 @@
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
                                     <a href="{{ route('petugas_fasilitas.fasilitas.index') }}"
-                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.fasilitas.index') ? 'active' : '' }}">
+                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.fasilitas.index','petugas_fasilitas.fasilitas.edit','petugas_fasilitas.fasilitas.create') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Daftar Fasilitas</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{{ route('petugas_fasilitas.fasilitas.create') }}"
-                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.fasilitas.create') ? 'active' : '' }}">
+                                    <a href="#"
+                                        class="nav-link {{ request()->routeIs('#') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Daftar Jadwal</p>
                                     </a>
@@ -318,7 +354,7 @@
                                     <a href="#"
                                         class="nav-link {{ request()->routeIs('petugas_fasilitas.booking.history') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Riwayat Booking</p>
+                                        <p>Riwayat Aktifitas</p>
                                     </a>
                                 </li>
                             </ul>
@@ -542,6 +578,22 @@
                 });
             }, 500);
 
+            // Handle sidebar collapse state for user profile
+            $('[data-widget="pushmenu"]').on('click', function() {
+                // Let the AdminLTE handle the actual collapse
+                // The CSS will take care of the visual changes
+                setTimeout(function() {
+                    // Force refresh of profile section layout
+                    $('.user-profile').toggleClass('refreshed').toggleClass('refreshed');
+                }, 300);
+            });
+
+            // Also check initial state on page load
+            if ($('body').hasClass('sidebar-collapse')) {
+                $('.user-profile').addClass('sidebar-collapsed');
+            } else {
+                $('.user-profile').removeClass('sidebar-collapsed');
+            }
 
         });
     </script>

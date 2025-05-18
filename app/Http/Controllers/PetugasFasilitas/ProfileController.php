@@ -5,6 +5,9 @@ namespace App\Http\Controllers\PetugasFasilitas;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\PetugasFasilitas;
+use App\Models\Admin;
+use App\Models\User;
+use App\Models\PetugasPembayaran;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -62,6 +65,57 @@ class ProfileController extends Controller
     }
 
     /**
+     * Memperbarui akun
+     */
+    public function updateAccount(Request $request)
+    {
+        $petugas = Auth::guard('petugas_fasilitas')->user();
+
+        $request->validate([
+            'username' => [
+                'required',
+                'alpha_num',
+                Rule::unique('petugas_fasilitas')->ignore($petugas->id),
+            ],
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('petugas_fasilitas')->ignore($petugas->id),
+            ],
+        ]);
+
+        // Check if username exists in other tables
+        $username = $request->username;
+
+        $existsInAdmin = Admin::where('username', $username)
+            ->exists();
+
+        $existsInUser = User::where('username', $username)
+            ->exists();
+
+        $existsInPembayaran = PetugasPembayaran::where('username', $username)
+            ->exists();
+
+        if ($existsInAdmin || $existsInUser || $existsInPembayaran) {
+            return back()->withErrors(['username' => 'Username sudah digunakan oleh petugas atau user lain.'])->withInput();
+        }
+
+        try {
+            // Update account info
+            $petugas->username = $request->username;
+            $petugas->email = $request->email;
+            $petugas->save();
+
+            return redirect()->route('petugas_fasilitas.profile.edit')
+                ->with('success', 'Informasi akun berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
      * Memperbarui password
      */
     public function updatePassword(Request $request)
@@ -70,7 +124,7 @@ class ProfileController extends Controller
 
         $request->validate([
             'current_password' => 'required',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
         // Verifikasi password lama

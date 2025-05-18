@@ -44,7 +44,7 @@ class DashboardController extends Controller
     $jadwalsToday = Jadwal::with(['fasilitas', 'checkouts.user'])
                           ->where('tanggal', $today)
                           ->orderBy('jam_mulai', 'asc')
-                          ->take(10)
+                          ->take(5)
                           ->get();
 
     // 5. Hitung durasi untuk setiap jadwal
@@ -81,7 +81,7 @@ private function getRecentActivities()
     // Karena tidak ada tabel activities, gunakan checkout sebagai representasi aktivitas
     $checkouts = Checkout::with(['jadwals.fasilitas', 'user'])
                 ->orderBy('created_at', 'desc')
-                ->take(8)
+                ->take(5)
                 ->get();
 
     // Format data untuk tampilan di UI

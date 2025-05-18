@@ -4,29 +4,29 @@ namespace App\Http\Controllers\PetugasFasilitas;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Fasilitas;
 use App\Models\Jadwal;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Auth;
 
 class FasilitasController extends Controller
 {
     /**
-     * Menampilkan daftar fasilitas
+     * Display list of facilities
      */
     public function index()
     {
-        // Ambil semua fasilitas termasuk yang soft deleted
-        $fasilitas = Fasilitas::withTrashed()->get();
+        // Get all facilities including soft-deleted ones
+        $data = Fasilitas::withTrashed()->get();
 
-        // Hitung statistik untuk setiap jenis
+        // Count statistics for each status
         $countAktif = Fasilitas::where('ketersediaan', 'aktif')->count();
         $countNonaktif = Fasilitas::where('ketersediaan', 'nonaktif')->count();
         $countMaintenance = Fasilitas::where('ketersediaan', 'maintanace')->count();
 
-        return view('PetugasFasilitas.Fasilitas.index', compact(
-            'fasilitas',
+        return view('PetugasFasilitas.KelolaFasilitas.index', compact(
+            'data',
             'countAktif',
             'countNonaktif',
             'countMaintenance'
@@ -34,15 +34,15 @@ class FasilitasController extends Controller
     }
 
     /**
-     * Menampilkan form tambah fasilitas
+     * Show form to create a new facility
      */
     public function create()
     {
-        return view('PetugasFasilitas.Fasilitas.create');
+        return view('PetugasFasilitas.KelolaFasilitas.create');
     }
 
     /**
-     * Menyimpan fasilitas baru
+     * Store a new facility in the database
      */
     public function store(Request $request)
     {
@@ -52,46 +52,48 @@ class FasilitasController extends Controller
             'tipe' => 'nullable|string|max:255',
             'lokasi' => 'required|string|max:255',
             'harga_sewa' => 'required|integer|min:0',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg,svg|max:2048',
+            'foto' => 'required|image|mimes:jpeg,png,jpg,svg|max:2048',
         ]);
 
-        // Upload foto jika ada
-        if ($request->hasFile('foto')) {
+        try {
+            // Save photo file to storage
             $path = $request->file('foto')->store('fasilitas', 'public');
+
+            // Create facility record
+            Fasilitas::create([
+                'nama_fasilitas' => $request->nama_fasilitas,
+                'deskripsi' => $request->deskripsi,
+                'tipe' => $request->tipe,
+                'lokasi' => $request->lokasi,
+                'harga_sewa' => $request->harga_sewa,
+                'foto' => $path,
+                'ketersediaan' => 'aktif',
+                'petugas_fasilitas_id' => Auth::guard('petugas_fasilitas')->id(),
+            ]);
+
+            return redirect()->route('petugas_fasilitas.fasilitas.index')
+                ->with('success', 'Fasilitas berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal menambahkan fasilitas: ' . $e->getMessage())
+                ->withInput();
         }
-
-        // Buat record fasilitas baru
-        Fasilitas::create([
-            'nama_fasilitas' => $request->nama_fasilitas,
-            'deskripsi' => $request->deskripsi,
-            'tipe' => $request->tipe,
-            'lokasi' => $request->lokasi,
-            'harga_sewa' => $request->harga_sewa,
-            'foto' => $path ?? null,
-            'ketersediaan' => 'aktif',
-            'petugas_fasilitas_id' => Auth::guard('petugas_fasilitas')->id(),
-        ]);
-
-        return redirect()->route('petugas_fasilitas.fasilitas.index')
-            ->with('success', 'Fasilitas berhasil ditambahkan');
     }
 
     /**
-     * Menampilkan form edit fasilitas
+     * Show form to edit a facility
      */
     public function edit($id)
     {
         $fasilitas = Fasilitas::withTrashed()->findOrFail($id);
-        return view('PetugasFasilitas.Fasilitas.edit', compact('fasilitas'));
+        return view('PetugasFasilitas.KelolaFasilitas.edit', compact('fasilitas'));
     }
 
     /**
-     * Menyimpan perubahan fasilitas
+     * Update facility data
      */
     public function update(Request $request, $id)
     {
-        $fasilitas = Fasilitas::withTrashed()->findOrFail($id);
-
         $request->validate([
             'nama_fasilitas' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
@@ -102,103 +104,98 @@ class FasilitasController extends Controller
             'ketersediaan' => 'required|in:aktif,nonaktif,maintanace',
         ]);
 
-        // Handle foto upload jika ada
-        if ($request->hasFile('foto')) {
-            // Hapus foto lama jika ada
-            if ($fasilitas->foto && Storage::disk('public')->exists($fasilitas->foto)) {
-                Storage::disk('public')->delete($fasilitas->foto);
+        try {
+            $fasilitas = Fasilitas::withTrashed()->findOrFail($id);
+
+            // Update base data
+            $fasilitas->nama_fasilitas = $request->nama_fasilitas;
+            $fasilitas->deskripsi = $request->deskripsi;
+            $fasilitas->tipe = $request->tipe;
+            $fasilitas->lokasi = $request->lokasi;
+            $fasilitas->harga_sewa = $request->harga_sewa;
+            $fasilitas->ketersediaan = $request->ketersediaan;
+
+            // Update petugas who edited
+            $fasilitas->petugas_fasilitas_id = Auth::guard('petugas_fasilitas')->id();
+
+            // Handle photo update if provided
+            if ($request->hasFile('foto')) {
+                // Delete old photo if exists
+                if ($fasilitas->foto && Storage::disk('public')->exists($fasilitas->foto)) {
+                    Storage::disk('public')->delete($fasilitas->foto);
+                }
+
+                // Save new photo
+                $fasilitas->foto = $request->file('foto')->store('fasilitas', 'public');
             }
 
-            // Upload foto baru
-            $path = $request->file('foto')->store('fasilitas', 'public');
-            $fasilitas->foto = $path;
+            $fasilitas->save();
+
+            // If status changed to nonactive or maintenance, update any available schedules
+            if ($request->ketersediaan !== 'aktif') {
+                Jadwal::where('fasilitas_id', $id)
+                    ->where('status', 'tersedia')
+                    ->update(['status' => 'batal']);
+            }
+
+            return redirect()->route('petugas_fasilitas.fasilitas.index')
+                ->with('success', 'Fasilitas berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal memperbarui fasilitas: ' . $e->getMessage())
+                ->withInput();
         }
-
-        // Update data fasilitas
-        $fasilitas->nama_fasilitas = $request->nama_fasilitas;
-        $fasilitas->deskripsi = $request->deskripsi;
-        $fasilitas->tipe = $request->tipe;
-        $fasilitas->lokasi = $request->lokasi;
-        $fasilitas->harga_sewa = $request->harga_sewa;
-        $fasilitas->ketersediaan = $request->ketersediaan;
-        $fasilitas->save();
-
-        // Jika fasilitas diset menjadi nonaktif, update semua jadwal tersedia menjadi nonaktif
-        if ($request->ketersediaan === 'nonaktif' || $request->ketersediaan === 'maintanace') {
-            Jadwal::where('fasilitas_id', $id)
-                ->where('status', 'tersedia')
-                ->update(['status' => 'batal']);
-        }
-
-        return redirect()->route('petugas_fasilitas.fasilitas.index')
-            ->with('success', 'Fasilitas berhasil diperbarui');
     }
 
     /**
-     * Menghapus fasilitas (soft delete)
+     * Soft delete a facility
      */
     public function destroy($id)
     {
-        $fasilitas = Fasilitas::findOrFail($id);
+        try {
+            $fasilitas = Fasilitas::findOrFail($id);
 
-        // Cek apakah fasilitas memiliki jadwal aktif
-        $hasActiveSchedules = Jadwal::where('fasilitas_id', $id)
-                                  ->where('status', 'terbooking')
-                                  ->where('tanggal', '>=', Carbon::today()->format('Y-m-d'))
-                                  ->exists();
+            // Check if facility has active schedules
+            $hasActiveSchedules = Jadwal::where('fasilitas_id', $id)
+                ->where('status', 'terbooking')
+                ->where('tanggal', '>=', Carbon::today()->format('Y-m-d'))
+                ->exists();
 
-        if ($hasActiveSchedules) {
-            return redirect()->back()->with('error', 'Fasilitas tidak dapat dihapus karena memiliki jadwal aktif');
+            if ($hasActiveSchedules) {
+                return redirect()->back()
+                    ->with('error', 'Fasilitas tidak dapat dihapus karena memiliki jadwal aktif.');
+            }
+
+            // Soft delete the facility
+            $fasilitas->delete();
+
+            return redirect()->route('petugas_fasilitas.fasilitas.index')
+                ->with('success', 'Fasilitas berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal menghapus fasilitas: ' . $e->getMessage());
         }
-
-        // Soft delete fasilitas
-        $fasilitas->delete();
-
-        return redirect()->route('petugas_fasilitas.fasilitas.index')
-            ->with('success', 'Fasilitas berhasil dihapus');
     }
 
     /**
-     * Restore fasilitas yang sudah dihapus
+     * Restore a soft-deleted facility
      */
     public function restore($id)
     {
-        $fasilitas = Fasilitas::withTrashed()->findOrFail($id);
-        $fasilitas->restore();
+        try {
+            $fasilitas = Fasilitas::withTrashed()->findOrFail($id);
+            $fasilitas->restore();
 
-        return redirect()->route('petugas_fasilitas.fasilitas.index')
-            ->with('success', 'Fasilitas berhasil dipulihkan');
+            return redirect()->route('petugas_fasilitas.fasilitas.index')
+                ->with('success', 'Fasilitas berhasil dipulihkan.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal memulihkan fasilitas: ' . $e->getMessage());
+        }
     }
 
     /**
-     * Menampilkan fasilitas dalam maintenance
-     */
-    public function maintenance()
-    {
-        $fasilitas = Fasilitas::where('ketersediaan', 'maintanace')->get();
-
-        // Ambil jadwal maintenance untuk setiap fasilitas
-        $fasilitasData = $fasilitas->map(function($item) {
-            $maintenanceStart = $item->updated_at ?? $item->created_at;
-
-            // Hitung berapa lama dalam maintenance (dalam hari)
-            $daysSinceMaintenance = $maintenanceStart->diffInDays(Carbon::now());
-
-            return [
-                'fasilitas' => $item,
-                'days_in_maintenance' => $daysSinceMaintenance,
-                'upcoming_bookings' => Jadwal::where('fasilitas_id', $item->id)
-                                        ->where('status', 'terbooking')
-                                        ->where('tanggal', '>=', Carbon::today()->format('Y-m-d'))
-                                        ->count()
-            ];
-        });
-
-        return view('PetugasFasilitas.Fasilitas.maintenance', compact('fasilitasData'));
-    }
-
-    /**
-     * Toggle status fasilitas (aktif/nonaktif/maintenance)
+     * Toggle facility status
      */
     public function toggleStatus(Request $request, $id)
     {
@@ -206,87 +203,27 @@ class FasilitasController extends Controller
             'status' => 'required|in:aktif,nonaktif,maintanace'
         ]);
 
-        $fasilitas = Fasilitas::findOrFail($id);
-        $oldStatus = $fasilitas->ketersediaan;
-        $fasilitas->ketersediaan = $request->status;
-        $fasilitas->save();
+        try {
+            $fasilitas = Fasilitas::findOrFail($id);
+            $oldStatus = $fasilitas->ketersediaan;
 
-        // Jika fasilitas diubah menjadi nonaktif/maintenance, update jadwal yang tersedia
-        if ($request->status !== 'aktif') {
-            Jadwal::where('fasilitas_id', $id)
-                ->where('status', 'tersedia')
-                ->update(['status' => 'batal']);
+            // Update status
+            $fasilitas->ketersediaan = $request->status;
+            $fasilitas->petugas_fasilitas_id = Auth::guard('petugas_fasilitas')->id();
+            $fasilitas->save();
+
+            // If status changed to nonactive or maintenance, update any available schedules
+            if ($request->status !== 'aktif') {
+                Jadwal::where('fasilitas_id', $id)
+                    ->where('status', 'tersedia')
+                    ->update(['status' => 'batal']);
+            }
+
+            return redirect()->back()
+                ->with('success', "Status fasilitas berhasil diubah dari $oldStatus menjadi {$request->status}.");
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal mengubah status fasilitas: ' . $e->getMessage());
         }
-
-        return redirect()->back()->with('success', "Status fasilitas berhasil diubah dari $oldStatus menjadi {$request->status}");
-    }
-
-    /**
-     * Tampilkan laporan penggunaan fasilitas
-     */
-    public function report(Request $request)
-    {
-        // Filter berdasarkan bulan dan tahun jika ada
-        $month = $request->input('month', Carbon::now()->month);
-        $year = $request->input('year', Carbon::now()->year);
-
-        // List fasilitas untuk dropdown filter
-        $allFasilitas = Fasilitas::withTrashed()->get();
-        $fasilitasId = $request->input('fasilitas_id');
-
-        // Query dasar untuk jadwal selesai
-        $query = Jadwal::with(['fasilitas', 'checkouts.user'])
-                    ->where('status', 'selesai');
-
-        // Terapkan filter bulan dan tahun
-        if ($month && $year) {
-            $query->whereMonth('tanggal', $month)
-                  ->whereYear('tanggal', $year);
-        }
-
-        // Terapkan filter fasilitas jika dipilih
-        if ($fasilitasId) {
-            $query->where('fasilitas_id', $fasilitasId);
-        }
-
-        // Dapatkan data jadwal
-        $jadwals = $query->get();
-
-        // Hitung statistik penggunaan
-        $statsByFacility = $jadwals->groupBy('fasilitas_id')
-            ->map(function($items, $fasilitasId) {
-                $fasilitas = $items->first()->fasilitas;
-                $totalHours = $items->sum(function($jadwal) {
-                    $start = Carbon::parse($jadwal->jam_mulai);
-                    $end = Carbon::parse($jadwal->jam_selesai);
-                    return $end->diffInHours($start);
-                });
-
-                $totalBookings = $items->count();
-                $totalRevenue = $totalHours * $fasilitas->harga_sewa;
-
-                return [
-                    'fasilitas' => $fasilitas,
-                    'total_hours' => $totalHours,
-                    'total_bookings' => $totalBookings,
-                    'total_revenue' => $totalRevenue
-                ];
-            });
-
-        // Hitung total overall
-        $totalRevenue = $statsByFacility->sum('total_revenue');
-        $totalBookings = $statsByFacility->sum('total_bookings');
-        $totalHours = $statsByFacility->sum('total_hours');
-
-        return view('PetugasFasilitas.Fasilitas.report', compact(
-            'statsByFacility',
-            'totalRevenue',
-            'totalBookings',
-            'totalHours',
-            'allFasilitas',
-            'month',
-            'year',
-            'fasilitasId'
-        ));
     }
 }

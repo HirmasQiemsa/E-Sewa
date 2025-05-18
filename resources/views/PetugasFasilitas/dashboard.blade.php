@@ -262,7 +262,7 @@
                 if (ctx) {
                     // Data untuk chart
                     var data = {
-                        labels: ['Aktif', 'Non-aktif', 'Maintenance'],
+                        // labels: ['Aktif', 'Non-aktif', 'Maintenance'],
                         datasets: [{
                             data: [{{ $fasilitasAktif }}, {{ $fasilitasNonaktif }},
                                 {{ $fasilitasMaintenance }}

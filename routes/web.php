@@ -79,7 +79,7 @@ Route::middleware(['auth:petugas_fasilitas', 'petugas_fasilitas'])->name('petuga
         Route::get('/{id}/edit', [PetugasFasilitasController::class, 'edit'])->name('edit');
         Route::put('/{id}', [PetugasFasilitasController::class, 'update'])->name('update');
         Route::delete('/{id}', [PetugasFasilitasController::class, 'destroy'])->name('destroy');
-        Route::get('/maintenance', [PetugasFasilitasController::class, 'maintenance'])->name('maintenance');
+        Route::post('/{id}/restore', [PetugasFasilitasController::class, 'restore'])->name('restore');
         Route::put('/{id}/toggle-status', [PetugasFasilitasController::class, 'toggleStatus'])->name('toggle-status');
     });
 
@@ -110,6 +110,7 @@ Route::middleware(['auth:petugas_fasilitas', 'petugas_fasilitas'])->name('petuga
         Route::get('/', [PetugasFasilitasProfileController::class, 'edit'])->name('edit');
         Route::put('/update', [PetugasFasilitasProfileController::class, 'update'])->name('update');
         Route::put('/update-password', [PetugasFasilitasProfileController::class, 'updatePassword'])->name('update-password');
+        Route::put('/update-account', [PetugasFasilitasProfileController::class, 'updateAccount'])->name('update-account');
     });
 });
 
