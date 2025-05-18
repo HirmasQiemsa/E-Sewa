@@ -92,7 +92,7 @@
                                 <div class="alert alert-info">
                                     <h5><i class="icon fas fa-info"></i> Informasi Pembayaran</h5>
                                     <p>Silakan transfer ke rekening:</p>
-                                    <p class="mb-0"><strong>Bank BCA: 1234567890</strong> a.n. DISPORA Semarang</p>
+                                    <p class="mb-0"><strong>Bank Sample: 1234567890</strong> a.n. DISPORA Semarang</p>
                                 </div>
                             </div>
 

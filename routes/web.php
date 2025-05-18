@@ -13,12 +13,19 @@ use App\Http\Controllers\BerandaController;
 use App\Http\Controllers\User\CheckoutController;
 use App\Http\Controllers\User\BookingController;
 use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\PetugasFasilitas\DashboardController as PetugasFasilitasDashboardController;
+use App\Http\Controllers\PetugasFasilitas\FasilitasController as PetugasFasilitasController;
+use App\Http\Controllers\PetugasFasilitas\JadwalController as PetugasFasilitasJadwalController;
+use App\Http\Controllers\PetugasFasilitas\BookingController as PetugasFasilitasBookingController;
+use App\Http\Controllers\PetugasFasilitas\AktivitasController as PetugasFasilitasAktivitasController;
+use App\Http\Controllers\PetugasFasilitas\ProfileController as PetugasFasilitasProfileController;
+use App\Http\Controllers\PetugasPembayaran\DashboardController as PetugasBayar;
 
 
-// as Guest //
 Route::get('/laravel', function () {
     return view('welcome');
 });
+// as Guest //
 Route::get('/', [BerandaController::class, 'index']);
 Route::get('/register', function () {
     return view('auth.register');
@@ -27,18 +34,6 @@ Route::post('/register/proses', [RegisterController::class,'register_proses'])->
 Route::post('/login/proses', [LoginController::class,'login_proses'])->name('login-proses');
 Route::get('/login', [LoginController::class,'login'])->name('login');
 Route::post('/logout', [LogoutController::class,'logout'])->name('logout');
-
-
-// PETUGAS FASILITAS //
-Route::middleware(['auth:petugas_fasilitas', 'petugas_fasilitas'])->name('petugas_fasilitas.')->group(function () {
-    //
-});
-
-
-// PETUGAS FASILITAS //
-Route::middleware(['auth:petugas_pembayarans', 'petugas_pembayarans'])->name('petugas_pembayarans.')->group(function () {
-    //
-});
 
 
 // ADMIN //
@@ -69,6 +64,62 @@ Route::middleware(['auth:admin', 'admin'])->name('admin.')->group(function () {
     // Profile
     Route::get('/admin/profile', [ProfileAdminController::class, 'edit'])->name('profile.edit');
 });
+
+
+// PETUGAS FASILITAS ROUTES //
+Route::middleware(['auth:petugas_fasilitas', 'petugas_fasilitas'])->name('petugas_fasilitas.')->prefix('petugas-fasilitas')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [PetugasFasilitasDashboardController::class, 'index'])->name('dashboard');
+
+    // Fasilitas Management
+    Route::prefix('fasilitas')->name('fasilitas.')->group(function () {
+        Route::get('/', [PetugasFasilitasController::class, 'index'])->name('index');
+        Route::get('/create', [PetugasFasilitasController::class, 'create'])->name('create');
+        Route::post('/store', [PetugasFasilitasController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [PetugasFasilitasController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [PetugasFasilitasController::class, 'update'])->name('update');
+        Route::delete('/{id}', [PetugasFasilitasController::class, 'destroy'])->name('destroy');
+        Route::get('/maintenance', [PetugasFasilitasController::class, 'maintenance'])->name('maintenance');
+        Route::put('/{id}/toggle-status', [PetugasFasilitasController::class, 'toggleStatus'])->name('toggle-status');
+    });
+
+    // Jadwal Management
+    Route::prefix('jadwal')->name('jadwal.')->group(function () {
+        Route::get('/', [PetugasFasilitasJadwalController::class, 'index'])->name('index');
+        Route::get('/create', [PetugasFasilitasJadwalController::class, 'create'])->name('create');
+        Route::post('/store', [PetugasFasilitasJadwalController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [PetugasFasilitasJadwalController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [PetugasFasilitasJadwalController::class, 'update'])->name('update');
+        Route::delete('/{id}', [PetugasFasilitasJadwalController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/detail', [PetugasFasilitasJadwalController::class, 'show'])->name('detail');
+    });
+
+    // Booking Management
+    Route::prefix('booking')->name('booking.')->group(function () {
+        Route::get('/today', [PetugasFasilitasBookingController::class, 'today'])->name('today');
+        Route::get('/upcoming', [PetugasFasilitasBookingController::class, 'upcoming'])->name('upcoming');
+        Route::get('/history', [PetugasFasilitasBookingController::class, 'history'])->name('history');
+        Route::get('/{id}/detail', [PetugasFasilitasBookingController::class, 'show'])->name('detail');
+        Route::put('/{id}/update-status', [PetugasFasilitasBookingController::class, 'updateStatus'])->name('update-status');
+    });
+
+    // Activity Log
+    Route::get('/activities', [PetugasFasilitasAktivitasController::class, 'index'])->name('activities');
+
+    // Profile Management
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [PetugasFasilitasProfileController::class, 'edit'])->name('edit');
+        Route::put('/update', [PetugasFasilitasProfileController::class, 'update'])->name('update');
+        Route::put('/update-password', [PetugasFasilitasProfileController::class, 'updatePassword'])->name('update-password');
+    });
+});
+
+
+// PETUGAS PEMBAYARAN //
+Route::middleware(['auth:petugas_pembayarans', 'petugas_pembayarans'])->name('petugas_pembayaran.')->group(function () {
+    //
+});
+
 
 // USER //
 Route::middleware(['auth:web', 'user:user'])->name('user.')->group(function () {
