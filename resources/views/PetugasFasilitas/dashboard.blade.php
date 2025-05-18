@@ -243,8 +243,8 @@
                             </div>
                         </div>
                         <div class="card-footer clearfix">
-                            <a href="{{ route('petugas_fasilitas.activities') }}"
-                                class="btn btn-sm btn-secondary float-right">Lihat Semua Aktivitas</a>
+                            {{-- <a href="{{ route('petugas_fasilitas.activities') }}"
+                                class="btn btn-sm btn-secondary float-right">Lihat Semua Aktivitas</a> --}}
                         </div>
                     </div>
                 </div>

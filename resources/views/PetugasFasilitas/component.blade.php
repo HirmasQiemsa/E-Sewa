@@ -298,12 +298,11 @@
                             </ul>
                         </li>
 
-
-
                         <!-- Kelola Booking dengan submenu -->
                         <li
-                            class="nav-item {{ request()->routeIs('petugas_fasilitas.booking.*') ? 'menu-open' : '' }}">
-                            <a href="#" class="nav-link bg-danger">
+                            class="nav-item {{ request()->routeIs('petugas_fasilitas.booking.*') || request()->routeIs('petugas_fasilitas.riwayat') ? 'menu-open' : '' }}">
+                            <a href="#"
+                                class="nav-link {{ request()->routeIs('petugas_fasilitas.booking.*') || request()->routeIs('petugas_fasilitas.riwayat') ? 'active' : '' }} bg-danger">
                                 <i class="nav-icon fas fa-calendar-alt"></i>
                                 <p>
                                     Kelola Booking
@@ -319,16 +318,14 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="#"
-                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.booking.history') ? 'active' : '' }}">
+                                    <a href="{{ route('petugas_fasilitas.riwayat') }}"
+                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.riwayat') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Riwayat Aktifitas</p>
                                     </a>
                                 </li>
                             </ul>
                         </li>
-
-
 
                         <!-- Profile (Blue) -->
                         <li class="nav-item mt-2">

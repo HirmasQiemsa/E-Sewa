@@ -137,6 +137,25 @@ class JadwalController extends Controller
         }
     }
 
+    public function detail($id)
+    {
+        // Find the jadwal with related data
+        $jadwal = Jadwal::with(['fasilitas', 'checkouts.user'])
+            ->findOrFail($id);
+
+        // Get booking information related to this jadwal if any
+        $bookings = $jadwal->checkouts()->with('user')->get();
+
+        // Calculate duration
+        $mulaiParts = explode(':', $jadwal->jam_mulai);
+        $selesaiParts = explode(':', $jadwal->jam_selesai);
+        $mulaiJam = (int)$mulaiParts[0];
+        $selesaiJam = (int)$selesaiParts[0];
+        $jadwal->durasi = $selesaiJam - $mulaiJam;
+
+        return view('PetugasFasilitas.KelolaFasilitas.detail_jadwal', compact('jadwal', 'bookings'));
+    }
+
     /**
      * Tampilkan form untuk menambah jadwal tunggal
      */

@@ -92,6 +92,7 @@ Route::middleware(['auth:petugas_fasilitas', 'petugas_fasilitas'])->name('petuga
         Route::get('/{id}/edit', [PetugasFasilitasJadwalController::class, 'edit'])->name('edit');
         Route::put('/{id}', [PetugasFasilitasJadwalController::class, 'update'])->name('update');
         Route::delete('/{id}', [PetugasFasilitasJadwalController::class, 'destroy'])->name('destroy');
+        Route::get('/{id}/detail', [PetugasFasilitasJadwalController::class, 'detail'])->name('detail');
     });
 
     // Kelola Booking
@@ -102,8 +103,10 @@ Route::middleware(['auth:petugas_fasilitas', 'petugas_fasilitas'])->name('petuga
         Route::put('/{id}/cancel', [PetugasFasilitasBookingController::class, 'cancelBooking'])->name('cancel');
     });
 
-    // Activity Log
-    Route::get('/activities', [PetugasFasilitasAktivitasController::class, 'index'])->name('activities');
+    // Riwayat Booking
+    Route::get('/riwayat', [PetugasFasilitasBookingController::class, 'riwayat'])->name('riwayat');
+
+    
 
     // Profile Management
     Route::prefix('profile')->name('profile.')->group(function () {

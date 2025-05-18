@@ -211,4 +211,126 @@ class BookingController extends Controller
 
         return view('PetugasFasilitas.KelolaBooking.detail', compact('booking'));
     }
+
+    /**
+ * Menampilkan riwayat aktivitas booking
+ */
+public function riwayat(Request $request)
+{
+    // Filter berdasarkan tanggal
+    $startDate = $request->input('start_date', Carbon::today()->subDays(30)->format('Y-m-d'));
+    $endDate = $request->input('end_date', Carbon::today()->format('Y-m-d'));
+    $type = $request->input('type', 'all');
+    $search = $request->input('search', '');
+
+    // Base query - menggunakan checkout sebagai log aktivitas
+    $query = Checkout::with(['jadwals.fasilitas', 'user'])
+                    ->orderBy('created_at', 'desc');
+
+    // Apply date filters
+    if ($startDate && $endDate) {
+        $query->whereBetween('created_at', [$startDate.' 00:00:00', $endDate.' 23:59:59']);
+    }
+
+    // Apply type filter
+    if ($type !== 'all') {
+        $query->where('status', $type);
+    }
+
+    // Apply search
+    if ($search) {
+        $query->where(function($q) use ($search) {
+            $q->whereHas('user', function($uq) use ($search) {
+                $uq->where('name', 'like', "%{$search}%")
+                   ->orWhere('email', 'like', "%{$search}%");
+            })
+            ->orWhereHas('jadwals.fasilitas', function($fq) use ($search) {
+                $fq->where('nama_fasilitas', 'like', "%{$search}%")
+                   ->orWhere('lokasi', 'like', "%{$search}%");
+            });
+        });
+    }
+
+    // Get activities with pagination
+    $activities = $query->paginate(10)->withQueryString();
+
+    // Format activities for view
+    $formattedActivities = $activities->map(function ($checkout) {
+        return [
+            'id' => $checkout->id,
+            'created_at' => $checkout->created_at,
+            'user' => $checkout->user,
+            'fasilitas' => $checkout->jadwals->first()->fasilitas ?? null,
+            'description' => $this->getActivityDescription($checkout),
+            'status' => $this->getActivityStatus($checkout),
+            'status_color' => $this->getActivityStatusColor($checkout)
+        ];
+    });
+
+    return view('PetugasFasilitas.KelolaBooking.riwayat', [
+        'activities' => $activities,
+        'formattedActivities' => $formattedActivities,
+        'startDate' => $startDate,
+        'endDate' => $endDate,
+        'type' => $type,
+        'search' => $search
+    ]);
+}
+
+    /**
+     * Helper method untuk mendapatkan deskripsi aktivitas
+     */
+    private function getActivityDescription($checkout)
+    {
+        switch ($checkout->status) {
+            case 'fee':
+                return 'Melakukan booking dan membayar DP';
+            case 'lunas':
+                return 'Melunasi pembayaran booking';
+            case 'batal':
+                return 'Membatalkan booking';
+            case 'selesai':
+                return 'Menyelesaikan penggunaan fasilitas';
+            default:
+                return 'Melakukan aktivitas pada sistem';
+        }
+    }
+
+    /**
+     * Helper method untuk mendapatkan label status
+     */
+    private function getActivityStatus($checkout)
+    {
+        switch ($checkout->status) {
+            case 'fee':
+                return 'DP Terbayar';
+            case 'lunas':
+                return 'Lunas';
+            case 'batal':
+                return 'Dibatalkan';
+            case 'selesai':
+                return 'Selesai';
+            default:
+                return 'Undefined';
+        }
+    }
+
+    /**
+     * Helper method untuk mendapatkan warna status
+     */
+    private function getActivityStatusColor($checkout)
+    {
+        switch ($checkout->status) {
+            case 'fee':
+                return 'warning';
+            case 'lunas':
+                return 'success';
+            case 'batal':
+                return 'danger';
+            case 'selesai':
+                return 'info';
+            default:
+                return 'secondary';
+        }
+    }
 }
