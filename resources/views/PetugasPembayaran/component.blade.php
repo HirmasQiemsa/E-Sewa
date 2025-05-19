@@ -34,6 +34,7 @@
     <!-- Toastr -->
     <link rel="stylesheet" href="{{ asset('lte/plugins/toastr/toastr.min.css') }}">
 
+
     <style>
         /* Critical CSS for footer positioning */
         html,
@@ -84,9 +85,103 @@
             font-size: 0.875rem;
             line-height: 1.5;
         }
+
+        /* User profile in sidebar */
+        .user-profile {
+            padding: 20px 10px;
+            margin-bottom: 10px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .user-profile .image {
+            position: relative;
+            display: inline-block;
+            width: 80px;
+            height: 80px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .user-profile .image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .user-profile .info {
+            margin-top: 5px;
+            transition: all 0.3s ease;
+        }
+
+        /* Enhanced text styling */
+        .user-profile .info h6 {
+            color: #fff;
+            margin-bottom: 8px;
+            /* Increased bottom margin */
+            font-weight: 800;
+            /* Extra bold */
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            /* Text shadow for better readability */
+        }
+
+        /* Role badge styling */
+        .user-profile .info .role-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            background-color: rgba(255, 255, 255, 0.15);
+            /* Semi-transparent white */
+            color: #ffffff;
+            border-radius: 4px;
+            /* Slightly rounded corners */
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin: 0 auto;
+            cursor: default;
+            /* Show default cursor to indicate non-clickable */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            /* Subtle border */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            /* Subtle shadow */
+        }
+
+        /* Specifically handle collapsed state */
+        .sidebar-mini.sidebar-collapse .user-profile {
+            padding: 10px 0;
+            display: flex;
+            justify-content: center;
+            border-bottom: none;
+        }
+
+        .sidebar-mini.sidebar-collapse .user-profile .image {
+            width: 2.2rem;
+            height: 2.2rem;
+            margin-bottom: 0;
+        }
+
+        .sidebar-mini.sidebar-collapse .user-profile .image img {
+            border-width: 1px;
+        }
+
+        .sidebar-mini.sidebar-collapse .user-profile .info {
+            display: none;
+        }
+
+        /* Perbaikan dropdown sidebar */
+        .nav-sidebar .nav-item.menu-is-opening .nav-link .right,
+        .nav-sidebar .nav-item.menu-open .nav-link .right {
+            transform: rotate(-90deg);
+        }
     </style>
 </head>
-
 
 <body class="hold-transition sidebar-mini layout-fixed">
 
@@ -111,102 +206,133 @@
                             Fasilitas DISPORA SEMARANG
                         </b>
                     </a>
-
                 </li>
-                {{-- <li class="nav-item ms-auto">
-                    <img class="animation__shake" src="{{ asset('img/logo.png') }}" alt="AdminLTELogo" height="40"
-                        width="40">
-                </li> --}}
+            </ul>
+
+            <!-- Right navbar links -->
+            <ul class="navbar-nav ml-auto">
+                <!-- Notifications Dropdown Menu -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link" data-toggle="dropdown" href="#">
+                        <i class="far fa-bell"></i>
+                        <span class="badge badge-warning navbar-badge">3</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+                        <span class="dropdown-item dropdown-header">3 Notifikasi</span>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item">
+                            <i class="fas fa-money-bill mr-2"></i> 3 pembayaran baru hari ini
+                            <span class="float-right text-muted text-sm">12:00</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" class="dropdown-item dropdown-footer">Lihat Semua Notifikasi</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+                        <i class="fas fa-expand-arrows-alt"></i>
+                    </a>
+                </li>
             </ul>
         </nav>
 
         <!-- Main Sidebar Container -->
         <aside class="main-sidebar sidebar-dark-danger elevation-4">
+            <!-- User Profile -->
+            <div class="user-profile">
+                <div class="image">
+                    <!-- Tampilkan foto petugas jika ada, jika tidak ada tampilkan default -->
+                    <img src="{{ Auth::guard('petugas_pembayarans')->user()->foto
+                        ? asset('storage/' . Auth::guard('petugas_pembayarans')->user()->foto)
+                        : asset('img/default-user.png') }}"
+                        alt="Petugas Profile" class="img-circle elevation-2">
+                </div>
+                <div class="info">
+                    <h6>{{ Auth::guard('petugas_pembayarans')->user()->name ?? 'Petugas Pembayaran' }}</h6>
+                    <span class="role-badge">Petugas Pembayaran</span>
+                </div>
+            </div>
+
             <!-- Sidebar -->
             <div class="sidebar">
-                <!-- SidebarSearch Form -->
-                <div class="form-inline">
-                    <div class="input-group" data-widget="sidebar-search">
-                        <input class="form-control form-control-sidebar mt-4" type="search" placeholder="Search"
-                            aria-label="Search">
-                        <div class="input-group-append">
-                            <button class="btn btn-sidebar mt-4">
-                                <i class="fas fa-search fa-fw "></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
                 <!-- Sidebar Menu -->
                 <nav class="mt-2">
-                    {{-- red --}}
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
-                        <li class="nav-item active mt-2">
-                            <a href="{{ route('admin.dashboard') }}" class="nav-link active bg-danger">
+                        <li class="nav-item">
+                            <a href="{{ route('petugas_pembayaran.dashboard') }}"
+                                class="nav-link {{ request()->routeIs('petugas_pembayaran.dashboard') ? 'active' : '' }} bg-danger">
                                 <i class="nav-icon fas fa-database"></i>
                                 <p>
                                     Dashboard
                                 </p>
                             </a>
                         </li>
-                    </ul>
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                        data-accordion="false">
-                        <li class="nav-item active mt-2">
-                            <a href="{{ route('admin.fasilitas.index') }}" class="nav-link active bg-danger">
-                                <i class="nav-icon fas fa-map"></i>
+
+                        <!-- Kelola Keuangan dengan submenu -->
+                        <li
+                            class="nav-item {{ request()->routeIs('petugas_pembayaran.pembayaran.*') || request()->routeIs('petugas_pembayaran.pemasukan.*') ? 'menu-open' : '' }}">
+                            <a href="#"
+                                class="nav-link {{ request()->routeIs('petugas_pembayaran.pembayaran.*') || request()->routeIs('petugas_pembayaran.pemasukan.*') ? 'active' : '' }} bg-danger">
+                                <i class="nav-icon fas fa-money-bill-wave"></i>
                                 <p>
-                                    Kelola Fasilitas
+                                    Kelola Keuangan
+                                    <i class="fas fa-angle-left right"></i>
                                 </p>
                             </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ route('petugas_pembayaran.pembayaran.index') }}"
+                                        class="nav-link {{ request()->routeIs('petugas_pembayaran.pembayaran.index', 'petugas_pembayaran.pembayaran.show', 'petugas_pembayaran.pembayaran.edit') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Verifikasi Pembayaran</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('petugas_pembayaran.pemasukan.index') }}"
+                                        class="nav-link {{ request()->routeIs('petugas_pembayaran.pemasukan.index', 'petugas_pembayaran.pemasukan.show') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Riwayat Pemasukan</p>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
-                    </ul>
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                        data-accordion="false">
-                        <li class="nav-item active mt-2">
-                            <a href="{{ route('admin.jadwal.index') }}" class="nav-link active bg-danger">
-                                <i class="nav-icon fas fa-calendar-plus"></i>
+
+                        <!-- Laporan Keuangan -->
+                        <li class="nav-item">
+                            <a href="{{ route('petugas_pembayaran.laporan.index') }}"
+                                class="nav-link {{ request()->routeIs('petugas_pembayaran.laporan.*') ? 'active' : '' }} bg-danger">
+                                <i class="nav-icon fas fa-chart-line"></i>
                                 <p>
-                                    Kelola Jadwal
-                                </p>
-                            </a>
-                        </li>
-                    </ul>
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                        data-accordion="false">
-                        <li class="nav-item active mt-2">
-                            <a href="{{ route('admin.riwayat.index') }}" class="nav-link active bg-danger">
-                                <i class="nav-icon fas fa-history"></i>
-                                <p>
-                                    Riwayat
+                                    Laporan Keuangan
                                 </p>
                             </a>
                         </li>
 
-                        {{-- blue --}}
-                        <li class="nav-item active mt-2">
-                            <a href="#" class="nav-link active bg-primary">
-                                <i class="nav-icon fas fa-user"></i>
+                        <!-- Profile (Blue) -->
+                        <li class="nav-item mt-2">
+                            <a href="{{ route('petugas_pembayaran.profile.edit') }}"
+                                class="nav-link {{ request()->routeIs('petugas_pembayaran.profile.*') ? 'active' : '' }} bg-primary">
+                                <i class="nav-icon fas fa-user-cog"></i>
                                 <p>
-                                    Admin Profile
+                                    Pengaturan Profil
                                 </p>
                             </a>
                         </li>
-                        <li class="nav-item active mt-2">
+
+                        <!-- Logout (Blue) -->
+                        <li class="nav-item">
                             <form method="POST" action="{{ route('logout') }}" id="logout-form">
                                 @csrf
-                                <a href="{{ route('logout') }}" class="nav-link active bg-primary"
+                                <a href="{{ route('logout') }}" class="nav-link bg-primary"
                                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                    <i class="nav-icon fas fa-times-circle"></i>
+                                    <i class="nav-icon fas fa-sign-out-alt"></i>
                                     <p>
                                         Logout
                                     </p>
                                 </a>
                             </form>
                         </li>
-                    </ul>
-                    <ul>
-
                     </ul>
                 </nav>
                 <!-- /.sidebar-menu -->
@@ -226,7 +352,6 @@
                     <div class="col-12">
                         <strong>Copyright &copy; 2025 <a href="#">E-SEWA</a>.</strong>
                         All rights reserved.
-                        {{-- <span class="float-right d-none d-sm-inline text-danger"><b>DISPORA SEMARANG</b></span> --}}
                     </div>
                 </div>
             </div>
@@ -237,15 +362,9 @@
 
     <!-- jQuery UI 1.11.4 -->
     <script src="{{ asset('lte/jquery/jquery.min.js') }}"></script>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
-        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous">
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
-        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
-    </script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
     <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
     <script>
         $.widget.bridge('uibutton', $.ui.button)
@@ -254,7 +373,9 @@
     <script src="{{ asset('lte/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- ChartJS -->
-    <script src="{{ asset('lte/chart.js/Chart.min.js') }}"></script>
+    <script src="{{ asset('lte/plugins/chart.js/Chart.min.js') }}"></script>
+    <!-- Chart.js dari CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
     <!-- Sparkline -->
     <script src="{{ asset('lte/sparklines/sparkline.js') }}"></script>
     <!-- JQVMap -->
@@ -264,15 +385,15 @@
     <script src="{{ asset('lte/jquery-knob/jquery.knob.min.js') }}"></script>
     <!-- daterangepicker -->
     <script src="{{ asset('lte/moment/moment.min.js') }}"></script>
-    <script src="{{ asset('lte/daterangepicker/daterangepicker.jsalt') }}"></script>
+    <script src="{{ asset('lte/daterangepicker/daterangepicker.js') }}"></script>
     <!-- Tempusdominus Bootstrap 4 -->
     <script src="{{ asset('lte/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') }}"></script>
     <!-- Summernote -->
     <script src="{{ asset('lte/summernote/summernote-bs4.min.js') }}"></script>
     <!-- overlayScrollbars -->
     <script src="{{ asset('lte/overlayScrollbars/js/jquery.overlayScrollbars.min.js') }}"></script>
-    <!-- AdminLTE App -->
-    <script src="{{ asset('lte/dist/js/adminlte.js') }}"></script>
+    <!-- AdminLTE -->
+    <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="{{ asset('lte/dist/js/demo.js') }}"></script>
     <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
@@ -294,13 +415,16 @@
             // Tooltip bootstrap
             $('[data-toggle="tooltip"]').tooltip();
 
+            // Toggle status dengan AJAX
             $('.toggle-status').on('change', function() {
-                var scheduleId = $(this).data('id');
+                var paymentId = $(this).data('id');
                 $.ajax({
-                    url: '/schedules/toggle/' + scheduleId,
+                    url: '/petugas-pembayaran/pembayaran/' + paymentId + '/toggle-status',
                     method: 'POST',
                     data: {
-                        _token: '{{ csrf_token() }}'
+                        _token: '{{ csrf_token() }}',
+                        _method: 'PUT',
+                        status: $(this).prop('checked') ? 'lunas' : 'fee'
                     },
                     success: function(response) {
                         toastr.success(response.message);
@@ -356,6 +480,59 @@
             $(document).on('DOMNodeInserted', '.content-wrapper', function() {
                 setTimeout(adjustFooterVisibility, 200);
             });
+
+            // Memperbaiki button collapse di card
+            // Solusi 1: Hentikan propagasi event untuk mencegah konflik
+            $(document).on('click', '[data-card-widget="collapse"]', function(event) {
+                event.stopPropagation();
+            });
+
+            // Solusi 2: Reinisialisasi card widgets
+            setTimeout(function() {
+                $('.card-tools [data-card-widget="collapse"]').each(function() {
+                    try {
+                        // Hapus event handler yang ada
+                        $(this).off('click');
+
+                        // Tambahkan event handler baru
+                        $(this).on('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            var $card = $(this).closest('.card');
+                            $card.find('.card-body, .card-footer').slideToggle('fast');
+
+                            // Toggle ikon
+                            var $icon = $(this).find('i.fa, i.fas');
+                            if ($icon.hasClass('fa-minus')) {
+                                $icon.removeClass('fa-minus').addClass('fa-plus');
+                            } else {
+                                $icon.removeClass('fa-plus').addClass('fa-minus');
+                            }
+                        });
+                    } catch (error) {
+                        console.error('Error reinitializing card widget:', error);
+                    }
+                });
+            }, 500);
+
+            // Handle sidebar collapse state for user profile
+            $('[data-widget="pushmenu"]').on('click', function() {
+                // Let the AdminLTE handle the actual collapse
+                // The CSS will take care of the visual changes
+                setTimeout(function() {
+                    // Force refresh of profile section layout
+                    $('.user-profile').toggleClass('refreshed').toggleClass('refreshed');
+                }, 300);
+            });
+
+            // Also check initial state on page load
+            if ($('body').hasClass('sidebar-collapse')) {
+                $('.user-profile').addClass('sidebar-collapsed');
+            } else {
+                $('.user-profile').removeClass('sidebar-collapsed');
+            }
+
         });
     </script>
 </body>

@@ -48,7 +48,7 @@ return [
             'driver' => 'session',
             'provider' => 'petugas_fasilitas',
         ],
-        'petugas_pembayaran' => [
+        'petugas_pembayarans' => [
             'driver' => 'session',
             'provider' => 'petugas_pembayarans',
         ],

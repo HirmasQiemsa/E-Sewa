@@ -3,21 +3,25 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\PemasukanSewa;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens;
 use App\Traits\HasFotoUrl;
 
-class PetugasPembayaran extends Model
+class PetugasPembayaran extends Authenticatable
 {
-    use HasFactory,HasFotoUrl;
+    use HasApiTokens, HasFactory, HasFotoUrl, Notifiable;
 
     protected $fillable = [
-        'username', 'name', 'email', 'password', 'role','foto','no_hp','alamat',
+        'username', 'name', 'email', 'password', 'role', 'foto', 'no_hp', 'alamat',
+    ];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
     ];
 
     public function pemasukanSewas() {
         return $this->hasMany(PemasukanSewa::class);
     }
-
 }

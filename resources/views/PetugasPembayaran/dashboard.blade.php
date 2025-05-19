@@ -1,635 +1,317 @@
-@extends('PetugasFasilitas.component')
+@extends('PetugasPembayaran.component')
 @section('content')
-    <!-- Content Wrapper. Contains page content -->
-
-        <!-- Content Header (Page header) -->
-        <div class="content-header">
-            <div class="container-fluid">
-                <div class="row mb-2">
-                    <div class="col-sm-6">
-                        <h1 class="m-0">Dashboard</h1>
-                    </div><!-- /.row -->
-                </div><!-- /.container-fluid -->
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">Dashboard Petugas Pembayaran</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item active"><i class="fas fa-database mr-1"></i> Dashboard</li>
+                    </ol>
+                </div>
             </div>
-            <!-- /.content-header -->
-
-            <!-- Main content -->
-            <section class="content">
-                <div class="container-fluid">
-                    <!-- Info boxes -->
-                    <div class="row">
-                        <!-- /.col -->
-                        <div class="col-12 col-sm-6 col-md-4">
-                            <div class="info-box mb-3">
-                                <span class="info-box-icon bg-danger elevation-1"><i class="fas fa-thumbs-up"></i></span>
-
-                                <div class="info-box-content">
-                                    <span class="info-box-text">Fasilitas Tersedia</span>
-                                    <span class="info-box-number">41,410</span>
-                                </div>
-                                <!-- /.info-box-content -->
-                            </div>
-                            <!-- /.info-box -->
-                        </div>
-                        <!-- /.col -->
-
-                        <!-- fix for small devices only -->
-                        <div class="clearfix hidden-md-up"></div>
-
-                        <div class="col-12 col-sm-6 col-md-4">
-                            <div class="info-box mb-3">
-                                <span class="info-box-icon bg-success elevation-1"><i class="fas fa-history"></i></span>
-
-                                <div class="info-box-content">
-                                    <span class="info-box-text">Riwayat Transaksi</span>
-                                    <span class="info-box-number">760</span>
-                                </div>
-                                <!-- /.info-box-content -->
-                            </div>
-                            <!-- /.info-box -->
-                        </div>
-                        <!-- /.col -->
-                        <div class="col-12 col-sm-6 col-md-4">
-                            <div class="info-box mb-3">
-                                <span class="info-box-icon bg-warning elevation-1"><i class="fas fa-users"></i></span>
-
-                                <div class="info-box-content">
-                                    <span class="info-box-text">User Terdaftar</span>
-                                    <span class="info-box-number">2,000</span>
-                                </div>
-                                <!-- /.info-box-content -->
-                            </div>
-                            <!-- /.info-box -->
-                        </div>
-                        <!-- /.col -->
-                    </div>
-                    <!-- /.row -->
-
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5 class="card-title">Monthly Recap Report</h5>
-
-                                    <div class="card-tools">
-                                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                            <i class="fas fa-minus"></i>
-                                        </button>
-                                        <div class="btn-group">
-                                            <button type="button" class="btn btn-tool dropdown-toggle"
-                                                data-toggle="dropdown">
-                                                <i class="fas fa-wrench"></i>
-                                            </button>
-                                            <div class="dropdown-menu dropdown-menu-right" role="menu">
-                                                <a href="#" class="dropdown-item">Action</a>
-                                                <a href="#" class="dropdown-item">Another action</a>
-                                                <a href="#" class="dropdown-item">Something else here</a>
-                                                <a class="dropdown-divider"></a>
-                                                <a href="#" class="dropdown-item">Separated link</a>
-                                            </div>
-                                        </div>
-                                        <button type="button" class="btn btn-tool" data-card-widget="remove">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <!-- /.card-header -->
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <p class="text-center">
-                                                <strong>Sales: 1 Jan, 2014 - 30 Jul, 2014</strong>
-                                            </p>
-
-                                            <div class="chart">
-                                                <!-- Sales Chart Canvas -->
-                                                <canvas id="salesChart" height="180" style="height: 180px;"></canvas>
-                                            </div>
-                                            <!-- /.chart-responsive -->
-                                        </div>
-                                        <!-- /.col -->
-                                        <div class="col-md-4">
-                                            <p class="text-center">
-                                                <strong>Goal Completion</strong>
-                                            </p>
-
-                                            <div class="progress-group">
-                                                Add Products to Cart
-                                                <span class="float-right"><b>160</b>/200</span>
-                                                <div class="progress progress-sm">
-                                                    <div class="progress-bar bg-primary" style="width: 80%"></div>
-                                                </div>
-                                            </div>
-                                            <!-- /.progress-group -->
-
-                                            <div class="progress-group">
-                                                Complete Purchase
-                                                <span class="float-right"><b>310</b>/400</span>
-                                                <div class="progress progress-sm">
-                                                    <div class="progress-bar bg-danger" style="width: 75%"></div>
-                                                </div>
-                                            </div>
-
-                                            <!-- /.progress-group -->
-                                            <div class="progress-group">
-                                                <span class="progress-text">Visit Premium Page</span>
-                                                <span class="float-right"><b>480</b>/800</span>
-                                                <div class="progress progress-sm">
-                                                    <div class="progress-bar bg-success" style="width: 60%"></div>
-                                                </div>
-                                            </div>
-
-                                            <!-- /.progress-group -->
-                                            <div class="progress-group">
-                                                Send Inquiries
-                                                <span class="float-right"><b>250</b>/500</span>
-                                                <div class="progress progress-sm">
-                                                    <div class="progress-bar bg-warning" style="width: 50%"></div>
-                                                </div>
-                                            </div>
-                                            <!-- /.progress-group -->
-                                        </div>
-                                        <!-- /.col -->
-                                    </div>
-                                    <!-- /.row -->
-                                </div>
-                                <!-- ./card-body -->
-                                <div class="card-footer">
-                                    <div class="row">
-                                        <div class="col-sm-3 col-6">
-                                            <div class="description-block border-right">
-                                                <span class="description-percentage text-success"><i
-                                                        class="fas fa-caret-up"></i> 17%</span>
-                                                <h5 class="description-header">$35,210.43</h5>
-                                                <span class="description-text">TOTAL REVENUE</span>
-                                            </div>
-                                            <!-- /.description-block -->
-                                        </div>
-                                        <!-- /.col -->
-                                        <div class="col-sm-3 col-6">
-                                            <div class="description-block border-right">
-                                                <span class="description-percentage text-warning"><i
-                                                        class="fas fa-caret-left"></i> 0%</span>
-                                                <h5 class="description-header">$10,390.90</h5>
-                                                <span class="description-text">TOTAL COST</span>
-                                            </div>
-                                            <!-- /.description-block -->
-                                        </div>
-                                        <!-- /.col -->
-                                        <div class="col-sm-3 col-6">
-                                            <div class="description-block border-right">
-                                                <span class="description-percentage text-success"><i
-                                                        class="fas fa-caret-up"></i> 20%</span>
-                                                <h5 class="description-header">$24,813.53</h5>
-                                                <span class="description-text">TOTAL PROFIT</span>
-                                            </div>
-                                            <!-- /.description-block -->
-                                        </div>
-                                        <!-- /.col -->
-                                        <div class="col-sm-3 col-6">
-                                            <div class="description-block">
-                                                <span class="description-percentage text-danger"><i
-                                                        class="fas fa-caret-down"></i> 18%</span>
-                                                <h5 class="description-header">1200</h5>
-                                                <span class="description-text">GOAL COMPLETIONS</span>
-                                            </div>
-                                            <!-- /.description-block -->
-                                        </div>
-                                    </div>
-                                    <!-- /.row -->
-                                </div>
-                                <!-- /.card-footer -->
-                            </div>
-                            <!-- /.card -->
-                        </div>
-                        <!-- /.col -->
-                    </div>
-                    <!-- /.row -->
-
-                    <!-- Main row -->
-                    <div class="row">
-                        <!-- Left col -->
-                        <div class="col-md-12">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <!-- DIRECT CHAT -->
-                                    <div class="card direct-chat direct-chat-warning">
-                                        <div class="card-header">
-                                            <h3 class="card-title">Direct Chat</h3>
-
-                                            <div class="card-tools">
-                                                <span title="3 New Messages" class="badge badge-warning">3</span>
-                                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                                    <i class="fas fa-minus"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-tool" title="Contacts"
-                                                    data-widget="chat-pane-toggle">
-                                                    <i class="fas fa-comments"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-tool" data-card-widget="remove">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <!-- /.card-header -->
-                                        <div class="card-body">
-                                            <!-- Conversations are loaded here -->
-                                            <div class="direct-chat-messages">
-                                                <!-- Message. Default to the left -->
-                                                <div class="direct-chat-msg">
-                                                    <div class="direct-chat-infos clearfix">
-                                                        <span class="direct-chat-name float-left">Alexander Pierce</span>
-                                                        <span class="direct-chat-timestamp float-right">23 Jan 2:00
-                                                            pm</span>
-                                                    </div>
-                                                    <!-- /.direct-chat-infos -->
-                                                    <img class="direct-chat-img" src="dist/img/user1-128x128.jpg"
-                                                        alt="message user image">
-                                                    <!-- /.direct-chat-img -->
-                                                    <div class="direct-chat-text">
-                                                        Is this template really for free? That's unbelievable!
-                                                    </div>
-                                                    <!-- /.direct-chat-text -->
-                                                </div>
-                                                <!-- /.direct-chat-msg -->
-
-                                                <!-- Message to the right -->
-                                                <div class="direct-chat-msg right">
-                                                    <div class="direct-chat-infos clearfix">
-                                                        <span class="direct-chat-name float-right">Sarah Bullock</span>
-                                                        <span class="direct-chat-timestamp float-left">23 Jan 2:05
-                                                            pm</span>
-                                                    </div>
-                                                    <!-- /.direct-chat-infos -->
-                                                    <img class="direct-chat-img" src="dist/img/user3-128x128.jpg"
-                                                        alt="message user image">
-                                                    <!-- /.direct-chat-img -->
-                                                    <div class="direct-chat-text">
-                                                        You better believe it!
-                                                    </div>
-                                                    <!-- /.direct-chat-text -->
-                                                </div>
-                                                <!-- /.direct-chat-msg -->
-
-                                                <!-- Message. Default to the left -->
-                                                <div class="direct-chat-msg">
-                                                    <div class="direct-chat-infos clearfix">
-                                                        <span class="direct-chat-name float-left">Alexander Pierce</span>
-                                                        <span class="direct-chat-timestamp float-right">23 Jan 5:37
-                                                            pm</span>
-                                                    </div>
-                                                    <!-- /.direct-chat-infos -->
-                                                    <img class="direct-chat-img" src="dist/img/user1-128x128.jpg"
-                                                        alt="message user image">
-                                                    <!-- /.direct-chat-img -->
-                                                    <div class="direct-chat-text">
-                                                        Working with AdminLTE on a great new app! Wanna join?
-                                                    </div>
-                                                    <!-- /.direct-chat-text -->
-                                                </div>
-                                                <!-- /.direct-chat-msg -->
-
-                                                <!-- Message to the right -->
-                                                <div class="direct-chat-msg right">
-                                                    <div class="direct-chat-infos clearfix">
-                                                        <span class="direct-chat-name float-right">Sarah Bullock</span>
-                                                        <span class="direct-chat-timestamp float-left">23 Jan 6:10
-                                                            pm</span>
-                                                    </div>
-                                                    <!-- /.direct-chat-infos -->
-                                                    <img class="direct-chat-img" src="dist/img/user3-128x128.jpg"
-                                                        alt="message user image">
-                                                    <!-- /.direct-chat-img -->
-                                                    <div class="direct-chat-text">
-                                                        I would love to.
-                                                    </div>
-                                                    <!-- /.direct-chat-text -->
-                                                </div>
-                                                <!-- /.direct-chat-msg -->
-
-                                            </div>
-                                            <!--/.direct-chat-messages-->
-
-                                            <!-- Contacts are loaded here -->
-                                            <div class="direct-chat-contacts">
-                                                <ul class="contacts-list">
-                                                    <li>
-                                                        <a href="#">
-                                                            <img class="contacts-list-img"
-                                                                src="dist/img/user1-128x128.jpg" alt="User Avatar">
-
-                                                            <div class="contacts-list-info">
-                                                                <span class="contacts-list-name">
-                                                                    Count Dracula
-                                                                    <small
-                                                                        class="contacts-list-date float-right">2/28/2015</small>
-                                                                </span>
-                                                                <span class="contacts-list-msg">How have you been? I
-                                                                    was...</span>
-                                                            </div>
-                                                            <!-- /.contacts-list-info -->
-                                                        </a>
-                                                    </li>
-                                                    <!-- End Contact Item -->
-                                                    <li>
-                                                        <a href="#">
-                                                            <img class="contacts-list-img"
-                                                                src="dist/img/user7-128x128.jpg" alt="User Avatar">
-
-                                                            <div class="contacts-list-info">
-                                                                <span class="contacts-list-name">
-                                                                    Sarah Doe
-                                                                    <small
-                                                                        class="contacts-list-date float-right">2/23/2015</small>
-                                                                </span>
-                                                                <span class="contacts-list-msg">I will be waiting
-                                                                    for...</span>
-                                                            </div>
-                                                            <!-- /.contacts-list-info -->
-                                                        </a>
-                                                    </li>
-                                                    <!-- End Contact Item -->
-                                                    <li>
-                                                        <a href="#">
-                                                            <img class="contacts-list-img"
-                                                                src="dist/img/user3-128x128.jpg" alt="User Avatar">
-
-                                                            <div class="contacts-list-info">
-                                                                <span class="contacts-list-name">
-                                                                    Nadia Jolie
-                                                                    <small
-                                                                        class="contacts-list-date float-right">2/20/2015</small>
-                                                                </span>
-                                                                <span class="contacts-list-msg">I'll call you back
-                                                                    at...</span>
-                                                            </div>
-                                                            <!-- /.contacts-list-info -->
-                                                        </a>
-                                                    </li>
-                                                    <!-- End Contact Item -->
-                                                    <li>
-                                                        <a href="#">
-                                                            <img class="contacts-list-img"
-                                                                src="dist/img/user5-128x128.jpg" alt="User Avatar">
-
-                                                            <div class="contacts-list-info">
-                                                                <span class="contacts-list-name">
-                                                                    Nora S. Vans
-                                                                    <small
-                                                                        class="contacts-list-date float-right">2/10/2015</small>
-                                                                </span>
-                                                                <span class="contacts-list-msg">Where is your new...</span>
-                                                            </div>
-                                                            <!-- /.contacts-list-info -->
-                                                        </a>
-                                                    </li>
-                                                    <!-- End Contact Item -->
-                                                    <li>
-                                                        <a href="#">
-                                                            <img class="contacts-list-img"
-                                                                src="dist/img/user6-128x128.jpg" alt="User Avatar">
-
-                                                            <div class="contacts-list-info">
-                                                                <span class="contacts-list-name">
-                                                                    John K.
-                                                                    <small
-                                                                        class="contacts-list-date float-right">1/27/2015</small>
-                                                                </span>
-                                                                <span class="contacts-list-msg">Can I take a look
-                                                                    at...</span>
-                                                            </div>
-                                                            <!-- /.contacts-list-info -->
-                                                        </a>
-                                                    </li>
-                                                    <!-- End Contact Item -->
-                                                    <li>
-                                                        <a href="#">
-                                                            <img class="contacts-list-img"
-                                                                src="dist/img/user8-128x128.jpg" alt="User Avatar">
-
-                                                            <div class="contacts-list-info">
-                                                                <span class="contacts-list-name">
-                                                                    Kenneth M.
-                                                                    <small
-                                                                        class="contacts-list-date float-right">1/4/2015</small>
-                                                                </span>
-                                                                <span class="contacts-list-msg">Never mind I
-                                                                    found...</span>
-                                                            </div>
-                                                            <!-- /.contacts-list-info -->
-                                                        </a>
-                                                    </li>
-                                                    <!-- End Contact Item -->
-                                                </ul>
-                                                <!-- /.contacts-list -->
-                                            </div>
-                                            <!-- /.direct-chat-pane -->
-                                        </div>
-                                        <!-- /.card-body -->
-                                        <div class="card-footer">
-                                            <form action="#" method="post">
-                                                <div class="input-group">
-                                                    <input type="text" name="message" placeholder="Type Message ..."
-                                                        class="form-control">
-                                                    <span class="input-group-append">
-                                                        <button type="button" class="btn btn-warning">Send</button>
-                                                    </span>
-                                                </div>
-                                            </form>
-                                        </div>
-                                        <!-- /.card-footer-->
-                                    </div>
-                                    <!--/.direct-chat -->
-                                </div>
-                                <!-- /.col -->
-
-                                <div class="col-md-6">
-                                    <!-- USERS LIST -->
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h3 class="card-title">Latest Members</h3>
-
-                                            <div class="card-tools">
-                                                <span class="badge badge-danger">8 New Members</span>
-                                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                                    <i class="fas fa-minus"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-tool" data-card-widget="remove">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <!-- /.card-header -->
-                                        <div class="card-body p-0">
-                                            <ul class="users-list clearfix">
-                                                <li>
-                                                    <img src="dist/img/user1-128x128.jpg" alt="User Image">
-                                                    <a class="users-list-name" href="#">Alexander Pierce</a>
-                                                    <span class="users-list-date">Today</span>
-                                                </li>
-                                                <li>
-                                                    <img src="dist/img/user8-128x128.jpg" alt="User Image">
-                                                    <a class="users-list-name" href="#">Norman</a>
-                                                    <span class="users-list-date">Yesterday</span>
-                                                </li>
-                                                <li>
-                                                    <img src="dist/img/user7-128x128.jpg" alt="User Image">
-                                                    <a class="users-list-name" href="#">Jane</a>
-                                                    <span class="users-list-date">12 Jan</span>
-                                                </li>
-                                                <li>
-                                                    <img src="dist/img/user6-128x128.jpg" alt="User Image">
-                                                    <a class="users-list-name" href="#">John</a>
-                                                    <span class="users-list-date">12 Jan</span>
-                                                </li>
-                                                <li>
-                                                    <img src="dist/img/user2-160x160.jpg" alt="User Image">
-                                                    <a class="users-list-name" href="#">Alexander</a>
-                                                    <span class="users-list-date">13 Jan</span>
-                                                </li>
-                                                <li>
-                                                    <img src="dist/img/user5-128x128.jpg" alt="User Image">
-                                                    <a class="users-list-name" href="#">Sarah</a>
-                                                    <span class="users-list-date">14 Jan</span>
-                                                </li>
-                                                <li>
-                                                    <img src="dist/img/user4-128x128.jpg" alt="User Image">
-                                                    <a class="users-list-name" href="#">Nora</a>
-                                                    <span class="users-list-date">15 Jan</span>
-                                                </li>
-                                                <li>
-                                                    <img src="dist/img/user3-128x128.jpg" alt="User Image">
-                                                    <a class="users-list-name" href="#">Nadia</a>
-                                                    <span class="users-list-date">15 Jan</span>
-                                                </li>
-                                            </ul>
-                                            <!-- /.users-list -->
-                                        </div>
-                                        <!-- /.card-body -->
-                                        <div class="card-footer text-center">
-                                            <a href="javascript:">View All Users</a>
-                                        </div>
-                                        <!-- /.card-footer -->
-                                    </div>
-                                    <!--/.card -->
-                                </div>
-                                <!-- /.col -->
-                            </div>
-                            <!-- /.row -->
-
-                            <!-- TABLE: LATEST ORDERS -->
-                            <div class="card">
-                                <div class="card-header border-transparent">
-                                    <h3 class="card-title">Latest Orders</h3>
-
-                                    <div class="card-tools">
-                                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                            <i class="fas fa-minus"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-tool" data-card-widget="remove">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <!-- /.card-header -->
-                                <div class="card-body p-0">
-                                    <div class="table-responsive">
-                                        <table class="table m-0">
-                                            <thead>
-                                                <tr>
-                                                    <th>Order ID</th>
-                                                    <th>Item</th>
-                                                    <th>Status</th>
-                                                    <th>Popularity</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td><a href="pages/examples/invoice.html">OR9842</a></td>
-                                                    <td>Call of Duty IV</td>
-                                                    <td><span class="badge badge-success">Shipped</span></td>
-                                                    <td>
-                                                        <div class="sparkbar" data-color="#00a65a" data-height="20">
-                                                            90,80,90,-70,61,-83,63</div>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td><a href="pages/examples/invoice.html">OR1848</a></td>
-                                                    <td>Samsung Smart TV</td>
-                                                    <td><span class="badge badge-warning">Pending</span></td>
-                                                    <td>
-                                                        <div class="sparkbar" data-color="#f39c12" data-height="20">
-                                                            90,80,-90,70,61,-83,68</div>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td><a href="pages/examples/invoice.html">OR7429</a></td>
-                                                    <td>iPhone 6 Plus</td>
-                                                    <td><span class="badge badge-danger">Delivered</span></td>
-                                                    <td>
-                                                        <div class="sparkbar" data-color="#f56954" data-height="20">
-                                                            90,-80,90,70,-61,83,63</div>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td><a href="pages/examples/invoice.html">OR7429</a></td>
-                                                    <td>Samsung Smart TV</td>
-                                                    <td><span class="badge badge-info">Processing</span></td>
-                                                    <td>
-                                                        <div class="sparkbar" data-color="#00c0ef" data-height="20">
-                                                            90,80,-90,70,-61,83,63</div>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td><a href="pages/examples/invoice.html">OR1848</a></td>
-                                                    <td>Samsung Smart TV</td>
-                                                    <td><span class="badge badge-warning">Pending</span></td>
-                                                    <td>
-                                                        <div class="sparkbar" data-color="#f39c12" data-height="20">
-                                                            90,80,-90,70,61,-83,68</div>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td><a href="pages/examples/invoice.html">OR7429</a></td>
-                                                    <td>iPhone 6 Plus</td>
-                                                    <td><span class="badge badge-danger">Delivered</span></td>
-                                                    <td>
-                                                        <div class="sparkbar" data-color="#f56954" data-height="20">
-                                                            90,-80,90,70,-61,83,63</div>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td><a href="pages/examples/invoice.html">OR9842</a></td>
-                                                    <td>Call of Duty IV</td>
-                                                    <td><span class="badge badge-success">Shipped</span></td>
-                                                    <td>
-                                                        <div class="sparkbar" data-color="#00a65a" data-height="20">
-                                                            90,80,90,-70,61,-83,63</div>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                    <!-- /.table-responsive -->
-                                </div>
-                                <!-- /.card-body -->
-                                <div class="card-footer clearfix">
-                                    <a href="javascript:void(0)" class="btn btn-sm btn-info float-left">Place New
-                                        Order</a>
-                                    <a href="javascript:void(0)" class="btn btn-sm btn-secondary float-right">View All
-                                        Orders</a>
-                                </div>
-                                <!-- /.card-footer -->
-                            </div>
-                            <!-- /.card -->
-                        </div>
-                        <!-- /.col -->
-                    </div>
-                    <!-- /.row -->
-                </div><!--/. container-fluid -->
-            </section>
-            <!-- /.content -->
         </div>
-        <!-- /.content-wrapper -->
+    </div>
+    <!-- /.content-header -->
 
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <!-- Small boxes (Stat box) -->
+            <div class="row">
+                <div class="col-lg-3 col-6">
+                    <!-- small box -->
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>Rp {{ number_format($totalPemasukan ?? 0, 0, ',', '.') }}</h3>
+                            <p>Total Pemasukan</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <a href="{{ route('petugas_pembayaran.pemasukan.index') }}" class="small-box-footer">Lihat Detail <i
+                                class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                <!-- ./col -->
+                <div class="col-lg-3 col-6">
+                    <!-- small box -->
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>{{ $transaksiHariIni ?? 0 }}</h3>
+                            <p>Transaksi Hari Ini</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-cash-register"></i>
+                        </div>
+                        <a href="{{ route('petugas_pembayaran.pembayaran.index') }}?filter=today" class="small-box-footer">Lihat Detail <i
+                                class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                <!-- ./col -->
+                <div class="col-lg-3 col-6">
+                    <!-- small box -->
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>{{ $menungguVerifikasi ?? 0 }}</h3>
+                            <p>Menunggu Verifikasi</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-hourglass-half"></i>
+                        </div>
+                        <a href="{{ route('petugas_pembayaran.pembayaran.index') }}?status=pending" class="small-box-footer">Lihat
+                            Detail <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                <!-- ./col -->
+                <div class="col-lg-3 col-6">
+                    <!-- small box -->
+                    <div class="small-box bg-primary">
+                        <div class="inner">
+                            <h3>{{ $totalBooking ?? 0 }}</h3>
+                            <p>Total Booking Aktif</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <a href="{{ route('petugas_pembayaran.pembayaran.index') }}" class="small-box-footer">Lihat Semua <i class="fas fa-arrow-circle-right"></i></a>
+                    </div>
+                </div>
+                <!-- ./col -->
+            </div>
+            <!-- /.row -->
+
+            <!-- Transaksi Hari Ini -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-money-check mr-1"></i>
+                                Transaksi Pembayaran Hari Ini
+                            </h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body table-responsive p-0">
+                            <table class="table table-hover text-nowrap">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Fasilitas</th>
+                                        <th>Jumlah</th>
+                                        <th>Metode</th>
+                                        <th>User</th>
+                                        <th>Status</th>
+                                        <th>Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @forelse($transaksiToday ?? [] as $transaksi)
+                                        <tr>
+                                            <td>{{ $transaksi->id }}</td>
+                                            <td>{{ $transaksi->fasilitas->nama_fasilitas }}</td>
+                                            <td>Rp {{ number_format($transaksi->jumlah_bayar, 0, ',', '.') }}</td>
+                                            <td>{{ ucfirst($transaksi->metode_pembayaran) }}</td>
+                                            <td>{{ $transaksi->checkout->user->name ?? 'N/A' }}</td>
+                                            <td>
+                                                @if ($transaksi->status == 'lunas')
+                                                    <span class="badge badge-success">Lunas</span>
+                                                @elseif($transaksi->status == 'fee')
+                                                    <span class="badge badge-warning">DP</span>
+                                                @elseif($transaksi->status == 'pending')
+                                                    <span class="badge badge-info">Pending</span>
+                                                @elseif($transaksi->status == 'batal')
+                                                    <span class="badge badge-danger">Batal</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('petugas_pembayaran.pembayaran.show', $transaksi->id) }}"
+                                                    class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="7" class="text-center">Tidak ada transaksi pembayaran hari ini</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- /.card-body -->
+                        <div class="card-footer clearfix">
+                            <a href="{{ route('petugas_pembayaran.pembayaran.index') }}" class="btn btn-sm btn-primary ml-2">
+                                <i class="fas fa-list"></i> Lihat Semua Transaksi
+                            </a>
+                        </div>
+                    </div>
+                    <!-- /.card -->
+                </div>
+
+                <!-- Status Pembayaran Chart Card -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Status Pembayaran</h3>
+                            <div class="card-tools">
+                                <!-- Perbaikan tombol collapse -->
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse"
+                                    data-toggle="tooltip" title="Collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="paymentStatusChart"
+                                    style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                            </div>
+
+                            <div class="mt-4 text-center">
+                                <span class="mr-3">
+                                    <i class="fas fa-circle text-success"></i> Lunas ({{ $pembayaranLunas ?? 0 }})
+                                </span>
+                                <span class="mr-3">
+                                    <i class="fas fa-circle text-warning"></i> DP ({{ $pembayaranDP ?? 0 }})
+                                </span>
+                                <span>
+                                    <i class="fas fa-circle text-danger"></i> Batal ({{ $pembayaranBatal ?? 0 }})
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <i class="fas fa-history mr-1"></i>
+                                Aktivitas Pembayaran Terbaru
+                            </h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table m-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Tanggal/Jam</th>
+                                            <th>User</th>
+                                            <th>Fasilitas</th>
+                                            <th>Jumlah</th>
+                                            <th>Keterangan</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @forelse($recentPayments ?? [] as $payment)
+                                            <tr>
+                                                <td>{{ date('d/m/Y H:i', strtotime($payment->created_at)) }}</td>
+                                                <td>{{ $payment->checkout->user->name ?? 'System' }}</td>
+                                                <td>{{ $payment->fasilitas->nama_fasilitas ?? 'N/A' }}</td>
+                                                <td>Rp {{ number_format($payment->jumlah_bayar, 0, ',', '.') }}</td>
+                                                <td>
+                                                    @if($payment->status == 'fee')
+                                                        Pembayaran DP
+                                                    @elseif($payment->status == 'lunas')
+                                                        Pelunasan
+                                                    @elseif($payment->status == 'batal')
+                                                        Pembayaran Dibatalkan
+                                                    @else
+                                                        {{ $payment->keterangan ?? '-' }}
+                                                    @endif
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-{{ $payment->status == 'lunas' ? 'success' : ($payment->status == 'fee' ? 'warning' : ($payment->status == 'batal' ? 'danger' : 'info')) }}">
+                                                        {{ $payment->status == 'lunas' ? 'Lunas' : ($payment->status == 'fee' ? 'DP' : ($payment->status == 'batal' ? 'Batal' : 'Pending')) }}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        @empty
+                                            <tr>
+                                                <td colspan="6" class="text-center">Belum ada aktivitas pembayaran terbaru</td>
+                                            </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card-footer clearfix">
+                            <a href="{{ route('petugas_pembayaran.pemasukan.index') }}"
+                                class="btn btn-sm btn-secondary float-right">Lihat Semua Riwayat</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Script untuk chart status pembayaran -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ensure jQuery and Chart are loaded
+            if (window.jQuery && typeof Chart !== 'undefined') {
+                var ctx = document.getElementById('paymentStatusChart');
+
+                if (ctx) {
+                    // Data untuk chart
+                    var data = {
+                        
+                        datasets: [{
+                            data: [{{ $pembayaranLunas ?? 0 }}, {{ $pembayaranDP ?? 0 }},
+                                {{ $pembayaranBatal ?? 0 }}
+                            ],
+                            backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                            hoverOffset: 4
+                        }]
+                    };
+
+                    // Opsi chart
+                    var options = {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        },
+                        animation: {
+                            animateScale: true
+                        }
+                    };
+
+                    // Inisialisasi chart
+                    var paymentChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: data,
+                        options: options
+                    });
+
+                    // Debug info
+                    console.log('Chart initialized with data:', data);
+                } else {
+                    console.error('Canvas element not found');
+                }
+            } else {
+                console.error('jQuery or Chart.js not loaded');
+            }
+        });
+    </script>
 @endsection

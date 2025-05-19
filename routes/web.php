@@ -13,13 +13,19 @@ use App\Http\Controllers\BerandaController;
 use App\Http\Controllers\User\CheckoutController;
 use App\Http\Controllers\User\BookingController;
 use App\Http\Controllers\User\UserController;
+
 use App\Http\Controllers\PetugasFasilitas\DashboardController as PetugasFasilitasDashboardController;
 use App\Http\Controllers\PetugasFasilitas\FasilitasController as PetugasFasilitasController;
 use App\Http\Controllers\PetugasFasilitas\JadwalController as PetugasFasilitasJadwalController;
 use App\Http\Controllers\PetugasFasilitas\BookingController as PetugasFasilitasBookingController;
 use App\Http\Controllers\PetugasFasilitas\AktivitasController as PetugasFasilitasAktivitasController;
 use App\Http\Controllers\PetugasFasilitas\ProfileController as PetugasFasilitasProfileController;
-use App\Http\Controllers\PetugasPembayaran\DashboardController as PetugasBayar;
+
+use App\Http\Controllers\PetugasPembayaran\DashboardController as PetugasPembayaranDashboardController;
+use App\Http\Controllers\PetugasPembayaran\PembayaranController as PetugasPembayaranPembayaranController;
+use App\Http\Controllers\PetugasPembayaran\PemasukanController as PetugasPembayaranPemasukanController;
+use App\Http\Controllers\PetugasPembayaran\LaporanController as PetugasPembayaranLaporanController;
+use App\Http\Controllers\PetugasPembayaran\ProfileController as PetugasPembayaranProfileController;
 
 
 Route::get('/laravel', function () {
@@ -106,7 +112,7 @@ Route::middleware(['auth:petugas_fasilitas', 'petugas_fasilitas'])->name('petuga
     // Riwayat Booking
     Route::get('/riwayat', [PetugasFasilitasBookingController::class, 'riwayat'])->name('riwayat');
 
-    
+
 
     // Profile Management
     Route::prefix('profile')->name('profile.')->group(function () {
@@ -119,8 +125,40 @@ Route::middleware(['auth:petugas_fasilitas', 'petugas_fasilitas'])->name('petuga
 
 
 // PETUGAS PEMBAYARAN //
-Route::middleware(['auth:petugas_pembayarans', 'petugas_pembayarans'])->name('petugas_pembayaran.')->group(function () {
-    //
+Route::middleware(['auth:petugas_pembayarans', 'petugas_pembayarans'])->name('petugas_pembayaran.')->prefix('petugas-pembayaran')->group(function () {
+    // Dashboard
+    Route::get('/dashboard', [PetugasPembayaranDashboardController::class, 'index'])->name('dashboard');
+
+    // Verifikasi Pembayaran
+    Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
+        Route::get('/', [PetugasPembayaranPembayaranController::class, 'index'])->name('index');
+        Route::get('/{id}', [PetugasPembayaranPembayaranController::class, 'show'])->name('show');
+        Route::put('/{id}/verifikasi', [PetugasPembayaranPembayaranController::class, 'verifikasi'])->name('verifikasi');
+        Route::put('/{id}/tolak', [PetugasPembayaranPembayaranController::class, 'tolak'])->name('tolak');
+        Route::put('/{id}/toggle-status', [PetugasPembayaranPembayaranController::class, 'toggleStatus'])->name('toggle-status');
+    });
+
+    // Riwayat Pemasukan
+    Route::prefix('pemasukan')->name('pemasukan.')->group(function () {
+        Route::get('/', [PetugasPembayaranPemasukanController::class, 'index'])->name('index');
+        Route::get('/{id}', [PetugasPembayaranPemasukanController::class, 'show'])->name('show');
+        Route::get('/export', [PetugasPembayaranPemasukanController::class, 'export'])->name('export');
+    });
+
+    // Laporan Keuangan
+    Route::prefix('laporan')->name('laporan.')->group(function () {
+        Route::get('/', [PetugasPembayaranLaporanController::class, 'index'])->name('index');
+        Route::post('/generate', [PetugasPembayaranLaporanController::class, 'generate'])->name('generate');
+        Route::get('/export/{type}', [PetugasPembayaranLaporanController::class, 'export'])->name('export');
+    });
+
+    // Profile Management
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [PetugasPembayaranProfileController::class, 'edit'])->name('edit');
+        Route::put('/update', [PetugasPembayaranProfileController::class, 'update'])->name('update');
+        Route::put('/update-password', [PetugasPembayaranProfileController::class, 'updatePassword'])->name('update-password');
+        Route::put('/update-account', [PetugasPembayaranProfileController::class, 'updateAccount'])->name('update-account');
+    });
 });
 
 
@@ -150,7 +188,6 @@ Route::middleware(['auth:web', 'user:user'])->name('user.')->group(function () {
     // API Route untuk cek jadwal
     Route::get('/api/check-jadwal/{fasilitasId}/{tanggal}', [CheckoutController::class, 'checkJadwal']);
 });
-// routes/web.php
 
 
 // ------------------------------------------------DUMB ROUTE (below)---------------------------------------------------- //

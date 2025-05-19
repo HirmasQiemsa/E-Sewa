@@ -100,10 +100,12 @@
                 transform: scale(1);
                 opacity: 1;
             }
+
             50% {
                 transform: scale(1.05);
                 opacity: 0.9;
             }
+
             100% {
                 transform: scale(1);
                 opacity: 1;
@@ -120,6 +122,7 @@
             0% {
                 opacity: 0;
             }
+
             100% {
                 opacity: 1;
             }
@@ -133,20 +136,61 @@
         .page-transition.fading {
             opacity: 0.6;
         }
+
+        .carousel-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0));
+            color: white;
+        }
+
+        .small-box {
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        .small-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .facility-info {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .how-to-book {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .step-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: #007bff;
+        }
     </style>
 </head>
 
 <body class="hold-transition sidebar-mini sidebar-collapse layout-fixed">
     <!-- Customizable preloader -->
     <div class="preloader" id="customPreloader">
-        <img class="animation__gentle" src="{{ asset('img/logo.png') }}" alt="DISPORA Logo" height="180" width="150">
+        <img class="animation__gentle" src="{{ asset('img/logo.png') }}" alt="DISPORA Logo" height="180"
+            width="150">
         <h2 class="mt-4 fade-in-text"><b>DISPORA SEMARANG</b></h2>
     </div>
 
     <div class="wrapper page-transition">
         <!-- Initial preloader that shows on first page load -->
         <div class="preloader">
-            <img class="animation__gentle" src="{{ asset('img/logo.png') }}" alt="DISPORA Logo" height="180" width="150">
+            <img class="animation__gentle" src="{{ asset('img/logo.png') }}" alt="DISPORA Logo" height="180"
+                width="150">
             <h2 class="mt-4 fade-in-text"><b>DISPORA SEMARANG</b></h2>
         </div>
 
@@ -157,7 +201,8 @@
                 <li class="nav-item">
                     <a class="nav-link d-flex align-items-center" data-widget="pushmenu"
                         href="{{ route('user.fasilitas') }}" role="button">
-                        <img class="me-2" src="{{ asset('img/logo.png') }}" alt="AdminLTELogo" height="40" width="40">
+                        <img class="me-2" src="{{ asset('img/logo.png') }}" alt="AdminLTELogo" height="40"
+                            width="40">
                         <b style="font-size: 1.5rem; margin-left: 1rem; color: white;"
                             onmouseover="this.style.color='yellow'" onmouseout="this.style.color='white'">E-Sewa
                             Fasilitas DISPORA SEMARANG
@@ -188,7 +233,8 @@
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
                         <li class="nav-item active mt-2">
-                            <a href="{{ route('user.fasilitas') }}" class="nav-link active bg-danger nav-with-preloader">
+                            <a href="{{ route('user.fasilitas') }}"
+                                class="nav-link active bg-danger nav-with-preloader">
                                 <i class="nav-icon fas fa-book"></i>
                                 <p>
                                     Fasilitas
