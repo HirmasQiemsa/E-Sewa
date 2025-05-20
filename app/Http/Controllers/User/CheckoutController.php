@@ -159,25 +159,22 @@ class CheckoutController extends Controller
 
         DB::beginTransaction();
         try {
-            // 1. Update checkout status
-            $checkout->update([
-                'status' => 'lunas'
-            ]);
+            // 1. Update checkout status stays as 'fee' until verified
+            // Status tidak langsung berubah menjadi 'lunas', menunggu verifikasi
 
-            // 2. Record payment
+            // 2. Record payment with 'pending' status
             PemasukanSewa::create([
                 'checkout_id' => $checkout->id,
                 'fasilitas_id' => $checkout->jadwal->fasilitas_id,
                 'tanggal_bayar' => now(),
                 'jumlah_bayar' => $sisaPembayaran,
                 'metode_pembayaran' => $request->metode_pembayaran,
-                'status' => 'lunas'
-                // Hapus field 'keterangan' yang tidak ada dalam tabel
+                'status' => 'pending' // Status pending menunggu verifikasi petugas
             ]);
 
             DB::commit();
             return redirect()->route('user.checkout')
-                ->with('success', 'Pembayaran berhasil dilunasi! Terima kasih atas transaksi Anda.');
+                ->with('success', 'Pembayaran telah direkam dan sedang menunggu verifikasi oleh petugas.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());

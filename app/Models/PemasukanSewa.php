@@ -23,7 +23,11 @@ class PemasukanSewa extends Model
     /**
      * Define relationship with Checkout model
      */
-    // Each payment belongs to a checkout
+    public function petugasPembayaran() {
+    return $this->belongsTo(PetugasPembayaran::class, 'petugas_pembayaran_id');
+    }
+    
+     // Each payment belongs to a checkout
     public function checkout() {
         return $this->belongsTo(Checkout::class);
     }

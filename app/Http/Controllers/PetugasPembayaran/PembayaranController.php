@@ -26,7 +26,7 @@ class PembayaranController extends Controller
 
         // Query dasar dengan relasi
         $query = PemasukanSewa::with(['checkout.user', 'fasilitas'])
-                             ->orderBy('created_at', 'desc');
+                            ->orderBy('created_at', 'desc');
 
         // Terapkan filter status
         if ($status !== 'all') {
@@ -40,7 +40,7 @@ class PembayaranController extends Controller
             $query->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
         } elseif ($filter === 'month') {
             $query->whereMonth('created_at', Carbon::now()->month)
-                 ->whereYear('created_at', Carbon::now()->year);
+                ->whereYear('created_at', Carbon::now()->year);
         }
 
         // Terapkan pencarian
@@ -48,7 +48,7 @@ class PembayaranController extends Controller
             $query->where(function($q) use ($search) {
                 $q->whereHas('checkout.user', function($userQ) use ($search) {
                     $userQ->where('name', 'LIKE', "%{$search}%")
-                         ->orWhere('email', 'LIKE', "%{$search}%");
+                        ->orWhere('email', 'LIKE', "%{$search}%");
                 })
                 ->orWhereHas('fasilitas', function($fasQ) use ($search) {
                     $fasQ->where('nama_fasilitas', 'LIKE', "%{$search}%");
@@ -58,8 +58,8 @@ class PembayaranController extends Controller
             });
         }
 
-        // Paginasi hasil
-        $pembayaran = $query->paginate(10)->withQueryString();
+        // Paginasi hasil - diubah dari 10 menjadi 15
+        $pembayaran = $query->paginate(15)->withQueryString();
 
         return view('PetugasPembayaran.Pembayaran.index', compact('pembayaran', 'status', 'filter', 'search'));
     }
@@ -91,7 +91,15 @@ class PembayaranController extends Controller
 
             // Update status pembayaran
             $pembayaran->status = $pembayaran->status === 'fee' ? 'fee' : 'lunas';
+
+            // Simpan ID petugas yang memverifikasi untuk tracking aktivitas
             $pembayaran->petugas_pembayaran_id = Auth::id();
+
+            // Simpan catatan jika ada
+            if ($request->filled('catatan')) {
+                $pembayaran->keterangan = $request->catatan;
+            }
+
             $pembayaran->save();
 
             // Jika ini pelunasan, update status checkout menjadi lunas
@@ -102,7 +110,7 @@ class PembayaranController extends Controller
 
             DB::commit();
             return redirect()->route('petugas_pembayaran.pembayaran.index')
-                           ->with('success', 'Pembayaran berhasil diverifikasi');
+                        ->with('success', 'Pembayaran berhasil diverifikasi');
         } catch (\Exception $e) {
             DB::rollback();
             return redirect()->back()->with('error', 'Gagal memverifikasi pembayaran: ' . $e->getMessage());

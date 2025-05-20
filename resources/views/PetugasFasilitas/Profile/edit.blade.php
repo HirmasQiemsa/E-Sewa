@@ -38,7 +38,8 @@
                             <h3 class="card-title"><b>Informasi Profile Petugas</b></h3>
                         </div>
                         <!-- form start -->
-                        <form action="{{ route('petugas_fasilitas.profile.update') }}" method="POST" enctype="multipart/form-data">
+                        <form action="{{ route('petugas_fasilitas.profile.update') }}" method="POST"
+                            enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
                             <div class="card-body">
@@ -107,11 +108,20 @@
                             <div class="card-tools">
                                 <ul class="nav nav-pills ml-auto p-0 ">
                                     <li class="nav-item mx-1">
-                                        <a class="nav-link active p-1 px-3" href="#account" data-toggle="tab"><b>Informasi Akun</b></a>
+                                        <a class="nav-link active p-1 px-3" href="#account" data-toggle="tab"><b>Informasi
+                                                Akun</b></a>
                                     </li>
                                     <li class="nav-item mx-1">
                                         <a class="nav-link p-1" href="#password" data-toggle="tab"><b>Password</b></a>
                                     </li>
+                                    @if ($petugas->id == 1)
+                                        <li class="nav-item mx-1">
+                                            <a class="nav-link p-1 px-3" href="#add-account" data-toggle="tab"
+                                                title="Tambah Akun">
+                                                <i class="fas fa-user-plus"></i>
+                                            </a>
+                                        </li>
+                                    @endif
                                 </ul>
                             </div>
                         </div>
@@ -119,14 +129,16 @@
                             <div class="tab-content p-0">
                                 <!-- Account Information Tab -->
                                 <div class="tab-pane active" id="account">
-                                    @if($petugas->id == 1)
-                                        <form action="{{ route('petugas_fasilitas.profile.update-account') }}" method="POST">
+                                    @if ($petugas->id == 1)
+                                        <form action="{{ route('petugas_fasilitas.profile.update-account') }}"
+                                            method="POST">
                                             @csrf
                                             @method('PUT')
                                             <div class="form-group">
                                                 <label for="username">Username</label>
-                                                <input type="text" name="username" class="form-control" id="username"
-                                                    value="{{ $petugas->username }}" placeholder="Username">
+                                                <input type="text" name="username" class="form-control"
+                                                    id="username" value="{{ $petugas->username }}"
+                                                    placeholder="Username">
                                                 @error('username')
                                                     <small class="text-danger">{{ $message }}</small>
                                                 @enderror
@@ -146,7 +158,8 @@
                                                 Sebagai admin utama, Anda dapat mengubah informasi akun.
                                             </div>
 
-                                            <button type="submit" class="btn btn-dark btn-block mt-4">Perbarui Informasi Akun</button>
+                                            <button type="submit" class="btn btn-dark btn-block mt-4">Perbarui Informasi
+                                                Akun</button>
                                         </form>
                                     @else
                                         <div class="form-group">
@@ -165,14 +178,16 @@
 
                                         <div class="alert alert-info">
                                             <i class="fas fa-info-circle mr-2"></i>
-                                            Untuk keamanan sistem, perubahan username dan email harus dilakukan oleh administrator.
+                                            Untuk keamanan sistem, perubahan username dan email harus dilakukan oleh
+                                            administrator.
                                         </div>
                                     @endif
                                 </div>
 
                                 <!-- Password Tab -->
                                 <div class="tab-pane" id="password">
-                                    <form action="{{ route('petugas_fasilitas.profile.update-password') }}" method="POST">
+                                    <form action="{{ route('petugas_fasilitas.profile.update-password') }}"
+                                        method="POST">
                                         @csrf
                                         @method('PUT')
                                         <div class="form-group">
@@ -232,6 +247,105 @@
                                             Password</button>
                                     </form>
                                 </div>
+
+                                <!-- Add Account Tab (Only visible for admin) -->
+                                @if ($petugas->id == 1)
+                                    <div class="tab-pane" id="add-account">
+                                        <!-- Change this line in the form -->
+                                        <form action="{{ route('petugas_fasilitas.profile.add-account') }}"
+                                            method="POST">
+                                            @csrf
+                                            <div class="form-group">
+                                                <label for="role">Pilih Jenis Petugas</label>
+                                                <select name="role" id="role" class="form-control" required>
+                                                    <option value="">-- Pilih Jenis Petugas --</option>
+                                                    <option value="petugas_fasilitas">Petugas Fasilitas</option>
+                                                    <option value="petugas_pembayaran">Petugas Pembayaran</option>
+                                                </select>
+                                                @error('role')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="name">Nama Lengkap</label>
+                                                <input type="text" name="name" class="form-control" id="name"
+                                                    placeholder="Nama lengkap petugas" required>
+                                                @error('name')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="new_username">Username</label>
+                                                <input type="text" name="new_username" class="form-control"
+                                                    id="new_username" placeholder="Username untuk login" required>
+                                                @error('new_username')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="no_hp">Nomor HP</label>
+                                                <input type="text" name="no_hp" class="form-control" id="no_hp"
+                                                    placeholder="Nomor HP petugas" required>
+                                                @error('no_hp')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="alamat">Alamat</label>
+                                                <textarea name="alamat" class="form-control" id="alamat" placeholder="Alamat petugas" required></textarea>
+                                                @error('alamat')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="new_password">Password</label>
+                                                <div class="input-group">
+                                                    <input type="password" name="new_password" class="form-control"
+                                                        id="new_password" placeholder="Password baru" required>
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-outline-secondary toggle-password"
+                                                            type="button" data-target="new_password">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                @error('new_password')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="new_password_confirmation">Konfirmasi Password</label>
+                                                <div class="input-group">
+                                                    <input type="password" name="new_password_confirmation"
+                                                        class="form-control" id="new_password_confirmation"
+                                                        placeholder="Konfirmasi password" required>
+                                                    <div class="input-group-append">
+                                                        <button class="btn btn-outline-secondary toggle-password"
+                                                            type="button" data-target="new_password_confirmation">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="alert alert-info">
+                                                <i class="fas fa-info-circle mr-2"></i>
+                                                Sebagai administrator, Anda dapat menambahkan petugas baru untuk sistem.
+                                                Pastikan data yang dimasukkan sudah benar dan valid.
+                                            </div>
+
+                                            <button type="submit" class="btn btn-success btn-block mt-4">
+                                                <i class="fas fa-user-plus mr-2"></i>Tambah Petugas Baru
+                                            </button>
+                                        </form>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>

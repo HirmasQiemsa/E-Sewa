@@ -139,4 +139,62 @@ class ProfileController extends Controller
         return redirect()->route('petugas_fasilitas.profile.edit')
             ->with('success', 'Password berhasil diperbarui');
     }
+
+     /**
+     * Add a new account (Petugas Fasilitas or Petugas Pembayaran)
+     * Only accessible for admin (ID 1)
+     */
+    public function addAccount(Request $request)
+    {
+        // Check if current user is admin (ID 1)
+        $currentPetugas = Auth::guard('petugas_fasilitas')->user();
+
+        if ($currentPetugas->id != 1) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk menambahkan petugas baru');
+        }
+
+        // Validate the request data
+        $request->validate([
+            'role' => 'required|in:petugas_fasilitas,petugas_pembayaran',
+            'name' => 'required|string|max:255',
+            'new_username' => 'required|alpha_num|min:3|max:20|unique:users,username|unique:petugas_fasilitas,username|unique:petugas_pembayarans,username|unique:admins,username',
+            'no_hp' => 'required|string|min:5|max:15|unique:petugas_fasilitas,no_hp|unique:petugas_pembayarans,no_hp',
+            'alamat' => 'required|string',
+            'new_password' => 'required|min:3|confirmed',
+        ]);
+
+        try {
+            // Create new account based on role
+            if ($request->role == 'petugas_fasilitas') {
+                PetugasFasilitas::create([
+                    'username' => $request->new_username,
+                    'name' => $request->name,
+                    'no_hp' => $request->no_hp,
+                    'alamat' => $request->alamat,
+                    'password' => Hash::make($request->new_password),
+                    'role' => 'petugas_fasilitas'
+                ]);
+
+                return redirect()->route('petugas_fasilitas.profile.edit')
+                    ->with('success', 'Akun Petugas Fasilitas baru berhasil ditambahkan');
+            } else {
+                PetugasPembayaran::create([
+                    'username' => $request->new_username,
+                    'name' => $request->name,
+                    'no_hp' => $request->no_hp,
+                    'alamat' => $request->alamat,
+                    'password' => Hash::make($request->new_password),
+                    'role' => 'petugas_pembayaran'
+                ]);
+
+                return redirect()->route('petugas_fasilitas.profile.edit')
+                    ->with('success', 'Akun Petugas Pembayaran baru berhasil ditambahkan');
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal menambahkan akun baru: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
 }

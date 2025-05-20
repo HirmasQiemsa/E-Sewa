@@ -18,8 +18,8 @@ return new class extends Migration
             $table->date('tanggal_bayar');
             $table->bigInteger('jumlah_bayar');
             $table->enum('metode_pembayaran', ['cash', 'transfer', 'qris', 'lainnya'])->default('cash');
-            $table->string('bukti_pembayaran', 2048)->nullable();
-            $table->enum('status', ['fee', 'lunas'])->default('fee');
+            $table->enum('status', ['fee', 'lunas','pending','ditolak'])->default('fee');
+            $table->text('keterangan')->nullable();
             $table->foreignId('petugas_pembayaran_id')->nullable()->constrained('petugas_pembayarans')->nullOnDelete();
             $table->timestamps();
         });

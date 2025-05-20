@@ -72,7 +72,7 @@ Route::middleware(['auth:admin', 'admin'])->name('admin.')->group(function () {
 });
 
 
-// PETUGAS FASILITAS ROUTES //
+// PETUGAS FASILITAS //
 Route::middleware(['auth:petugas_fasilitas', 'petugas_fasilitas'])->name('petugas_fasilitas.')->prefix('petugas-fasilitas')->group(function () {
     // Dashboard
     Route::get('/dashboard', [PetugasFasilitasDashboardController::class, 'index'])->name('dashboard');
@@ -120,6 +120,7 @@ Route::middleware(['auth:petugas_fasilitas', 'petugas_fasilitas'])->name('petuga
         Route::put('/update', [PetugasFasilitasProfileController::class, 'update'])->name('update');
         Route::put('/update-password', [PetugasFasilitasProfileController::class, 'updatePassword'])->name('update-password');
         Route::put('/update-account', [PetugasFasilitasProfileController::class, 'updateAccount'])->name('update-account');
+        Route::post('/add-account', [PetugasFasilitasProfileController::class, 'addAccount'])->name('add-account');
     });
 });
 
