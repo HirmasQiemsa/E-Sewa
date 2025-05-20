@@ -53,42 +53,7 @@
     <section class="content">
         <div class="container-fluid">
 
-            <!-- Carousel Section -->
-            <div id="facilityCarousel" class="carousel slide mb-4 facility-carousel" data-ride="carousel">
-                <ol class="carousel-indicators">
-                    <li data-target="#facilityCarousel" data-slide-to="0" class="active"></li>
-                    <li data-target="#facilityCarousel" data-slide-to="1"></li>
-                    <li data-target="#facilityCarousel" data-slide-to="2"></li>
-                </ol>
-                <div class="carousel-inner">
-                    <div class="carousel-item active" style="background-image: url('{{ asset('img/futsal.jpg') }}')">
-                        <div class="carousel-overlay">
-                            <h2>Lapangan Futsal</h2>
-                            <p>Rasakan sensasi bermain di lapangan futsal berkualitas</p>
-                        </div>
-                    </div>
-                    <div class="carousel-item" style="background-image: url('{{ asset('img/tennis.jpg') }}')">
-                        <div class="carousel-overlay">
-                            <h2>Lapangan Tenis</h2>
-                            <p>Sempurna untuk pecinta olahraga raket</p>
-                        </div>
-                    </div>
-                    <div class="carousel-item" style="background-image: url('{{ asset('img/volleyball.jpg') }}')">
-                        <div class="carousel-overlay">
-                            <h2>Lapangan Voli</h2>
-                            <p>Ideal untuk latihan tim atau pertandingan persahabatan</p>
-                        </div>
-                    </div>
-                </div>
-                <a class="carousel-control-prev" href="#facilityCarousel" role="button" data-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="sr-only">Previous</span>
-                </a>
-                <a class="carousel-control-next" href="#facilityCarousel" role="button" data-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="sr-only">Next</span>
-                </a>
-            </div>
+
 
             <!-- Content Header -->
             <div class="content-header">
@@ -105,16 +70,6 @@
                                     </div>
                                 </li>
                             </ol>
-                        </div>
-                    </div>
-                    <div class="row mt-2">
-                        <div class="col-12">
-                            <div class="alert alert-dark">
-                                <i class="fas fa-info-circle mr-2"></i> Selamat datang di sistem pemesanan fasilitas
-                                olahraga DISPORA Kota Semarang. Pilih fasilitas yang ingin Anda gunakan dan lakukan booking
-                                dengan
-                                mudah!
-                            </div>
                         </div>
                     </div>
                 </div>

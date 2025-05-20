@@ -32,7 +32,7 @@
                         <div class="icon">
                             <i class="fas fa-money-bill-wave"></i>
                         </div>
-                        <a href="{{ route('petugas_pembayaran.pemasukan.index') }}" class="small-box-footer">Lihat Detail <i
+                        <a href="{{ route('petugas_pembayaran.keuangan.transaksi') }}" class="small-box-footer">Lihat Detail <i
                                 class="fas fa-arrow-circle-right"></i></a>
                     </div>
                 </div>
@@ -254,7 +254,7 @@
                             </div>
                         </div>
                         <div class="card-footer clearfix">
-                            <a href="{{ route('petugas_pembayaran.pemasukan.index') }}"
+                            <a href="{{ route('petugas_pembayaran.keuangan.transaksi') }}"
                                 class="btn btn-sm btn-secondary float-right">Lihat Semua Riwayat</a>
                         </div>
                     </div>
@@ -273,7 +273,7 @@
                 if (ctx) {
                     // Data untuk chart
                     var data = {
-                        
+
                         datasets: [{
                             data: [{{ $pembayaranLunas ?? 0 }}, {{ $pembayaranDP ?? 0 }},
                                 {{ $pembayaranBatal ?? 0 }}

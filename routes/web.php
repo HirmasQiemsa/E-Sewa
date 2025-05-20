@@ -6,10 +6,12 @@ use App\Http\Controllers\Admin\FasilitasController;
 use App\Http\Controllers\Admin\ProfileAdminController;
 use App\Http\Controllers\Admin\RiwayatController;
 use App\Http\Controllers\Admin\JadwalController;
+
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Controllers\BerandaController;
+
 use App\Http\Controllers\User\CheckoutController;
 use App\Http\Controllers\User\BookingController;
 use App\Http\Controllers\User\UserController;
@@ -18,14 +20,13 @@ use App\Http\Controllers\PetugasFasilitas\DashboardController as PetugasFasilita
 use App\Http\Controllers\PetugasFasilitas\FasilitasController as PetugasFasilitasController;
 use App\Http\Controllers\PetugasFasilitas\JadwalController as PetugasFasilitasJadwalController;
 use App\Http\Controllers\PetugasFasilitas\BookingController as PetugasFasilitasBookingController;
-use App\Http\Controllers\PetugasFasilitas\AktivitasController as PetugasFasilitasAktivitasController;
 use App\Http\Controllers\PetugasFasilitas\ProfileController as PetugasFasilitasProfileController;
 
 use App\Http\Controllers\PetugasPembayaran\DashboardController as PetugasPembayaranDashboardController;
-use App\Http\Controllers\PetugasPembayaran\PembayaranController as PetugasPembayaranPembayaranController;
-use App\Http\Controllers\PetugasPembayaran\PemasukanController as PetugasPembayaranPemasukanController;
-use App\Http\Controllers\PetugasPembayaran\LaporanController as PetugasPembayaranLaporanController;
+use App\Http\Controllers\PetugasPembayaran\PembayaranController as PetugasPembayaranController;
 use App\Http\Controllers\PetugasPembayaran\ProfileController as PetugasPembayaranProfileController;
+use App\Http\Controllers\PetugasPembayaran\KeuanganController;
+
 
 
 Route::get('/laravel', function () {
@@ -112,8 +113,6 @@ Route::middleware(['auth:petugas_fasilitas', 'petugas_fasilitas'])->name('petuga
     // Riwayat Booking
     Route::get('/riwayat', [PetugasFasilitasBookingController::class, 'riwayat'])->name('riwayat');
 
-
-
     // Profile Management
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [PetugasFasilitasProfileController::class, 'edit'])->name('edit');
@@ -132,25 +131,20 @@ Route::middleware(['auth:petugas_pembayarans', 'petugas_pembayarans'])->name('pe
 
     // Verifikasi Pembayaran
     Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
-        Route::get('/', [PetugasPembayaranPembayaranController::class, 'index'])->name('index');
-        Route::get('/{id}', [PetugasPembayaranPembayaranController::class, 'show'])->name('show');
-        Route::put('/{id}/verifikasi', [PetugasPembayaranPembayaranController::class, 'verifikasi'])->name('verifikasi');
-        Route::put('/{id}/tolak', [PetugasPembayaranPembayaranController::class, 'tolak'])->name('tolak');
-        Route::put('/{id}/toggle-status', [PetugasPembayaranPembayaranController::class, 'toggleStatus'])->name('toggle-status');
+        Route::get('/', [PetugasPembayaranController::class, 'index'])->name('index');
+        Route::get('/{id}', [PetugasPembayaranController::class, 'show'])->name('show');
+        Route::put('/{id}/verifikasi', [PetugasPembayaranController::class, 'verifikasi'])->name('verifikasi');
+        Route::put('/{id}/tolak', [PetugasPembayaranController::class, 'tolak'])->name('tolak');
+        Route::put('/{id}/toggle-status', [PetugasPembayaranController::class, 'toggleStatus'])->name('toggle-status');
     });
 
-    // Riwayat Pemasukan
-    Route::prefix('pemasukan')->name('pemasukan.')->group(function () {
-        Route::get('/', [PetugasPembayaranPemasukanController::class, 'index'])->name('index');
-        Route::get('/{id}', [PetugasPembayaranPemasukanController::class, 'show'])->name('show');
-        Route::get('/export', [PetugasPembayaranPemasukanController::class, 'export'])->name('export');
-    });
-
-    // Laporan Keuangan
-    Route::prefix('laporan')->name('laporan.')->group(function () {
-        Route::get('/', [PetugasPembayaranLaporanController::class, 'index'])->name('index');
-        Route::post('/generate', [PetugasPembayaranLaporanController::class, 'generate'])->name('generate');
-        Route::get('/export/{type}', [PetugasPembayaranLaporanController::class, 'export'])->name('export');
+    // Kelola Keuangan
+    Route::prefix('keuangan')->name('keuangan.')->group(function () {
+        Route::get('/', [KeuanganController::class, 'index'])->name('index');
+        Route::get('/transaksi', [KeuanganController::class, 'transaksi'])->name('transaksi');
+        Route::get('/ringkasan', [KeuanganController::class, 'ringkasan'])->name('ringkasan');
+        Route::get('/transaksi/export', [KeuanganController::class, 'exportTransaksi'])->name('transaksi.export');
+        Route::get('/ringkasan/export/{type}', [KeuanganController::class, 'exportRingkasan'])->name('ringkasan.export');
     });
 
     // Profile Management

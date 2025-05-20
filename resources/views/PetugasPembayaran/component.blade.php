@@ -263,17 +263,24 @@
                             <a href="{{ route('petugas_pembayaran.dashboard') }}"
                                 class="nav-link {{ request()->routeIs('petugas_pembayaran.dashboard') ? 'active' : '' }} bg-danger">
                                 <i class="nav-icon fas fa-database"></i>
-                                <p>
-                                    Dashboard
-                                </p>
+                                <p>Dashboard</p>
                             </a>
                         </li>
 
-                        <!-- Kelola Keuangan dengan submenu -->
+                        <!-- Verifikasi Pembayaran (Item Terpisah) -->
+                        <li class="nav-item">
+                            <a href="{{ route('petugas_pembayaran.pembayaran.index') }}"
+                                class="nav-link {{ request()->routeIs('petugas_pembayaran.pembayaran.*') ? 'active' : '' }} bg-danger">
+                                <i class="nav-icon fas fa-check-circle"></i>
+                                <p>Verifikasi Pembayaran</p>
+                            </a>
+                        </li>
+
+                        <!-- Kelola Keuangan dengan submenu baru -->
                         <li
-                            class="nav-item {{ request()->routeIs('petugas_pembayaran.pembayaran.*') || request()->routeIs('petugas_pembayaran.pemasukan.*') ? 'menu-open' : '' }}">
+                            class="nav-item {{ request()->routeIs('petugas_pembayaran.keuangan.*') ? 'menu-open' : '' }}">
                             <a href="#"
-                                class="nav-link {{ request()->routeIs('petugas_pembayaran.pembayaran.*') || request()->routeIs('petugas_pembayaran.pemasukan.*') ? 'active' : '' }} bg-danger">
+                                class="nav-link {{ request()->routeIs('petugas_pembayaran.keuangan.*') ? 'active' : '' }} bg-danger">
                                 <i class="nav-icon fas fa-money-bill-wave"></i>
                                 <p>
                                     Kelola Keuangan
@@ -282,31 +289,20 @@
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="{{ route('petugas_pembayaran.pembayaran.index') }}"
-                                        class="nav-link {{ request()->routeIs('petugas_pembayaran.pembayaran.index', 'petugas_pembayaran.pembayaran.show', 'petugas_pembayaran.pembayaran.edit') ? 'active' : '' }}">
+                                    <a href="{{ route('petugas_pembayaran.keuangan.transaksi') }}"
+                                        class="nav-link {{ request()->routeIs('petugas_pembayaran.keuangan.transaksi') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Verifikasi Pembayaran</p>
+                                        <p>Transaksi Keuangan</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{{ route('petugas_pembayaran.pemasukan.index') }}"
-                                        class="nav-link {{ request()->routeIs('petugas_pembayaran.pemasukan.index', 'petugas_pembayaran.pemasukan.show') ? 'active' : '' }}">
+                                    <a href="{{ route('petugas_pembayaran.keuangan.ringkasan') }}"
+                                        class="nav-link {{ request()->routeIs('petugas_pembayaran.keuangan.ringkasan') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Riwayat Pemasukan</p>
+                                        <p>Ringkasan Keuangan</p>
                                     </a>
                                 </li>
                             </ul>
-                        </li>
-
-                        <!-- Laporan Keuangan -->
-                        <li class="nav-item">
-                            <a href="{{ route('petugas_pembayaran.laporan.index') }}"
-                                class="nav-link {{ request()->routeIs('petugas_pembayaran.laporan.*') ? 'active' : '' }} bg-danger">
-                                <i class="nav-icon fas fa-chart-line"></i>
-                                <p>
-                                    Laporan Keuangan
-                                </p>
-                            </a>
                         </li>
 
                         <!-- Profile (Blue) -->
@@ -314,9 +310,7 @@
                             <a href="{{ route('petugas_pembayaran.profile.edit') }}"
                                 class="nav-link {{ request()->routeIs('petugas_pembayaran.profile.*') ? 'active' : '' }} bg-primary">
                                 <i class="nav-icon fas fa-user-cog"></i>
-                                <p>
-                                    Pengaturan Profil
-                                </p>
+                                <p>Pengaturan Profil</p>
                             </a>
                         </li>
 
@@ -327,9 +321,7 @@
                                 <a href="{{ route('logout') }}" class="nav-link bg-primary"
                                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                     <i class="nav-icon fas fa-sign-out-alt"></i>
-                                    <p>
-                                        Logout
-                                    </p>
+                                    <p>Logout</p>
                                 </a>
                             </form>
                         </li>
