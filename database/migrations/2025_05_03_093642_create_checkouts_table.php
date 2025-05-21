@@ -24,6 +24,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('checkout_id')->constrained()->onDelete('cascade');
             $table->foreignId('jadwal_id')->constrained()->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

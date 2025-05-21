@@ -267,20 +267,11 @@
                             </a>
                         </li>
 
-                        <!-- Verifikasi Pembayaran (Item Terpisah) -->
-                        <li class="nav-item">
-                            <a href="{{ route('petugas_pembayaran.pembayaran.index') }}"
-                                class="nav-link {{ request()->routeIs('petugas_pembayaran.pembayaran.*') ? 'active' : '' }} bg-danger">
-                                <i class="nav-icon fas fa-check-circle"></i>
-                                <p>Verifikasi Pembayaran</p>
-                            </a>
-                        </li>
-
                         <!-- Kelola Keuangan dengan submenu baru -->
                         <li
-                            class="nav-item {{ request()->routeIs('petugas_pembayaran.keuangan.*') ? 'menu-open' : '' }}">
+                            class="nav-item {{ request()->routeIs('petugas_pembayaran.keuangan.*','petugas_pembayaran.pembayaran.*') ? 'menu-open' : '' }}">
                             <a href="#"
-                                class="nav-link {{ request()->routeIs('petugas_pembayaran.keuangan.*') ? 'active' : '' }} bg-danger">
+                                class="nav-link {{ request()->routeIs('petugas_pembayaran.keuangan.*','petugas_pembayaran.pembayaran.*') ? 'active' : '' }} bg-danger">
                                 <i class="nav-icon fas fa-money-bill-wave"></i>
                                 <p>
                                     Kelola Keuangan
@@ -288,11 +279,12 @@
                                 </p>
                             </a>
                             <ul class="nav nav-treeview">
+
                                 <li class="nav-item">
-                                    <a href="{{ route('petugas_pembayaran.keuangan.transaksi') }}"
-                                        class="nav-link {{ request()->routeIs('petugas_pembayaran.keuangan.transaksi') ? 'active' : '' }}">
+                                    <a href="{{ route('petugas_pembayaran.pembayaran.index') }}"
+                                        class="nav-link {{ request()->routeIs('petugas_pembayaran.pembayaran.index') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
-                                        <p>Transaksi Keuangan</p>
+                                        <p>Verifikasi Pembayaran</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">

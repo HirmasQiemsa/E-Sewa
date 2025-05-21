@@ -11,7 +11,8 @@
                     <ol class="breadcrumb float-sm-right">
                         <!-- Dynamic breadcrumb based on source -->
                         <li class="breadcrumb-item">
-                            <a href="{{ request()->query('source') === 'riwayat' ? route('user.riwayat') : route('user.checkout') }}">
+                            <a
+                                href="{{ request()->query('source') === 'riwayat' ? route('user.riwayat') : route('user.checkout') }}">
                                 {{ request()->query('source') === 'riwayat' ? 'Riwayat' : 'Checkout' }}
                             </a>
                         </li>
@@ -125,7 +126,7 @@
                     </div>
                 </div>
 
-                <!-- Riwayat Pembayaran -->
+                <!-- Riwayat Pembayaran (Diperbarui) -->
                 <div class="col-md-6">
                     <div class="card card-success">
                         <div class="card-header">
@@ -142,7 +143,7 @@
                                         <th>Tanggal</th>
                                         <th>Jumlah</th>
                                         <th>Metode</th>
-                                        <th>Keterangan</th>
+                                        <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -151,7 +152,21 @@
                                             <td>{{ date('d/m/Y H:i', strtotime($p->tanggal_bayar)) }}</td>
                                             <td>Rp {{ number_format($p->jumlah_bayar, 0, ',', '.') }}</td>
                                             <td>{{ ucfirst($p->metode_pembayaran) }}</td>
-                                            <td>{{ $p->keterangan ?? '-' }}</td>
+                                            <td>
+                                                @if ($p->status == 'fee')
+                                                    <span class="badge badge-warning">DP</span>
+                                                @elseif($p->status == 'lunas')
+                                                    <span class="badge badge-success">Lunas</span>
+                                                @elseif($p->status == 'pending')
+                                                    <span class="badge badge-info">Menunggu Verifikasi</span>
+                                                @elseif($p->status == 'ditolak')
+                                                    <span class="badge badge-danger">Ditolak</span>
+                                                    @if ($p->keterangan)
+                                                        <i class="fas fa-info-circle" data-toggle="tooltip"
+                                                            title="{{ $p->keterangan }}"></i>
+                                                    @endif
+                                                @endif
+                                            </td>
                                         </tr>
                                     @empty
                                         <tr>
@@ -178,8 +193,10 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between">
                                 <!-- Dynamic back button based on source -->
-                                <a href="{{ request()->query('source') === 'riwayat' ? route('user.riwayat') : route('user.checkout') }}" class="btn btn-secondary">
-                                    <i class="fas fa-arrow-left"></i> Kembali ke {{ request()->query('source') === 'riwayat' ? 'Riwayat' : 'Checkout' }}
+                                <a href="{{ request()->query('source') === 'riwayat' ? route('user.riwayat') : route('user.checkout') }}"
+                                    class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Kembali ke
+                                    {{ request()->query('source') === 'riwayat' ? 'Riwayat' : 'Checkout' }}
                                 </a>
 
                                 @if ($checkout->status == 'fee')

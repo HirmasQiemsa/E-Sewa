@@ -21,11 +21,11 @@ class KeuanganController extends Controller
     }
 
     /**
-     * Menampilkan tab transaksi keuangan (menggunakan data dari PemasukanController)
+     * Menampilkan tab transaksi keuangan
      */
     public function transaksi(Request $request)
     {
-        // Kode dari PemasukanController->index()
+        // Filter berdasarkan tanggal dan fasilitas
         $startDate = $request->input('start_date', Carbon::now()->subDays(30)->format('Y-m-d'));
         $endDate = $request->input('end_date', Carbon::now()->format('Y-m-d'));
         $fasilitasId = $request->input('fasilitas_id');
@@ -77,24 +77,24 @@ class KeuanganController extends Controller
     }
 
     /**
-     * Menampilkan tab ringkasan keuangan (menggunakan data dari LaporanController)
+     * Menampilkan tab ringkasan keuangan
      */
     public function ringkasan(Request $request)
     {
-        // Kode dari LaporanController->index()
-        $month = $request->input('month', Carbon::now()->month);
-        $year = $request->input('year', Carbon::now()->year);
+        // Default to current month and year if not specified
+        $month = $request->input('month', date('n'));
+        $year = $request->input('year', date('Y'));
 
-        // Dapatkan data pemasukan berdasarkan filter
+        // Get income data based on the filter
         $pemasukan = PemasukanSewa::where('status', 'lunas')
-                                 ->whereMonth('created_at', $month)
-                                 ->whereYear('created_at', $year)
-                                 ->get();
+                                ->whereMonth('created_at', $month)
+                                ->whereYear('created_at', $year)
+                                ->get();
 
-        // Hitung total pemasukan
+        // Calculate total income
         $totalPemasukan = $pemasukan->sum('jumlah_bayar');
 
-        // Grup pemasukan berdasarkan fasilitas
+        // Group income by facility
         $pemasukanByFasilitas = $pemasukan->groupBy('fasilitas_id')
                                         ->map(function ($items, $key) {
                                             $fasilitas = Fasilitas::find($key);
@@ -105,27 +105,44 @@ class KeuanganController extends Controller
                                             ];
                                         });
 
-        // Hitung statistik per bulan (untuk chart)
-        $pemasukanBulanan = PemasukanSewa::where('status', 'lunas')
-                                       ->whereYear('created_at', $year)
-                                       ->select(DB::raw('MONTH(created_at) as month'), DB::raw('SUM(jumlah_bayar) as total'))
-                                       ->groupBy('month')
-                                       ->get()
-                                       ->pluck('total', 'month')
-                                       ->toArray();
+        // Calculate monthly statistics for the whole year (for chart)
+        // Use DB::connection()->getDriverName() to make the query database-agnostic
+        $pemasukanBulanan = [];
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            // For SQLite
+            $monthlyData = PemasukanSewa::where('status', 'lunas')
+                ->whereYear('created_at', $year)
+                ->selectRaw("strftime('%m', created_at) as month, SUM(jumlah_bayar) as total")
+                ->groupBy('month')
+                ->get();
+        } else {
+            // For MySQL and other databases
+            $monthlyData = PemasukanSewa::where('status', 'lunas')
+                ->whereYear('created_at', $year)
+                ->selectRaw("MONTH(created_at) as month, SUM(jumlah_bayar) as total")
+                ->groupBy('month')
+                ->get();
+        }
 
-        // Daftar bulan untuk tampilan
+        // Convert to the format we need
+        foreach ($monthlyData as $data) {
+            // Convert month to integer (remove leading 0 if it exists)
+            $monthNumber = (int)$data->month;
+            $pemasukanBulanan[$monthNumber] = $data->total;
+        }
+
+        // Prepare chart data for all months
+        $chartData = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $chartData[] = $pemasukanBulanan[$i] ?? 0;
+        }
+
+        // List of months for display
         $bulan = [
             1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
             5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
             9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
         ];
-
-        // Siapkan data chart
-        $chartData = [];
-        for ($i = 1; $i <= 12; $i++) {
-            $chartData[] = $pemasukanBulanan[$i] ?? 0;
-        }
 
         return view('PetugasPembayaran.Keuangan.ringkasan', compact(
             'month',
@@ -135,6 +152,68 @@ class KeuanganController extends Controller
             'pemasukanByFasilitas',
             'chartData'
         ));
+    }
+
+    public function exportRingkasan($type)
+    {
+        $month = request('month', date('n'));
+        $year = request('year', date('Y'));
+
+        // Get income data
+        $pemasukan = PemasukanSewa::where('status', 'lunas')
+                                ->whereMonth('created_at', $month)
+                                ->whereYear('created_at', $year)
+                                ->with(['checkout.user', 'fasilitas'])
+                                ->get();
+
+        $bulan = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+
+        // Filename
+        $filename = 'Laporan_Keuangan_' . $bulan[$month] . '_' . $year;
+
+        // If PDF export is requested
+        if ($type === 'pdf') {
+            // Return view for PDF rendering
+            return view('PetugasPembayaran.Laporan.export_pdf', compact('pemasukan', 'month', 'year', 'bulan'));
+        } else {
+            // Fall back to CSV if needed
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '.csv"',
+            ];
+
+            $handle = fopen('php://temp', 'r+');
+
+            // Header columns
+            fputcsv($handle, [
+                'ID', 'Tanggal', 'User', 'Fasilitas', 'Jumlah Bayar', 'Metode Pembayaran'
+            ]);
+
+            // Data
+            foreach ($pemasukan as $item) {
+                fputcsv($handle, [
+                    $item->id,
+                    $item->created_at->format('d/m/Y H:i'),
+                    $item->checkout->user->name ?? 'N/A',
+                    $item->fasilitas->nama_fasilitas ?? 'N/A',
+                    $item->jumlah_bayar,
+                    ucfirst($item->metode_pembayaran)
+                ]);
+            }
+
+            // Add total
+            fputcsv($handle, ['', '', '', '', 'TOTAL:', $pemasukan->sum('jumlah_bayar')]);
+
+            rewind($handle);
+            $contents = stream_get_contents($handle);
+            fclose($handle);
+
+            return response($contents, 200, $headers);
+        }
     }
 
     /**
@@ -201,68 +280,5 @@ class KeuanganController extends Controller
         // Mengembalikan file untuk diunduh
         return response($contents, 200, $headers);
     }
-
-     /**
-     * Export data ringkasan keuangan ke PDF
-     */
-    public function exportRingkasan($type)
-    {
-        $month = request('month', Carbon::now()->month);
-        $year = request('year', Carbon::now()->year);
-
-        // Dapatkan data pemasukan
-        $pemasukan = PemasukanSewa::where('status', 'lunas')
-                                 ->whereMonth('created_at', $month)
-                                 ->whereYear('created_at', $year)
-                                 ->with(['checkout.user', 'fasilitas'])
-                                 ->get();
-
-        $bulan = [
-            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
-            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
-            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
-        ];
-
-        // Filename
-        $filename = 'Laporan_Keuangan_' . $bulan[$month] . '_' . $year . '.' . $type;
-
-        if ($type === 'csv') {
-            // Export to CSV
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-            ];
-
-            $handle = fopen('php://temp', 'r+');
-
-            // Header kolom
-            fputcsv($handle, [
-                'ID', 'Tanggal', 'User', 'Fasilitas', 'Jumlah Bayar', 'Metode Pembayaran'
-            ]);
-
-            // Data
-            foreach ($pemasukan as $item) {
-                fputcsv($handle, [
-                    $item->id,
-                    $item->created_at->format('d/m/Y H:i'),
-                    $item->checkout->user->name ?? 'N/A',
-                    $item->fasilitas->nama_fasilitas ?? 'N/A',
-                    $item->jumlah_bayar,
-                    ucfirst($item->metode_pembayaran)
-                ]);
-            }
-
-            // Tambahkan total
-            fputcsv($handle, ['', '', '', '', 'TOTAL:', $pemasukan->sum('jumlah_bayar')]);
-
-            rewind($handle);
-            $contents = stream_get_contents($handle);
-            fclose($handle);
-
-            return response($contents, 200, $headers);
-        } else {
-            // Default export - PDF report view
-            return view('PetugasPembayaran.Laporan.export', compact('pemasukan', 'month', 'year', 'bulan'));
-        }
-    }
 }
+

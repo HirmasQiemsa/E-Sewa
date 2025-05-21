@@ -7,14 +7,13 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-//View Blade
+    // View Blade
     public function login()
     {
         return view('login');
     }
 
-
-//Proses POS
+    // Proses POS
     public function login_proses(Request $request)
     {
         $request->validate([
@@ -30,22 +29,26 @@ class LoginController extends Controller
 
         // Coba login sebagai Petugas Pembayaran
         if (Auth::guard('petugas_pembayarans')->attempt($request->only('username', 'password'))) {
-            return redirect()->intended(route('petugas_pembayaran.dashboard'))->with('success', 'Selamat datang, Petugas Pembayaran!');
+            return redirect()->route('petugas_pembayaran.dashboard')
+                            ->with('success', 'Selamat datang, Petugas Pembayaran!');
         }
 
         // Coba login sebagai Petugas Fasilitas
         if (Auth::guard('petugas_fasilitas')->attempt($request->only('username', 'password'))) {
-            return redirect()->intended(route('petugas_fasilitas.dashboard'))->with('success', 'Selamat datang, Petugas Fasilitas!');
+            return redirect()->route('petugas_fasilitas.dashboard')
+                            ->with('success', 'Selamat datang, Petugas Fasilitas!');
         }
 
         // Coba login sebagai Admin
         if (Auth::guard('admin')->attempt($request->only('username', 'password'))) {
-            return redirect()->intended(route('admin.dashboard'))->with('success', 'Selamat datang, Admin!');
+            return redirect()->route('admin.dashboard')
+                            ->with('success', 'Selamat datang, Admin!');
         }
 
         // Coba login sebagai User
         if (Auth::guard('web')->attempt($request->only('username', 'password'))) {
-            return redirect()->intended(route('user.fasilitas'))->with('success', 'Selamat datang, User!');
+            return redirect()->route('user.fasilitas')
+                            ->with('success', 'Selamat datang, User!');
         }
 
         // Jika gagal
