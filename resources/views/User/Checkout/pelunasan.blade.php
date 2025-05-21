@@ -37,7 +37,8 @@
                             <h3 class="card-title">Form Pelunasan</h3>
                         </div>
 
-                        <form id="pelunasanForm" action="{{ route('user.checkout.proses-lunasi', $checkout->id) }}" method="POST">
+                        <form id="pelunasanForm" action="{{ route('user.checkout.proses-lunasi', $checkout->id) }}"
+                            method="POST">
                             @csrf
                             <div class="card-body">
                                 <!-- Informasi Booking -->
@@ -56,29 +57,25 @@
                                 <div class="form-group">
                                     <label>Tanggal Booking</label>
                                     <input type="text" class="form-control"
-                                        value="{{ date('d F Y', strtotime($checkout->jadwal->tanggal)) }}"
-                                        readonly>
+                                        value="{{ date('d F Y', strtotime($checkout->jadwal->tanggal)) }}" readonly>
                                 </div>
 
                                 <div class="form-group">
                                     <label>Total Tagihan</label>
                                     <input type="text" class="form-control"
-                                        value="Rp {{ number_format($checkout->total_bayar, 0, ',', '.') }}"
-                                        readonly>
+                                        value="Rp {{ number_format($checkout->total_bayar, 0, ',', '.') }}" readonly>
                                 </div>
 
                                 <div class="form-group">
                                     <label>DP Sudah Dibayar (50%)</label>
                                     <input type="text" class="form-control"
-                                        value="Rp {{ number_format($checkout->total_bayar * 0.5, 0, ',', '.') }}"
-                                        readonly>
+                                        value="Rp {{ number_format($checkout->total_bayar * 0.5, 0, ',', '.') }}" readonly>
                                 </div>
 
                                 <div class="form-group">
                                     <label>Sisa Pembayaran</label>
                                     <input type="text" class="form-control"
-                                        value="Rp {{ number_format($sisaPembayaran, 0, ',', '.') }}"
-                                        readonly>
+                                        value="Rp {{ number_format($sisaPembayaran, 0, ',', '.') }}" readonly>
                                 </div>
 
                                 <!-- Metode Pembayaran -->
@@ -97,8 +94,27 @@
                             </div>
 
                             <div class="card-footer">
-                                <button type="submit" id="submitBtn" class="btn btn-success">Konfirmasi Pelunasan</button>
-                                <a href="{{ route('user.checkout') }}" class="btn btn-secondary">Kembali</a>
+                                @php
+                                    $pendingPayment = false;
+                                    foreach ($checkout->pembayaran as $p) {
+                                        if ($p->status == 'pending') {
+                                            $pendingPayment = true;
+                                            break;
+                                        }
+                                    }
+                                @endphp
+
+                                @if (!$pendingPayment)
+                                    <button type="submit" id="submitBtn" class="btn btn-success">Konfirmasi
+                                        Pelunasan</button>
+                                    <a href="{{ route('user.checkout') }}" class="btn btn-secondary">Kembali</a>
+                                @else
+                                    <div class="alert alert-info mb-0">
+                                        <i class="fas fa-info-circle mr-2"></i>
+                                        Pembayaran pelunasan Anda sedang dalam proses verifikasi oleh petugas.
+                                    </div>
+                                    <a href="{{ route('user.checkout') }}" class="btn btn-secondary mt-3">Kembali</a>
+                                @endif
                             </div>
                         </form>
                     </div>
@@ -122,10 +138,11 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach($checkout->jadwals as $jadwal)
+                                        @foreach ($checkout->jadwals as $jadwal)
                                             <tr>
                                                 <td>{{ date('d/m/Y', strtotime($jadwal->tanggal)) }}</td>
-                                                <td>{{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }}</td>
+                                                <td>{{ substr($jadwal->jam_mulai, 0, 5) }} -
+                                                    {{ substr($jadwal->jam_selesai, 0, 5) }}</td>
                                                 <td>{{ $jadwal->durasi }} jam</td>
                                             </tr>
                                         @endforeach
@@ -140,7 +157,8 @@
                                         <p><strong>Nama:</strong> {{ $checkout->jadwal->fasilitas->nama_fasilitas }}</p>
                                         <p><strong>Tipe:</strong> {{ $checkout->jadwal->fasilitas->tipe }}</p>
                                         <p><strong>Lokasi:</strong> {{ $checkout->jadwal->fasilitas->lokasi }}</p>
-                                        <p class="mb-0"><strong>Harga Per Jam:</strong> Rp {{ number_format($checkout->jadwal->fasilitas->harga_sewa, 0, ',', '.') }}</p>
+                                        <p class="mb-0"><strong>Harga Per Jam:</strong> Rp
+                                            {{ number_format($checkout->jadwal->fasilitas->harga_sewa, 0, ',', '.') }}</p>
                                     </div>
                                 </div>
                             </div>

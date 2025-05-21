@@ -33,13 +33,13 @@
                         </h3>
                         <div class="card-tools">
                             @if($checkout->status == 'fee')
-                                <span class="badge badge-warning">DP</span>
+                                <span class="badge badge-warning px-2 py-1" style="font-size: 0.9rem;">DP</span>
                             @elseif($checkout->status == 'lunas')
-                                <span class="badge badge-success">Lunas</span>
+                                <span class="badge badge-success px-2 py-1" style="font-size: 0.9rem;">LUNAS</span>
                             @elseif($checkout->status == 'batal')
-                                <span class="badge badge-danger">Batal</span>
+                                <span class="badge badge-danger px-2 py-1" style="font-size: 0.9rem;">BATAL</span>
                             @else
-                                <span class="badge badge-secondary">{{ $checkout->status }}</span>
+                                <span class="badge badge-secondary px-2 py-1" style="font-size: 0.9rem;">{{ $checkout->status }}</span>
                             @endif
                         </div>
                     </div>
@@ -85,7 +85,13 @@
                             </dd>
 
                             <dt class="col-sm-4">Waktu Booking</dt>
-                            <dd class="col-sm-8">{{ date('d M Y H:i', strtotime($checkout->created_at)) }}</dd>
+                            <dd class="col-sm-8">
+                                @php
+                                    $waktuBooking = new DateTime($checkout->created_at);
+                                    $waktuBooking->setTimezone(new DateTimeZone('Asia/Jakarta'));
+                                    echo $waktuBooking->format('d M Y H:i');
+                                @endphp
+                            </dd>
                         </dl>
 
                         <div class="alert alert-info mt-3">
@@ -110,8 +116,16 @@
                             <div class="row mt-3">
                                 <div class="col-sm-12">
                                     <p class="mb-1">Sisa Pembayaran:</p>
-                                    <h4 class="{{ $checkout->sisa_pembayaran > 0 ? 'text-danger' : 'text-success' }}">
-                                        {{ $checkout->sisa_pembayaran > 0 ? 'Rp ' . number_format($checkout->sisa_pembayaran, 0, ',', '.') : 'LUNAS' }}
+                                    <h4>
+                                    @if($checkout->status == 'lunas')
+                                        <span class="badge badge-success px-3 py-2" style="font-size: 1rem;">LUNAS</span>
+                                    @elseif($checkout->pembayaran->where('status', 'ditolak')->count() > 0 && $checkout->sisa_pembayaran <= 0)
+                                        <span class="text-warning">Pembayaran Ditolak</span>
+                                    @elseif($checkout->status == 'batal')
+                                        <span class="text-secondary">-</span>
+                                    @else
+                                        <span class="text-danger">Rp {{ number_format($checkout->sisa_pembayaran, 0, ',', '.') }}</span>
+                                    @endif
                                     </h4>
                                 </div>
                             </div>
@@ -202,25 +216,36 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($checkout->pembayaran as $bayar)
+                                @php
+                                    // Use tanggal_bayar and sort by it for correct chronological order
+                                    $sortedPayments = $checkout->pembayaran->sortBy('tanggal_bayar');
+                                @endphp
+                                @forelse($sortedPayments as $bayar)
                                     <tr>
-                                        <td>{{ date('d/m/Y H:i', strtotime($bayar->created_at)) }}</td>
+                                        <td>
+                                            @php
+                                                // Konversi waktu UTC ke timezone Asia/Jakarta (WIB)
+                                                $waktuBayar = new DateTime($bayar->tanggal_bayar);
+                                                $waktuBayar->setTimezone(new DateTimeZone('Asia/Jakarta'));
+                                                echo $waktuBayar->format('d/m/Y H:i');
+                                            @endphp
+                                        </td>
                                         <td>Rp {{ number_format($bayar->jumlah_bayar, 0, ',', '.') }}</td>
                                         <td>{{ ucfirst($bayar->metode_pembayaran) }}</td>
                                         <td>
                                             @if($bayar->status == 'fee')
-                                                <span class="badge badge-warning">DP</span>
+                                                <span class="badge badge-warning px-2">DP</span>
                                             @elseif($bayar->status == 'lunas')
-                                                <span class="badge badge-success">Lunas</span>
+                                                <span class="badge badge-success px-2">Lunas</span>
                                             @elseif($bayar->status == 'pending')
-                                                <span class="badge badge-primary">Menunggu Verifikasi</span>
+                                                <span class="badge badge-primary px-2">Menunggu Verifikasi</span>
                                             @elseif($bayar->status == 'ditolak')
-                                                <span class="badge badge-danger">Ditolak</span>
+                                                <span class="badge badge-danger px-2">Ditolak</span>
                                                 @if($bayar->keterangan)
                                                     <br><small class="text-muted">{{ $bayar->keterangan }}</small>
                                                 @endif
                                             @else
-                                                <span class="badge badge-secondary">{{ $bayar->status }}</span>
+                                                <span class="badge badge-secondary px-2">{{ $bayar->status }}</span>
                                             @endif
                                         </td>
                                     </tr>
@@ -246,16 +271,21 @@
                                 <i class="fas fa-arrow-left mr-1"></i> Kembali
                             </a>
 
-                            <div>
-                                @if($checkout->status == 'fee' && $checkout->pembayaran->where('status', 'pending')->count() > 0)
-                                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#verifikasiModalDetail">
-                                        <i class="fas fa-check mr-1"></i> Verifikasi Pembayaran
-                                    </button>
+                            @php
+                                // Find the pending payment if exists
+                                $pendingPayment = $checkout->pembayaran->where('status', 'pending')->first();
+                            @endphp
+
+                            @if($checkout->status == 'fee' && $pendingPayment)
+                                <div>
                                     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#tolakModalDetail">
                                         <i class="fas fa-times mr-1"></i> Tolak Pembayaran
                                     </button>
-                                @endif
-                            </div>
+                                    <button type="button" class="btn btn-success ml-2" data-toggle="modal" data-target="#verifikasiModalDetail">
+                                        <i class="fas fa-check mr-1"></i> Verifikasi Pembayaran
+                                    </button>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -266,6 +296,9 @@
 
 <!-- Modal Verifikasi -->
 @if($checkout->status == 'fee' && $checkout->pembayaran->where('status', 'pending')->count() > 0)
+    @php
+        $pendingPayment = $checkout->pembayaran->where('status', 'pending')->first();
+    @endphp
     <div class="modal fade" id="verifikasiModalDetail" tabindex="-1" role="dialog" aria-labelledby="verifikasiModalDetailLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -275,7 +308,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form action="{{ route('petugas_pembayaran.pembayaran.verifikasi', $checkout->pembayaran->where('status', 'pending')->first()->id) }}" method="POST">
+                <form action="{{ route('petugas_pembayaran.pembayaran.verifikasi', $pendingPayment->id) }}" method="POST">
                     @csrf
                     <input type="hidden" name="checkout_id" value="{{ $checkout->id }}">
                     <div class="modal-body">
@@ -312,7 +345,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form action="{{ route('petugas_pembayaran.pembayaran.tolak', $checkout->pembayaran->where('status', 'pending')->first()->id) }}" method="POST">
+                <form action="{{ route('petugas_pembayaran.pembayaran.tolak', $pendingPayment->id) }}" method="POST">
                     @csrf
                     <input type="hidden" name="checkout_id" value="{{ $checkout->id }}">
                     <div class="modal-body">
@@ -336,13 +369,15 @@
     </div>
 @endif
 
-<!-- Add this JavaScript at the end -->
 <script>
     $(function() {
         // Add loading state to form submission
         $('form').submit(function() {
             $(this).find('button[type="submit"]').prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Memproses...');
         });
+
+        // Initialize tooltips
+        $('[data-toggle="tooltip"]').tooltip();
     });
 </script>
 @endsection

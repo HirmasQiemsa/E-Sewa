@@ -89,7 +89,14 @@ class PembayaranController extends Controller
             $checkout->total_dibayar = $dibayar;
             $checkout->sisa_pembayaran = $checkout->total_bayar - $dibayar;
             $checkout->persen_dibayar = $checkout->total_bayar > 0 ?
-                                        round(($dibayar / $checkout->total_bayar) * 100) : 0;
+                           round(($dibayar / $checkout->total_bayar) * 100) : 0;
+                    // With this code:
+                    if ($checkout->status == 'lunas') {
+                        $checkout->persen_dibayar = 100; // Force 100% if status is lunas
+                    } else {
+                        $checkout->persen_dibayar = $checkout->total_bayar > 0 ?
+                                                round(($dibayar / $checkout->total_bayar) * 100) : 0;
+                    }
 
             // Tentukan fasilitas dari jadwal pertama
             // Ini aman karena satu checkout selalu untuk fasilitas yang sama
@@ -153,7 +160,15 @@ class PembayaranController extends Controller
         $checkout->total_dibayar = $dibayar;
         $checkout->sisa_pembayaran = $checkout->total_bayar - $dibayar;
         $checkout->persen_dibayar = $checkout->total_bayar > 0 ?
-                                    round(($dibayar / $checkout->total_bayar) * 100) : 0;
+                           round(($dibayar / $checkout->total_bayar) * 100) : 0;
+
+// With this code:
+if ($checkout->status == 'lunas') {
+    $checkout->persen_dibayar = 100; // Force 100% if status is lunas
+} else {
+    $checkout->persen_dibayar = $checkout->total_bayar > 0 ?
+                              round(($dibayar / $checkout->total_bayar) * 100) : 0;
+}
 
         // Tentukan fasilitas dari jadwal pertama
         if ($checkout->jadwals->isNotEmpty() && $checkout->jadwals->first()->fasilitas) {
@@ -242,9 +257,11 @@ class PembayaranController extends Controller
 
         DB::beginTransaction();
         try {
+            // Find the payment record
             $pembayaran = PemasukanSewa::findOrFail($id);
+            $checkout = Checkout::findOrFail($request->checkout_id);
 
-            // Update status pembayaran
+            // Update payment status to 'ditolak'
             $pembayaran->status = 'ditolak';
             $pembayaran->keterangan = $request->alasan_tolak;
             $pembayaran->petugas_pembayaran_id = Auth::id();
@@ -253,12 +270,12 @@ class PembayaranController extends Controller
             // Tidak mengubah status checkout - tetap 'fee' karena pelunasan ditolak
 
             DB::commit();
-            return redirect()->route('petugas_pembayaran.pembayaran.index')
-                           ->with('success', 'Pembayaran ditolak dengan alasan: ' . $request->alasan_tolak);
-        } catch (\Exception $e) {
-            DB::rollback();
-            return redirect()->back()->with('error', 'Gagal menolak pembayaran: ' . $e->getMessage());
-        }
+                return redirect()->route('petugas_pembayaran.pembayaran.index')
+                            ->with('success', 'Pembayaran ditolak dengan alasan: ' . $request->alasan_tolak);
+            } catch (\Exception $e) {
+                DB::rollback();
+                return redirect()->back()->with('error', 'Gagal menolak pembayaran: ' . $e->getMessage());
+            }
     }
 
     /**

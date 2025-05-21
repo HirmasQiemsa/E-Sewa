@@ -178,11 +178,31 @@
                         </div>
 
                         @if ($checkout->status == 'fee')
-                            <div class="card-footer d-flex justify-content-end">
-                                <a href="{{ route('user.checkout.pelunasan', $checkout->id) }}" class="btn btn-success">
-                                    <i class="fas fa-money-bill"></i> Lunasi Pembayaran
-                                </a>
-                            </div>
+                            @php
+                                $pendingPayment = false;
+                                foreach ($pembayaran as $p) {
+                                    if ($p->status == 'pending') {
+                                        $pendingPayment = true;
+                                        break;
+                                    }
+                                }
+                            @endphp
+
+                            @if (!$pendingPayment)
+                                <div class="card-footer d-flex justify-content-end">
+                                    <a href="{{ route('user.checkout.pelunasan', $checkout->id) }}"
+                                        class="btn btn-success">
+                                        <i class="fas fa-money-bill"></i> Lunasi Pembayaran
+                                    </a>
+                                </div>
+                            @else
+                                <div class="card-footer">
+                                    <div class="alert alert-info mb-0">
+                                        <i class="fas fa-info-circle mr-2"></i> Pembayaran pelunasan sedang dalam proses
+                                        verifikasi.
+                                    </div>
+                                </div>
+                            @endif
                         @endif
                     </div>
                 </div>

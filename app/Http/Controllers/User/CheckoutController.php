@@ -19,17 +19,28 @@ class CheckoutController extends Controller
      */
     public function index()
     {
-        // Get active facilities
-        $fasilitas = Fasilitas::where('ketersediaan', 'aktif')
-                             ->whereNull('deleted_at')
-                             ->get();
+        // Dapatkan ID fasilitas dari parameter URL
+        $id = request('id');
 
-        // Get user's checkouts
-        $checkouts = Checkout::with(['jadwal.fasilitas'])
-                           ->where('user_id', Auth::id())
-                           ->whereIn('status', ['fee', 'lunas']) // Only show active bookings
-                           ->latest()
-                           ->get();
+        // Filter fasilitas berdasarkan ID jika ada
+        if ($id) {
+            $fasilitas = Fasilitas::where('id', $id)
+                                ->where('ketersediaan', 'aktif')
+                                ->whereNull('deleted_at')
+                                ->get();
+        } else {
+            // Jika tidak ada ID, tampilkan semua fasilitas aktif
+            $fasilitas = Fasilitas::where('ketersediaan', 'aktif')
+                                ->whereNull('deleted_at')
+                                ->get();
+        }
+
+        // Dapatkan booking pengguna
+        $checkouts = Checkout::with(['jadwals', 'jadwal.fasilitas'])
+                        ->where('user_id', Auth::id())
+                        ->whereIn('status', ['fee', 'lunas'])
+                        ->latest()
+                        ->get();
 
         // Calculate total duration for each checkout
         foreach ($checkouts as $checkout) {
@@ -159,10 +170,7 @@ class CheckoutController extends Controller
 
         DB::beginTransaction();
         try {
-            // 1. Update checkout status stays as 'fee' until verified
-            // Status tidak langsung berubah menjadi 'lunas', menunggu verifikasi
-
-            // 2. Record payment with 'pending' status
+            // Record payment with 'pending' status
             PemasukanSewa::create([
                 'checkout_id' => $checkout->id,
                 'fasilitas_id' => $checkout->jadwal->fasilitas_id,
