@@ -15,41 +15,51 @@ class DashboardController extends Controller
     /**
      * Menampilkan dashboard petugas pembayaran
      */
-     public function index()
+    public function index()
     {
         // Data tanggal hari ini
         $today = Carbon::today()->format('Y-m-d');
 
-        // Total pemasukan (sum dari jumlah_bayar di tabel pemasukan_sewas)
+        // Total pemasukan dari transaksi lunas
         $totalPemasukan = PemasukanSewa::where('status', 'lunas')->sum('jumlah_bayar');
 
         // Transaksi hari ini
         $transaksiHariIni = PemasukanSewa::whereDate('created_at', $today)->count();
 
-        // Menunggu verifikasi (status pending)
-        $menungguVerifikasi = PemasukanSewa::where('status', 'pending')->count();
+        // PERBAIKAN PENTING: Hitung menunggu verifikasi dengan benar
+        // Ini adalah jumlah checkout dengan status fee yang punya pembayaran pending
+        $menungguVerifikasi = Checkout::where('status', 'fee')
+            ->whereHas('pembayaran', function($query) {
+                $query->where('status', 'pending');
+            })
+            ->count();
 
-        // Total booking aktif
+        // Total booking aktif (fee atau lunas)
         $totalBooking = Checkout::whereIn('status', ['fee', 'lunas'])->count();
 
-        // Status pembayaran untuk chart
+        // Status pembayaran untuk chart dengan tambahan batal
         $pembayaranLunas = PemasukanSewa::where('status', 'lunas')->count();
-        $pembayaranDP = PemasukanSewa::where('status', 'fee')->count();
-        $pembayaranPending = PemasukanSewa::where('status', 'pending')->count();
+        $pembayaranDP = Checkout::where('status', 'fee')
+            ->whereDoesntHave('pembayaran', function($query) {
+                $query->where('status', 'pending');
+            })
+            ->count();
+        $pembayaranPending = $menungguVerifikasi; // Menggunakan hasil perhitungan yang sudah diperbaiki
+        $pembayaranBatal = Checkout::where('status', 'batal')->count(); // DITAMBAHKAN
 
-        // Transaksi hari ini dengan relasi (limit 5)
+        // Transaksi hari ini - tetap ditampilkan tapi tanpa aksi
         $transaksiToday = PemasukanSewa::with(['checkout.user', 'fasilitas'])
-                          ->whereDate('created_at', $today)
-                          ->orderBy('created_at', 'desc')
-                          ->take(5)
-                          ->get();
+                        ->whereDate('created_at', $today)
+                        ->orderBy('created_at', 'desc')
+                        ->take(5)
+                        ->get();
 
-        // Aktivitas pembayaran yang menunggu verifikasi (pending)
+        // Pembayaran menunggu verifikasi
         $recentPayments = PemasukanSewa::with(['checkout.user', 'fasilitas'])
-                         ->where('status', 'pending')
-                         ->orderBy('created_at', 'desc')
-                         ->take(5)
-                         ->get();
+                        ->where('status', 'pending')
+                        ->orderBy('created_at', 'desc')
+                        ->take(5)
+                        ->get();
 
         return view('PetugasPembayaran.dashboard', compact(
             'totalPemasukan',
@@ -59,6 +69,7 @@ class DashboardController extends Controller
             'pembayaranLunas',
             'pembayaranDP',
             'pembayaranPending',
+            'pembayaranBatal', // DITAMBAHKAN untuk diagram
             'transaksiToday',
             'recentPayments'
         ));

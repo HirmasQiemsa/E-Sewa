@@ -110,7 +110,6 @@
                                         <th>Metode</th>
                                         <th>User</th>
                                         <th>Status</th>
-                                        <th>Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -131,12 +130,6 @@
                                                 @elseif($transaksi->status == 'batal')
                                                     <span class="badge badge-danger">Batal</span>
                                                 @endif
-                                            </td>
-                                            <td>
-                                                <a href="{{ route('petugas_pembayaran.pembayaran.show', $transaksi->id) }}"
-                                                    class="btn btn-sm btn-info">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
                                             </td>
                                         </tr>
                                     @empty
@@ -176,17 +169,7 @@
                                     style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
                             </div>
 
-                            <div class="mt-4 text-center">
-                                <span class="mr-3">
-                                    <i class="fas fa-circle text-success"></i> Lunas ({{ $pembayaranLunas ?? 0 }})
-                                </span>
-                                <span class="mr-3">
-                                    <i class="fas fa-circle text-warning"></i> DP ({{ $pembayaranDP ?? 0 }})
-                                </span>
-                                <span>
-                                    <i class="fas fa-circle text-danger"></i> Batal ({{ $pembayaranBatal ?? 0 }})
-                                </span>
-                            </div>
+                            
                         </div>
                     </div>
                 </div>
@@ -264,54 +247,74 @@
     </section>
 
     <!-- Script untuk chart status pembayaran -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Ensure jQuery and Chart are loaded
-            if (window.jQuery && typeof Chart !== 'undefined') {
-                var ctx = document.getElementById('paymentStatusChart');
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Ensure jQuery and Chart are loaded
+        if (window.jQuery && typeof Chart !== 'undefined') {
+            var ctx = document.getElementById('paymentStatusChart');
 
-                if (ctx) {
-                    // Data untuk chart
-                    var data = {
+            if (ctx) {
+                // Data untuk chart
+                var data = {
+                    labels: ['Lunas', 'DP', 'Pending', 'Batal'], // Menambahkan labels
+                    datasets: [{
+                        data: [
+                            {{ $pembayaranLunas ?? 0 }},
+                            {{ $pembayaranDP ?? 0 }},
+                            {{ $pembayaranPending ?? 0 }}, // Menambahkan data pending
+                            {{ $pembayaranBatal ?? 0 }}
+                        ],
+                        backgroundColor: ['#28a745', '#ffc107', '#17a2b8', '#dc3545'], // Menambahkan warna untuk pending
+                        hoverOffset: 4
+                    }]
+                };
 
-                        datasets: [{
-                            data: [{{ $pembayaranLunas ?? 0 }}, {{ $pembayaranDP ?? 0 }},
-                                {{ $pembayaranBatal ?? 0 }}
-                            ],
-                            backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
-                            hoverOffset: 4
-                        }]
-                    };
-
-                    // Opsi chart
-                    var options = {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom'
+                // Opsi chart
+                var options = {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                boxWidth: 12
                             }
                         },
-                        animation: {
-                            animateScale: true
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    var label = context.label || '';
+                                    var value = context.raw || 0;
+                                    var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    var percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                    return label + ': ' + value + ' (' + percentage + '%)';
+                                }
+                            }
                         }
-                    };
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
+                    },
+                    cutout: '60%' // Untuk tampilan donut yang lebih baik
+                };
 
-                    // Inisialisasi chart
-                    var paymentChart = new Chart(ctx, {
-                        type: 'doughnut',
-                        data: data,
-                        options: options
-                    });
+                // Inisialisasi chart
+                var paymentChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: data,
+                    options: options
+                });
 
-                    // Debug info
-                    console.log('Chart initialized with data:', data);
-                } else {
-                    console.error('Canvas element not found');
-                }
+                // Debug info
+                console.log('Chart initialized with data:', data);
             } else {
-                console.error('jQuery or Chart.js not loaded');
+                console.error('Canvas element not found');
             }
-        });
-    </script>
+        } else {
+            console.error('jQuery or Chart.js not loaded');
+        }
+    });
+</script>
 @endsection

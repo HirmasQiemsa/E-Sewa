@@ -1,5 +1,3 @@
-<!-- Place this in your user.blade.php file -->
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -37,6 +35,32 @@
     <link rel="stylesheet" href="{{ asset('lte/plugins/toastr/toastr.min.css') }}">
 
     <style>
+        /* HAPUS: Semua loading untuk navigasi internal - hanya untuk logout */
+        .logout-progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, #dc3545, #ff6b6b);
+            background-size: 200% 100%;
+            animation: logout-gradient 1s ease-in-out infinite;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.2s ease, width 0.4s ease;
+            box-shadow: 0 0 8px rgba(220, 53, 69, 0.6);
+        }
+
+        .logout-progress-bar.active {
+            opacity: 1;
+        }
+
+        @keyframes logout-gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
         /* Critical CSS for footer positioning */
         html,
         body {
@@ -63,8 +87,8 @@
             /* Exact height */
         }
 
-        /* Enhanced preloader styles */
-        .preloader {
+        /* HANYA untuk initial load - tetap dipertahankan */
+        .preloader.initial-only {
             position: fixed;
             top: 0;
             left: 0;
@@ -81,12 +105,12 @@
             transition: opacity 0.4s ease, visibility 0.4s ease;
         }
 
-        .preloader.fade-out {
+        .preloader.initial-only.fade-out {
             opacity: 0;
             visibility: hidden;
         }
 
-        .preloader.hidden {
+        .preloader.initial-only.hidden {
             display: none;
         }
 
@@ -128,13 +152,20 @@
             }
         }
 
-        /* Page transition effect */
-        .page-transition {
-            transition: opacity 0.3s ease-out;
+        /* TAMBAHAN: Disable AdminLTE default transitions yang memperlambat */
+        .content-wrapper,
+        .main-sidebar,
+        .navbar,
+        .nav-link,
+        a {
+            transition: none !important;
+            animation: none !important;
         }
 
-        .page-transition.fading {
-            opacity: 0.6;
+        /* TAMBAHAN: Optimasi untuk navigasi cepat */
+        .fast-navigation {
+            transition: none !important;
+            animation: none !important;
         }
 
         .carousel-overlay {
@@ -175,20 +206,27 @@
             margin-bottom: 15px;
             color: #007bff;
         }
+
+        /* Footer visibility styles */
+        .footer-hidden {
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .footer-visible {
+            transform: translateY(0);
+            transition: transform 0.3s ease;
+        }
     </style>
 </head>
 
 <body class="hold-transition sidebar-mini sidebar-collapse layout-fixed">
-    <!-- Customizable preloader -->
-    <div class="preloader" id="customPreloader">
-        <img class="animation__gentle" src="{{ asset('img/logo.png') }}" alt="DISPORA Logo" height="180"
-            width="150">
-        <h2 class="mt-4 fade-in-text"><b>DISPORA SEMARANG</b></h2>
-    </div>
+    <!-- HANYA untuk logout: Progress bar -->
+    <div id="logoutProgressBar" class="logout-progress-bar"></div>
 
-    <div class="wrapper page-transition">
-        <!-- Initial preloader that shows on first page load -->
-        <div class="preloader">
+    <div class="wrapper" id="pageContent">
+        <!-- TETAP: Initial preloader untuk first page load -->
+        <div class="preloader initial-only" id="initialPreloader">
             <img class="animation__gentle" src="{{ asset('img/logo.png') }}" alt="DISPORA Logo" height="180"
                 width="150">
             <h2 class="mt-4 fade-in-text"><b>DISPORA SEMARANG</b></h2>
@@ -199,7 +237,8 @@
             <!-- Left navbar links -->
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link d-flex align-items-center" data-widget="pushmenu"
+                    <!-- HAPUS semua loading untuk navigasi - biarkan default -->
+                    <a class="nav-link d-flex align-items-center fast-navigation" data-widget="pushmenu"
                         href="{{ route('user.fasilitas') }}" role="button">
                         <img class="me-2" src="{{ asset('img/logo.png') }}" alt="AdminLTELogo" height="40"
                             width="40">
@@ -233,8 +272,9 @@
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
                         <li class="nav-item active mt-2">
+                            <!-- HAPUS loading - navigasi langsung -->
                             <a href="{{ route('user.fasilitas') }}"
-                                class="nav-link active bg-danger nav-with-preloader">
+                                class="nav-link active bg-danger fast-navigation">
                                 <i class="nav-icon fas fa-book"></i>
                                 <p>
                                     Fasilitas
@@ -245,7 +285,8 @@
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
                         <li class="nav-item active mt-2">
-                            <a href="{{ route('user.riwayat') }}" class="nav-link active bg-danger nav-with-preloader">
+                            <!-- HAPUS loading - navigasi langsung -->
+                            <a href="{{ route('user.riwayat') }}" class="nav-link active bg-danger fast-navigation">
                                 <i class="nav-icon fas fa-history"></i>
                                 <p>
                                     Riwayat
@@ -255,7 +296,8 @@
 
                         <!-- logout -->
                         <li class="nav-item active mt-2">
-                            <a href="{{ route('user.profile') }}" class="nav-link active bg-primary">
+                            <!-- HAPUS loading - navigasi langsung -->
+                            <a href="{{ route('user.profile') }}" class="nav-link active bg-primary fast-navigation">
                                 <i class="nav-icon fas fa-user"></i>
                                 <p>
                                     User Profile
@@ -263,7 +305,8 @@
                             </a>
                         </li>
                         <li class="nav-item active mt-2">
-                            <form method="POST" action="{{ route('logout') }}" id="logout-form">
+                            <!-- HANYA ini yang ada loading -->
+                            <form method="POST" action="{{ route('logout') }}" id="logout-form" class="logout-form-with-loading">
                                 @csrf
                                 <a href="{{ route('logout') }}" class="nav-link active bg-primary"
                                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
@@ -335,172 +378,152 @@
     <script src="{{ asset('lte/plugins/toastr/toastr.min.js') }}"></script>
     <script src="{{ asset('lte/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
 
-    <!-- Custom Scripts for Preloader Management -->
+    <!-- MINIMAL: Hanya untuk initial load dan logout -->
     <script>
-        // Initialize the preloader system
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialize preloader functionality
-            initPreloader();
+        class MinimalLoader {
+            constructor() {
+                this.logoutProgressBar = document.getElementById('logoutProgressBar');
+                this.isLoading = false;
+                this.init();
+            }
 
-            // Adjust footer visibility
-            adjustFooterVisibility();
-
-            // Listen for window resize
-            window.addEventListener('resize', adjustFooterVisibility);
-
-            // Setup navigation with preloader
-            setupNavigation();
-
-            // Setup forms with preloader
-            setupForms();
-        });
-
-        // Function to handle the initial page load preloader
-        function initPreloader() {
-            const initialPreloader = document.querySelector('.preloader:not(#customPreloader)');
-            const customPreloader = document.getElementById('customPreloader');
-            const wrapper = document.querySelector('.wrapper');
-
-            // Hide custom preloader initially
-            if (customPreloader) {
-                customPreloader.classList.add('hidden');
+            init() {
+                this.handleInitialLoad();
+                this.setupLogoutOnly();
+                this.disableAdminLTETransitions();
+                this.setupFooterControl();
             }
 
             // Handle initial page load preloader
-            if (initialPreloader) {
-                window.addEventListener('load', function() {
-                    setTimeout(function() {
-                        initialPreloader.classList.add('fade-out');
+            handleInitialLoad() {
+                const initialPreloader = document.getElementById('initialPreloader');
 
-                        setTimeout(function() {
-                            initialPreloader.classList.add('hidden');
-                        }, 400);
-                    }, 1000);
-                });
-            }
-        }
-
-        // Function to show the custom preloader
-        function showPreloader(duration = 1000) {
-            const preloader = document.getElementById('customPreloader');
-            const wrapper = document.querySelector('.wrapper');
-
-            if (preloader) {
-                // First fade the page slightly
-                if (wrapper) {
-                    wrapper.classList.add('fading');
-                }
-
-                // Show the preloader
-                preloader.classList.remove('hidden');
-                preloader.classList.remove('fade-out');
-
-                // Optional: Auto-hide after duration
-                if (duration > 0) {
-                    setTimeout(function() {
-                        hidePreloader();
-                    }, duration);
+                if (initialPreloader) {
+                    window.addEventListener('load', () => {
+                        setTimeout(() => {
+                            initialPreloader.classList.add('fade-out');
+                            setTimeout(() => {
+                                initialPreloader.classList.add('hidden');
+                            }, 400);
+                        }, 1000);
+                    });
                 }
             }
-        }
 
-        // Function to hide the custom preloader
-        function hidePreloader(delay = 400) {
-            const preloader = document.getElementById('customPreloader');
-            const wrapper = document.querySelector('.wrapper');
+            // HANYA untuk logout
+            showLogoutLoading() {
+                if (this.isLoading) return;
 
-            if (preloader) {
-                setTimeout(function() {
-                    preloader.classList.add('fade-out');
+                this.isLoading = true;
+                this.logoutProgressBar.classList.add('active');
 
-                    // Restore page opacity
-                    if (wrapper) {
-                        wrapper.classList.remove('fading');
-                    }
-
-                    setTimeout(function() {
-                        preloader.classList.add('hidden');
-                    }, 400);
-                }, delay);
+                this.animateLogoutProgress();
             }
-        }
 
-        // Function to setup navigation with preloader
-        function setupNavigation() {
-            // Add preloader to sidebar navigation links
-            const navLinks = document.querySelectorAll('.nav-with-preloader');
+            // Animate logout progress bar
+            animateLogoutProgress() {
+                let width = 0;
+                const increment = 100 / (500 / 15); // 500ms duration
 
-            navLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    // Only intercept if it's a normal link click (not middle click or ctrl+click)
-                    if (!e.ctrlKey && !e.metaKey && e.button !== 1) {
-                        e.preventDefault();
-                        const targetUrl = this.getAttribute('href');
+                const animate = () => {
+                    if (width < 90 && this.isLoading) {
+                        width += increment;
+                        this.logoutProgressBar.style.width = width + '%';
+                        setTimeout(animate, 15);
+                    }
+                };
 
-                        // Show preloader
-                        showPreloader(0); // Don't auto-hide
+                animate();
 
-                        // Navigate after a short delay
-                        setTimeout(function() {
-                            window.location.href = targetUrl;
-                        }, 600);
+                // Complete after 500ms
+                setTimeout(() => {
+                    this.logoutProgressBar.style.width = '100%';
+                    setTimeout(() => {
+                        this.logoutProgressBar.classList.remove('active');
+                        this.logoutProgressBar.style.width = '0%';
+                        this.isLoading = false;
+                    }, 100);
+                }, 500);
+            }
+
+            // Setup HANYA untuk logout
+            setupLogoutOnly() {
+                document.addEventListener('submit', (e) => {
+                    if (e.target.classList.contains('logout-form-with-loading')) {
+                        this.showLogoutLoading();
                     }
                 });
-            });
-        }
+            }
 
-        // Function to setup forms with preloader
-        function setupForms() {
-            // Add preloader to forms with specific class
-            document.querySelectorAll('form.form-with-preloader').forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    // Show the preloader without auto-hide
-                    showPreloader(0);
+            // Disable AdminLTE default transitions yang memperlambat
+            disableAdminLTETransitions() {
+                // Disable pushmenu animation
+                if (typeof AdminLTE !== 'undefined' && AdminLTE.PushMenu) {
+                    AdminLTE.PushMenu.options = {
+                        ...AdminLTE.PushMenu.options,
+                        animationSpeed: 0
+                    };
+                }
 
-                    // Let the form submit normally
-                    return true;
-                });
-            });
-        }
+                // Disable sidebar transitions
+                const style = document.createElement('style');
+                style.textContent = `
+                    .main-sidebar {
+                        transition: none !important;
+                        animation: none !important;
+                    }
+                    .content-wrapper {
+                        transition: none !important;
+                        animation: none !important;
+                    }
+                    .nav-link {
+                        transition: none !important;
+                    }
+                `;
+                document.head.appendChild(style);
+            }
 
-        // Expose functions globally so they can be called from anywhere
-        window.appPreloader = {
-            show: showPreloader,
-            hide: hidePreloader
-        };
+            // Footer visibility control
+            setupFooterControl() {
+                const adjustFooterVisibility = () => {
+                    const contentHeight = $('.content-wrapper').height();
+                    const windowHeight = $(window).height();
+                    const footerHeight = 60;
+                    const navbarHeight = $('.main-header').outerHeight();
+                    const availableHeight = windowHeight - navbarHeight;
 
-        // Footer visibility control function
-        function adjustFooterVisibility() {
-            var contentHeight = $('.content-wrapper').height();
-            var windowHeight = $(window).height();
-            var footerHeight = 60; // Exact 60px height
-            var navbarHeight = $('.main-header').outerHeight();
-            var availableHeight = windowHeight - navbarHeight;
+                    if (contentHeight > (availableHeight - footerHeight)) {
+                        $(window).scroll(function() {
+                            if ($(window).scrollTop() + windowHeight >= $(document).height() - 10) {
+                                $('.main-footer').addClass('footer-visible').removeClass('footer-hidden');
+                            } else {
+                                $('.main-footer').addClass('footer-hidden').removeClass('footer-visible');
+                            }
+                        });
 
-            // If content plus footer would overflow the screen
-            if (contentHeight > (availableHeight - footerHeight)) {
-                // Hide footer when scrolling through content
-                $(window).scroll(function() {
-                    if ($(window).scrollTop() + windowHeight >= $(document).height() - 10) {
-                        // User has scrolled to bottom, show footer
-                        $('.main-footer').addClass('footer-visible').removeClass('footer-hidden');
+                        if ($(window).scrollTop() + windowHeight < $(document).height() - 10) {
+                            $('.main-footer').addClass('footer-hidden').removeClass('footer-visible');
+                        }
                     } else {
-                        // User is not at bottom, hide footer
-                        $('.main-footer').addClass('footer-hidden').removeClass('footer-visible');
+                        $('.main-footer').addClass('footer-visible').removeClass('footer-hidden');
+                        $(window).off('scroll');
                     }
-                });
+                };
 
-                // Initialize as hidden if not at bottom
-                if ($(window).scrollTop() + windowHeight < $(document).height() - 10) {
-                    $('.main-footer').addClass('footer-hidden').removeClass('footer-visible');
-                }
-            } else {
-                // Content is short, footer should always be visible
-                $('.main-footer').addClass('footer-visible').removeClass('footer-hidden');
-                // Remove scroll event if previously added
-                $(window).off('scroll');
+                adjustFooterVisibility();
+                window.addEventListener('resize', adjustFooterVisibility);
             }
         }
+
+        // Initialize minimal loader
+        document.addEventListener('DOMContentLoaded', () => {
+            window.minimalLoader = new MinimalLoader();
+
+            // Global function untuk logout saja
+            window.showLogoutLoader = () => {
+                window.minimalLoader.showLogoutLoading();
+            };
+        });
     </script>
 </body>
 

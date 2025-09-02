@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         // 1. Laporan Booking
-        Schema::create('laporan_bookings', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('checkout_id')->constrained()->onDelete('cascade');
-            $table->enum('status', ['fee', 'lunas', 'batal']);
-            $table->date('tanggal_booking');
-            $table->timestamps();
-        });
+        // Schema::create('laporan_bookings', function (Blueprint $table) {
+        //     $table->id();
+        //     $table->foreignId('checkout_id')->constrained()->onDelete('cascade');
+        //     $table->enum('status', ['fee', 'lunas', 'batal']);
+        //     $table->date('tanggal_booking');
+        //     $table->timestamps();
+        // });
 
         // 2. Laporan Pemasukan Sewa
         Schema::create('laporan_pemasukan_sewas', function (Blueprint $table) {

@@ -271,10 +271,10 @@
 
                         <!-- Kelola Fasilitas dengan submenu -->
                         <li
-                            class="nav-item {{ request()->routeIs('petugas_fasilitas.fasilitas.*') || request()->routeIs('petugas_fasilitas.jadwal.*') ? 'menu-open' : '' }}">
-                            <a href="#"
-                                class="nav-link {{ request()->routeIs('petugas_fasilitas.fasilitas.*') || request()->routeIs('petugas_fasilitas.jadwal.*') ? 'active' : '' }} bg-danger">
-                                <i class="nav-icon fas fa-map-marker-alt"></i>
+                        class="nav-item {{ request()->routeIs('petugas_fasilitas.fasilitas.*') || request()->routeIs('petugas_fasilitas.jadwal.*') ? 'menu-open' : '' }}">
+                        <a href="#"
+                        class="nav-link {{ request()->routeIs('petugas_fasilitas.fasilitas.*') || request()->routeIs('petugas_fasilitas.jadwal.*') ? 'active' : '' }} bg-danger">
+                        <i class="nav-icon fas fa-map-marker-alt"></i>
                                 <p>
                                     Kelola Fasilitas
                                     <i class="fas fa-angle-left right"></i>
@@ -290,20 +290,30 @@
                                 </li>
                                 <li class="nav-item">
                                     <a href="{{ route('petugas_fasilitas.jadwal.index') }}"
-                                        class="nav-link {{ request()->routeIs('petugas_fasilitas.jadwal.index', 'petugas_fasilitas.jadwal.create', 'petugas_fasilitas.jadwal.edit') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
-                                        <p>Daftar Jadwal</p>
+                                    class="nav-link {{ request()->routeIs('petugas_fasilitas.jadwal.index', 'petugas_fasilitas.jadwal.create', 'petugas_fasilitas.jadwal.edit') ? 'active' : '' }}">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Daftar Jadwal</p>
                                     </a>
                                 </li>
                             </ul>
                         </li>
 
+                        <li class="nav-item">
+                            <a href="{{ route('petugas_fasilitas.riwayat') }}"
+                                class="nav-link {{ request()->routeIs('petugas_fasilitas.riwayat') ? 'active' : '' }} bg-danger">
+                                <i class="nav-icon fas fa-history"></i>
+                                <p>
+                                    Riwayat Aktifitas
+                                </p>
+                            </a>
+                        </li>
+
                         <!-- Kelola Booking dengan submenu -->
-                        <li
+                        {{-- <li
                             class="nav-item {{ request()->routeIs('petugas_fasilitas.booking.*') || request()->routeIs('petugas_fasilitas.riwayat') ? 'menu-open' : '' }}">
                             <a href="#"
                                 class="nav-link {{ request()->routeIs('petugas_fasilitas.booking.*') || request()->routeIs('petugas_fasilitas.riwayat') ? 'active' : '' }} bg-danger">
-                                <i class="nav-icon fas fa-calendar-alt"></i>
+                                <i class="nav-icon fas fa-history"></i>
                                 <p>
                                     Kelola Booking
                                     <i class="fas fa-angle-left right"></i>
@@ -320,12 +330,12 @@
                                 <li class="nav-item">
                                     <a href="{{ route('petugas_fasilitas.riwayat') }}"
                                         class="nav-link {{ request()->routeIs('petugas_fasilitas.riwayat') ? 'active' : '' }}">
-                                        <i class="far fa-circle nav-icon"></i>
+                                        <i class="far fa-history nav-icon"></i>
                                         <p>Riwayat Aktifitas</p>
                                     </a>
                                 </li>
                             </ul>
-                        </li>
+                        </li> --}}
 
                         <!-- Profile (Blue) -->
                         <li class="nav-item mt-2">
