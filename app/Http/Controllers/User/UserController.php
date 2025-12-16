@@ -6,20 +6,20 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Admin;
-use App\Models\PetugasFasilitas;
-use App\Models\PetugasPembayaran;
+use App\Models\AdminFasilitas;
+use App\Models\AdminPembayaran;
+use App\Models\Checkout;
+use Carbon\Carbon;
+use App\Models\Fasilitas;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
+
 class UserController extends Controller
 {
-    // View Blade
-    public function beranda()
-    {
-        return view('User.Fasilitas.index');
-    }
+
 
     /**
      * Display user profile page
@@ -104,10 +104,10 @@ class UserController extends Controller
         $existsInAdmin = Admin::where('username', $username)
             ->exists();
 
-        $existsInFasilitas = PetugasFasilitas::where('username', $username)
+        $existsInFasilitas = AdminFasilitas::where('username', $username)
             ->exists();
 
-        $existsInPembayaran = PetugasPembayaran::where('username', $username)
+        $existsInPembayaran = AdminPembayaran::where('username', $username)
             ->exists();
 
         if ($existsInAdmin || $existsInFasilitas || $existsInPembayaran) {

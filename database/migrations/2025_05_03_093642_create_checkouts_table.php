@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('jadwals_id')->nullable()->constrained()->onDelete('cascade');
             $table->bigInteger('total_bayar')->default(value: 0);
-            $table->enum('status', ['fee', 'lunas', 'batal',])->default('fee');
+            $table->enum('status', ['kompensasi','pending', 'lunas', 'batal',])->default('kompensasi');
             $table->softDeletes();
             $table->timestamps();
         });

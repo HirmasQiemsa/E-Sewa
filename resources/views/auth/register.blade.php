@@ -1,349 +1,177 @@
-{{-- resources/views/auth/register.blade.php --}}
-<x-guest-layout>
-    <div class="text-center mb-4">
-        <h2 class="h4 text-gray-900 mb-2">Daftar Akun Baru</h2>
-        <p class="text-muted small">Bergabunglah untuk menyewa fasilitas olahraga DISPORA</p>
-    </div>
+<!DOCTYPE html>
+<html lang="id">
 
-    <form method="POST" action="{{ route('register-proses') }}" id="registerForm">
-        @csrf
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Daftar Akun | E-Sewa DISPORA</title>
 
-        <!-- Nama Lengkap -->
-        <div class="form-group">
-            <label for="name" class="form-label">
-                <i class="fas fa-user text-primary mr-2"></i>Nama Lengkap
-            </label>
-            <input id="name" class="form-control @error('name') is-invalid @enderror" type="text" name="name"
-                value="{{ old('name') }}" required autofocus autocomplete="name"
-                placeholder="Masukkan nama lengkap Anda">
-            @error('name')
-                <div class="invalid-feedback">
-                    <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
-                </div>
-            @enderror
-        </div>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/icheck-bootstrap@3.0.1/icheck-bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
 
-        <!-- Username -->
-        <div class="form-group">
-            <label for="username" class="form-label">
-                <i class="fas fa-at text-primary mr-2"></i>Username
-            </label>
-            <input id="username" class="form-control @error('username') is-invalid @enderror" type="text"
-                name="username" value="{{ old('username') }}" required autocomplete="username"
-                placeholder="Pilih username unik Anda">
-            @error('username')
-                <div class="invalid-feedback">
-                    <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
-                </div>
-            @enderror
-            <small class="form-text text-muted">
-                <i class="fas fa-info-circle mr-1"></i>Username hanya boleh huruf dan angka, tanpa spasi
-            </small>
-        </div>
+    <style>
+        /* Background seragam dengan Login */
+        body.register-page {
+            background: url('{{ asset("img/body-login.png") }}') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+        }
 
-        <!-- Email -->
-        <div class="form-group">
-            <label for="email" class="form-label">
-                <i class="fas fa-envelope text-primary mr-2"></i>Email
-                <span class="text-muted">(Opsional)</span>
-            </label>
-            <input id="email" class="form-control @error('email') is-invalid @enderror" type="email"
-                name="email" value="{{ old('email') }}" autocomplete="email"
-                placeholder="contoh@email.com (boleh dikosongkan)">
-            @error('email')
-                <div class="invalid-feedback">
-                    <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
-                </div>
-            @enderror
-            <small class="form-text text-muted">
-                <i class="fas fa-info-circle mr-1"></i>Email berguna untuk notifikasi booking. Jika belum punya email,
-                bisa dikosongkan dahulu dan diisi nanti di profil.
-            </small>
-        </div>
+        /* Card effect */
+        .register-box .card {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 20px rgba(171, 19, 19, 0.2);
+            border-radius: 10px;
+        }
 
-        <!-- No HP -->
-        <div class="form-group">
-            <label for="no_hp" class="form-label">
-                <i class="fas fa-phone text-primary mr-2"></i>Nomor HP/WhatsApp
-            </label>
-            <div class="input-group">
-                <div class="input-group-prepend">
-                    <span class="input-group-text">+62</span>
-                </div>
-                <input id="no_hp" class="form-control @error('no_hp') is-invalid @enderror" type="tel"
-                    name="no_hp" value="{{ old('no_hp') }}" required autocomplete="tel" placeholder="8123456789"
-                    pattern="[0-9]{10,13}">
-                @error('no_hp')
-                    <div class="invalid-feedback">
-                        <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+        /* Lebarkan box registrasi karena inputnya banyak */
+        .register-box {
+            width: 400px;
+        }
+
+        @media (max-width: 576px) {
+            .register-box {
+                width: 90%;
+                margin-top: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body class="hold-transition register-page">
+
+    <div class="register-box">
+        <div class="card card-outline card-danger">
+            <div class="card-header text-center">
+                <a href="{{ url('/') }}" class="h2 font-weight-bold text-dark">E-SEWA FASILITAS</a>
+            </div>
+
+            <div class="card-body">
+                <p class="login-box-msg text-muted">Daftar akun baru untuk mulai booking</p>
+
+                <form action="{{ route('register-proses') }}" method="post">
+                    @csrf
+
+                    <div class="input-group mb-3">
+                        <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
+                               placeholder="Nama Lengkap" value="{{ old('name') }}" required autofocus>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-user"></span>
+                            </div>
+                        </div>
+                        @error('name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
-                @enderror
-            </div>
-            <small class="form-text text-muted">
-                <i class="fas fa-info-circle mr-1"></i>Nomor akan digunakan untuk konfirmasi booking
-            </small>
-        </div>
 
-        <!-- Alamat -->
-        <div class="form-group">
-            <label for="alamat" class="form-label">
-                <i class="fas fa-map-marker-alt text-primary mr-2"></i>Alamat Lengkap
-            </label>
-            <textarea id="alamat" class="form-control @error('alamat') is-invalid @enderror" name="alamat" required
-                rows="3" placeholder="Masukkan alamat lengkap Anda">{{ old('alamat') }}</textarea>
-            @error('alamat')
-                <div class="invalid-feedback">
-                    <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
-                </div>
-            @enderror
-        </div>
-
-        <!-- Password -->
-        <div class="form-group">
-            <label for="password" class="form-label">
-                <i class="fas fa-lock text-primary mr-2"></i>Password
-            </label>
-            <div class="input-group">
-                <input id="password" class="form-control @error('password') is-invalid @enderror" type="password"
-                    name="password" required autocomplete="new-password" placeholder="Minimal 6 karakter">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
-                        <i class="fas fa-eye"></i>
-                    </button>
-                </div>
-                @error('password')
-                    <div class="invalid-feedback">
-                        <i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}
+                    <div class="input-group mb-3">
+                        <input type="text" name="username" class="form-control @error('username') is-invalid @enderror"
+                               placeholder="Username (Tanpa Spasi)" value="{{ old('username') }}" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-at"></span>
+                            </div>
+                        </div>
+                        @error('username') <div class="invalid-feedback">{{ $message }}</div> @enderror
                     </div>
-                @enderror
-            </div>
-            <small class="form-text text-muted">
-                <i class="fas fa-info-circle mr-1"></i>Gunakan kombinasi huruf, angka, dan simbol
-            </small>
-        </div>
 
-        <!-- Confirm Password -->
-        <div class="form-group">
-            <label for="password_confirmation" class="form-label">
-                <i class="fas fa-lock text-primary mr-2"></i>Konfirmasi Password
-            </label>
-            <div class="input-group">
-                <input id="password_confirmation" class="form-control" type="password" name="password_confirmation"
-                    required autocomplete="new-password" placeholder="Ulangi password yang sama">
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="button" id="togglePasswordConfirm">
-                        <i class="fas fa-eye"></i>
-                    </button>
+                    <div class="input-group mb-3">
+                        <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
+                               placeholder="Email Aktif" value="{{ old('email') }}" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-envelope"></span>
+                            </div>
+                        </div>
+                        @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <input type="number" name="no_hp" class="form-control @error('no_hp') is-invalid @enderror"
+                               placeholder="Nomor WhatsApp" value="{{ old('no_hp') }}" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-phone"></span>
+                            </div>
+                        </div>
+                        @error('no_hp') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <textarea name="alamat" class="form-control @error('alamat') is-invalid @enderror"
+                                  rows="2" placeholder="Alamat Lengkap" required>{{ old('alamat') }}</textarea>
+                        @error('alamat') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <input type="password" name="password" id="password" class="form-control @error('password') is-invalid @enderror"
+                               placeholder="Password (Min. 6 Karakter)" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-lock"></span>
+                            </div>
+                        </div>
+                        @error('password') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <input type="password" name="password_confirmation" id="password_confirmation" class="form-control"
+                               placeholder="Ulangi Password" required>
+                        <div class="input-group-append">
+                            <div class="input-group-text">
+                                <span class="fas fa-check"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-8">
+                            <div class="icheck-danger">
+                                <input type="checkbox" id="agreeTerms" name="terms" value="agree" required>
+                                <label for="agreeTerms">
+                                    Saya setuju <a href="#">ketentuan</a>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <button type="submit" class="btn btn-danger btn-block font-weight-bold">Daftar</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="social-auth-links text-center mt-3">
+                    <hr>
+                    <p class="mb-0">Sudah punya akun?</p>
+                    <a href="{{ route('login') }}" class="text-center font-weight-bold text-danger">Login disini</a>
                 </div>
             </div>
-        </div>
-
-        <!-- Terms & Conditions -->
-        {{-- <div class="form-group">
-            <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" id="terms" name="terms" required>
-                <label class="custom-control-label" for="terms">
-                    Saya setuju dengan <a href="#" class="auth-link" data-toggle="modal"
-                        data-target="#termsModal">Syarat & Ketentuan</a>
-                    dan <a href="#" class="auth-link" data-toggle="modal"
-                        data-target="#privacyModal">Kebijakan Privasi</a>
-                </label>
-            </div>
-        </div> --}}
-
-        <!-- Submit Button -->
-        <div class="form-group mb-0">
-            <button type="submit" class="btn btn-primary btn-auth btn-block">
-                <i class="fas fa-user-plus mr-2"></i>Daftar Sekarang
-            </button>
-        </div>
-
-        <!-- Login Link -->
-        <div class="text-center mt-4">
-            <p class="mb-0">
-                Sudah punya akun?
-                <a href="{{ route('login') }}" class="auth-link">
-                    <i class="fas fa-sign-in-alt mr-1"></i>Masuk di sini
-                </a>
-            </p>
-        </div>
-    </form>
-
-    {{-- <!-- Terms Modal -->
-    <div class="modal fade" id="termsModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Syarat & Ketentuan</h5>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <h6>1. Pendaftaran Akun</h6>
-                    <p>Dengan mendaftar, Anda menyetujui untuk memberikan informasi yang akurat dan terkini.</p>
-
-                    <h6>2. Penggunaan Fasilitas</h6>
-                    <p>Fasilitas hanya dapat digunakan sesuai jadwal yang telah dibooking dan dilunasi.</p>
-
-                    <h6>3. Pembayaran</h6>
-                    <p>DP 50% wajib dibayar saat booking, pelunasan dilakukan sebelum penggunaan fasilitas.</p>
-
-                    <h6>4. Pembatalan</h6>
-                    <p>Pembatalan dapat dilakukan dengan konsekuensi DP tidak dikembalikan.</p>
-                </div>
             </div>
         </div>
-    </div>
-
-    <!-- Privacy Modal -->
-    <div class="modal fade" id="privacyModal" tabindex="-1" role="dialog">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Kebijakan Privasi</h5>
-                    <button type="button" class="close" data-dismiss="modal">
-                        <span>&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <h6>Pengumpulan Data</h6>
-                    <p>Kami mengumpulkan data personal untuk keperluan administrasi booking fasilitas.</p>
-
-                    <h6>Penggunaan Data</h6>
-                    <p>Data digunakan untuk konfirmasi booking, komunikasi, dan pelayanan customer service.</p>
-
-                    <h6>Keamanan Data</h6>
-                    <p>Data Anda diamankan dengan enkripsi dan tidak akan dibagikan ke pihak ketiga.</p>
-                </div>
-            </div>
-        </div>
-    </div> --}}
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        $(document).ready(function() {
-            // Toggle password visibility
-            $('#togglePassword').click(function() {
-                const passwordField = $('#password');
-                const passwordFieldType = passwordField.attr('type');
-                const icon = $(this).find('i');
-
-                if (passwordFieldType === 'password') {
-                    passwordField.attr('type', 'text');
-                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
-                } else {
-                    passwordField.attr('type', 'password');
-                    icon.removeClass('fa-eye-slash').addClass('fa-eye');
-                }
-            });
-
-            $('#togglePasswordConfirm').click(function() {
-                const passwordField = $('#password_confirmation');
-                const passwordFieldType = passwordField.attr('type');
-                const icon = $(this).find('i');
-
-                if (passwordFieldType === 'password') {
-                    passwordField.attr('type', 'text');
-                    icon.removeClass('fa-eye').addClass('fa-eye-slash');
-                } else {
-                    passwordField.attr('type', 'password');
-                    icon.removeClass('fa-eye-slash').addClass('fa-eye');
-                }
-            });
-
-            // Real-time password confirmation
-            $('#password, #password_confirmation').on('keyup', function() {
-                const password = $('#password').val();
-                const confirmPassword = $('#password_confirmation').val();
-                const confirmField = $('#password_confirmation');
-
-                if (confirmPassword.length > 0) {
-                    if (password === confirmPassword) {
-                        confirmField.removeClass('is-invalid').addClass('is-valid');
-                    } else {
-                        confirmField.removeClass('is-valid').addClass('is-invalid');
-                    }
-                }
-            });
-
-            // Email validation (opsional tapi jika diisi harus valid)
-            $('#email').on('blur', function() {
-                const email = $(this).val();
-                const emailField = $(this);
-
-                if (email.length > 0) {
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (emailRegex.test(email)) {
-                        emailField.removeClass('is-invalid').addClass('is-valid');
-                    } else {
-                        emailField.removeClass('is-valid').addClass('is-invalid');
-                    }
-                } else {
-                    emailField.removeClass('is-invalid is-valid');
-                }
-            });
-
-            // Phone number formatting
-            $('#no_hp').on('input', function() {
-                let value = $(this).val().replace(/\D/g, '');
-
-                // Remove leading zero if exists
-                if (value.startsWith('0')) {
-                    value = value.substring(1);
-                }
-
-                $(this).val(value);
-            });
-
-            // Form validation enhancement
-            $('#registerForm').on('submit', function(e) {
-                const password = $('#password').val();
-                const confirmPassword = $('#password_confirmation').val();
-                const email = $('#email').val();
-
-                if (password !== confirmPassword) {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Password Tidak Cocok',
-                        text: 'Konfirmasi password harus sama dengan password.',
-                        confirmButtonColor: '#dc3545'
-                    });
-                    return false;
-                }
-
-                // Validasi email jika diisi
-                if (email.length > 0) {
-                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    if (!emailRegex.test(email)) {
-                        e.preventDefault();
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Email Tidak Valid',
-                            text: 'Jika mengisi email, pastikan format email sudah benar.',
-                            confirmButtonColor: '#dc3545'
-                        });
-                        return false;
-                    }
-                }
-
-                if (!$('#terms').is(':checked')) {
-                    e.preventDefault();
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Persetujuan Diperlukan',
-                        text: 'Anda harus menyetujui Syarat & Ketentuan untuk melanjutkan.',
-                        confirmButtonColor: '#ffc107'
-                    });
-                    return false;
-                }
-            });
-
-            // Auto-resize textarea
-            $('textarea').on('input', function() {
-                this.style.height = 'auto';
-                this.style.height = (this.scrollHeight) + 'px';
-            });
+        // Validasi Password Match Real-time
+        $('#password, #password_confirmation').on('keyup', function () {
+            if ($('#password').val() == $('#password_confirmation').val()) {
+                $('#password_confirmation').removeClass('is-invalid').addClass('is-valid');
+            } else {
+                $('#password_confirmation').removeClass('is-valid').addClass('is-invalid');
+            }
         });
+
+        // Tampilkan Error dari Session (Controller)
+        @if ($message = Session::get('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal Daftar',
+                text: '{{ $message }}',
+                confirmButtonColor: '#d33',
+            });
+        @endif
     </script>
-</x-guest-layout>
+</body>
+</html>

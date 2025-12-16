@@ -3,6 +3,9 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Session\TokenMismatchException;
+use Illuminate\Http\Request;
+use App\Http\Middleware\CheckRole;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,21 +15,37 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Tambahkan middleware global di sini
+
+        // Middleware Global
+        // Laravel 11 biasanya sudah otomatis memuat StartSession dll.
+        // Cek dulu apakah perlu di-append manual. Jika session jalan, hapus blok ini.
+
         $middleware->append([
-            \Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests::class,
-            \Illuminate\Session\Middleware\StartSession::class, // Untuk sesi
-            \Illuminate\View\Middleware\ShareErrorsFromSession::class, // Untuk validasi form
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
         ]);
 
-        // Middleware alias untuk role-based authentication
+
+        // Middleware Alias (Panggilan Singkat di Route)
         $middleware->alias([
-            'admin' => \App\Http\Middleware\AdminMiddleware::class,
-            'user' => \App\Http\Middleware\UserMiddleware::class,
-            'petugas_pembayarans' => \App\Http\Middleware\PetugasPembayaranMiddleware::class,
-            'petugas_fasilitas' => \App\Http\Middleware\PetugasFasilitasMiddleware::class,
+            // Role Checker Utama (Yang kita pakai di web.php)
+            'role' => CheckRole::class,
         ]);
     })
+    // KONFIGURASI HANDLING ERROR
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+
+        $exceptions->render(function (TokenMismatchException $e, Request $request) {
+
+            // Jika request adalah AJAX (seperti dari tombol delete/toggle status)
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'Sesi Anda telah berakhir. Silakan refresh halaman dan login kembali.'
+                ], 419);
+            }
+
+            // Jika request biasa (Submit Form)
+            return redirect()->route('login')->with('error', 'Sesi Anda telah berakhir (Page Expired). Silakan login kembali untuk melanjutkan.');
+        });
+
     })->create();

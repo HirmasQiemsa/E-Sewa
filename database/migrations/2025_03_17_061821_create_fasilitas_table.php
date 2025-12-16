@@ -13,14 +13,17 @@ return new class extends Migration
     {
         Schema::create('fasilitas', function (Blueprint $table) {
             $table->id();
-            $table->string('foto', 2048)->nullable();
+            $table->string('foto')->nullable();
             $table->string('nama_fasilitas');
             $table->text('deskripsi')->nullable();
             $table->string('tipe')->nullable();
+            $table->string('kategori')->nullable();
             $table->string('lokasi');
-            $table->integer('harga_sewa')->default(value: 0);
-            $table->enum('ketersediaan', ['aktif', 'nonaktif','maintanace'])->default('aktif');
-            $table->foreignId('petugas_fasilitas_id')->nullable()->constrained('petugas_fasilitas')->nullOnDelete();
+            $table->integer('harga_sewa')->default(0);
+            $table->enum('ketersediaan', ['aktif', 'nonaktif', 'maintenance'])->default('nonaktif');
+            $table->enum('status_approval', ['draft', 'pending', 'approved', 'rejected'])->default('draft');
+            $table->foreignId('admin_fasilitas_id')->nullable()->constrained('admins')->nullOnDelete();
+            $table->foreignId('admin_pembayaran_id')->nullable()->constrained('admins')->nullOnDelete();
             $table->softDeletes();
             $table->timestamps();
         });

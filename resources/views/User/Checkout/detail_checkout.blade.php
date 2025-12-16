@@ -1,267 +1,152 @@
 @extends('User.user')
+
 @section('content')
-    <!-- Content Header (Page header) -->
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0">Detail Booking</h1>
-                </div><!-- /.col -->
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <!-- Dynamic breadcrumb based on source -->
-                        <li class="breadcrumb-item">
-                            <a
-                                href="{{ request()->query('source') === 'riwayat' ? route('user.riwayat') : route('user.checkout') }}">
-                                {{ request()->query('source') === 'riwayat' ? 'Riwayat' : 'Checkout' }}
-                            </a>
-                        </li>
-                        <li class="breadcrumb-item active">Detail</li>
-                    </ol>
-                </div><!-- /.col -->
-            </div><!-- /.row -->
-        </div><!-- /.container-fluid -->
+<div class="container py-4">
+
+    <div class="mb-3">
+        <a href="{{ route('user.riwayat') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left mr-1"></i> Kembali ke Riwayat
+        </a>
     </div>
-    <!-- /.content-header -->
 
-    <!-- Main content -->
-    <section class="content">
-        <div class="container-fluid">
-            <div class="row">
-                <!-- Detail Booking -->
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-info-circle mr-1"></i>
-                                Informasi Booking #{{ $checkout->id }}
-                            </h3>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Detail Booking #{{ $checkout->id }}</h5>
 
-                            <div class="card-tools">
-                                <span
-                                    class="badge
-                                    @if ($checkout->status == 'fee') badge-warning
-                                    @elseif($checkout->status == 'lunas') badge-success
-                                    @elseif($checkout->status == 'batal') badge-danger @endif">
-                                    {{ ucfirst($checkout->status) }}
-                                </span>
-                            </div>
+                    @if($checkout->status == 'kompensasi')
+                        <span class="badge badge-warning px-3 py-2">DP Terbayar</span>
+                    @elseif($checkout->status == 'pending')
+                         <span class="badge badge-info px-3 py-2">Menunggu Verifikasi Admin</span>
+                    @elseif($checkout->status == 'lunas')
+                        <span class="badge badge-success px-3 py-2">Lunas / Siap Main</span>
+                    @else
+                        <span class="badge badge-danger px-3 py-2">Dibatalkan</span>
+                    @endif
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4 text-center">
+                            <img src="{{ asset('storage/' . $checkout->jadwal->fasilitas->foto) }}"
+                                 class="img-fluid rounded shadow-sm"
+                                 style="max-height: 150px; object-fit: cover;">
                         </div>
-
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <strong><i class="fas fa-calendar mr-1"></i> Tanggal Booking</strong>
-                                    <p class="text-muted">
-                                        {{ date('d F Y', strtotime($checkout->jadwal->tanggal)) }}
-                                    </p>
-
-                                    <strong><i class="fas fa-map-marker-alt mr-1"></i> Fasilitas Dipilih</strong>
-                                    <p class="text-muted">
-                                        {{ $checkout->jadwal->fasilitas->nama_fasilitas }}
-                                        ({{ $checkout->jadwal->fasilitas->tipe }})
-                                        <br>
-                                        <small>{{ $checkout->jadwal->fasilitas->lokasi }}</small>
-                                    </p>
-
-                                    <strong><i class="fas fa-check-circle mr-1"></i> Include</strong>
-                                    <p class="text-muted">
-                                        {{ $checkout->jadwal->fasilitas->deskripsi }}
-                                    </p>
-
-                                    <strong><i class="fas fa-money-bill mr-1"></i> Total Biaya</strong>
-                                    <p class="text-muted">
-                                        Rp {{ number_format($checkout->total_bayar, 0, ',', '.') }}
-                                    </p>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <strong><i class="fas fa-user mr-1"></i> Nama Pemesan</strong>
-                                    <p class="text-muted">{{ $checkout->user->name }}</p>
-
-                                    <strong><i class="fas fa-clock mr-1"></i> Tanggal Pemesanan</strong>
-                                    <p class="text-muted">{{ date('d F Y H:i', strtotime($checkout->created_at)) }}</p>
-
-                                    <strong><i class="fas fa-edit mr-1"></i> Status Terakhir</strong>
-                                    <p class="text-muted">{{ date('d F Y H:i', strtotime($checkout->updated_at)) }}</p>
-                                </div>
-                            </div>
+                        <div class="col-md-8">
+                            <h4 class="font-weight-bold">{{ $checkout->jadwal->fasilitas->nama_fasilitas }}</h4>
+                            <p class="text-muted mb-1"><i class="fas fa-map-marker-alt mr-2"></i> {{ $checkout->jadwal->fasilitas->lokasi }}</p>
+                            <p class="text-muted mb-1"><i class="fas fa-calendar-alt mr-2"></i> {{ \Carbon\Carbon::parse($checkout->jadwal->tanggal)->isoFormat('dddd, D MMMM Y') }}</p>
+                            <p class="text-muted"><i class="fas fa-clock mr-2"></i> {{ substr($checkout->jadwal->jam_mulai, 0, 5) }} - {{ substr($checkout->jadwal->jam_selesai, 0, 5) }} WIB</p>
                         </div>
                     </div>
-                </div>
 
-                <!-- Jadwal Detail -->
-                <div class="col-md-6">
-                    <div class="card card-info">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-calendar-alt mr-1"></i>
-                                Detail Jadwal
-                            </h3>
-                        </div>
-
-                        <div class="card-body table-responsive p-0">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>No</th>
-                                        <th>Tanggal</th>
-                                        <th>Jam</th>
-                                        <th>Durasi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($jadwals as $index => $jadwal)
-                                        <tr>
-                                            <td>{{ $index + 1 }}</td>
-                                            <td>{{ date('d/m/Y', strtotime($jadwal->tanggal)) }}</td>
-                                            <td>{{ substr($jadwal->jam_mulai, 0, 5) }} -
-                                                {{ substr($jadwal->jam_selesai, 0, 5) }}</td>
-                                            <td>{{ $jadwal->durasi }} jam</td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Riwayat Pembayaran (Diperbarui) -->
-                <div class="col-md-6">
-                    <div class="card card-success">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-money-check mr-1"></i>
-                                Riwayat Pembayaran
-                            </h3>
-                        </div>
-
-                        <div class="card-body table-responsive p-0">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Tanggal</th>
-                                        <th>Jumlah</th>
-                                        <th>Metode</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($pembayaran as $p)
-                                        <tr>
-                                            <td>{{ date('d/m/Y H:i', strtotime($p->tanggal_bayar)) }}</td>
-                                            <td>Rp {{ number_format($p->jumlah_bayar, 0, ',', '.') }}</td>
-                                            <td>{{ ucfirst($p->metode_pembayaran) }}</td>
-                                            <td>
-                                                @if ($p->status == 'fee')
-                                                    <span class="badge badge-warning">DP</span>
-                                                @elseif($p->status == 'lunas')
-                                                    <span class="badge badge-success">Lunas</span>
-                                                @elseif($p->status == 'pending')
-                                                    <span class="badge badge-info">Menunggu Verifikasi</span>
-                                                @elseif($p->status == 'ditolak')
-                                                    <span class="badge badge-danger">Ditolak</span>
-                                                    @if ($p->keterangan)
-                                                        <i class="fas fa-info-circle" data-toggle="tooltip"
-                                                            title="{{ $p->keterangan }}"></i>
-                                                    @endif
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="4" class="text-center">Tidak ada data pembayaran</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-
-                        @if ($checkout->status == 'fee')
-                            @php
-                                $pendingPayment = false;
-                                foreach ($pembayaran as $p) {
-                                    if ($p->status == 'pending') {
-                                        $pendingPayment = true;
-                                        break;
-                                    }
-                                }
-                            @endphp
-
-                            @if (!$pendingPayment)
-                                <div class="card-footer d-flex justify-content-end">
-                                    <a href="{{ route('user.checkout.pelunasan', $checkout->id) }}"
-                                        class="btn btn-success">
-                                        <i class="fas fa-money-bill"></i> Lunasi Pembayaran
-                                    </a>
-                                </div>
-                            @else
-                                <div class="card-footer">
-                                    <div class="alert alert-info mb-0">
-                                        <i class="fas fa-info-circle mr-2"></i> Pembayaran pelunasan sedang dalam proses
-                                        verifikasi.
-                                    </div>
-                                </div>
-                            @endif
-                        @endif
-                    </div>
-                </div>
-
-                <!-- Tindakan -->
-                <div class="col-md-12">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between">
-                                <!-- Dynamic back button based on source -->
-                                <a href="{{ request()->query('source') === 'riwayat' ? route('user.riwayat') : route('user.checkout') }}"
-                                    class="btn btn-secondary">
-                                    <i class="fas fa-arrow-left"></i> Kembali ke
-                                    {{ request()->query('source') === 'riwayat' ? 'Riwayat' : 'Checkout' }}
-                                </a>
-
-                                @if ($checkout->status == 'fee')
-                                    <button type="button" class="btn btn-danger"
-                                        onclick="confirmCancel({{ $checkout->id }})">
-                                        <i class="fas fa-times"></i> Batalkan Booking
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Deskripsi</th>
+                                    <th class="text-right">Biaya</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Sewa Lapangan ({{ $checkout->totalDurasi ?? 1 }} Jam)</td>
+                                    <td class="text-right">Rp {{ number_format($checkout->total_bayar, 0, ',', '.') }}</td>
+                                </tr>
+                                <tr class="font-weight-bold bg-light">
+                                    <td>Total Tagihan</td>
+                                    <td class="text-right">Rp {{ number_format($checkout->total_bayar, 0, ',', '.') }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-primary font-weight-bold">Kekurangan Yang Harus Dibayar (50%)</td>
+                                    <td class="text-right text-primary font-weight-bold">
+                                        Rp {{ number_format($checkout->total_bayar * 0.5, 0, ',', '.') }}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
 
-    <!-- Modal Konfirmasi Batal -->
-    <div class="modal fade" id="cancelModal" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="cancelModalLabel">Konfirmasi Pembatalan</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+        <div class="col-md-4">
+
+            @if($checkout->status == 'kompensasi')
+            <div class="card shadow-sm border-warning mb-3">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0 font-weight-bold"><i class="fas fa-wallet mr-2"></i> Instruksi Pembayaran</h6>
                 </div>
-                <div class="modal-body">
-                    <p>Apakah Anda yakin ingin membatalkan booking ini? DP tidak akan dikembalikan.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <form id="cancel-form" action="{{ route('user.checkout.cancel', $checkout->id) }}" method="POST">
+                <div class="card-body">
+                    <p class="small text-muted mb-2">Silakan transfer pelunasan sebesar:</p>
+                    <h3 class="font-weight-bold text-center mb-3">Rp {{ number_format($checkout->total_bayar * 0.5, 0, ',', '.') }}</h3>
+
+                    <div class="alert alert-light border">
+                        <strong class="d-block text-dark">Bank Jateng</strong>
+                        <span class="h5 d-block mb-0 text-primary">123-456-7890</span>
+                        <small>a.n. Dispora Semarang</small>
+                    </div>
+
+                    <hr>
+
+                    <form action="{{ route('user.checkout.upload_bukti', $checkout->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
-                        <button type="submit" class="btn btn-danger">Ya, Batalkan</button>
+                        <div class="form-group">
+                            <label class="small font-weight-bold">Upload Bukti Transfer</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" id="bukti_bayar" name="bukti_bayar" required>
+                                <label class="custom-file-label" for="bukti_bayar">Pilih file...</label>
+                            </div>
+                            <small class="text-muted">Format: JPG, PNG, PDF. Max: 2MB</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block font-weight-bold">
+                            <i class="fas fa-upload mr-1"></i> Konfirmasi Pembayaran
+                        </button>
                     </form>
                 </div>
             </div>
+
+            @elseif($checkout->status == 'pending')
+            <div class="card shadow-sm border-info mb-3">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-clock fa-4x text-info mb-3"></i>
+                    <h5>Pembayaran Sedang Diverifikasi</h5>
+                    <p class="text-muted small">Mohon tunggu, admin kami sedang mengecek bukti pembayaran Anda.</p>
+                    @if($checkout->bukti_bayar)
+                         <a href="{{ asset('storage/'.$checkout->bukti_bayar) }}" target="_blank" class="btn btn-sm btn-outline-info mt-2">Lihat Bukti Anda</a>
+                    @endif
+                </div>
+            </div>
+
+            @elseif($checkout->status == 'lunas')
+            <div class="card shadow-sm border-success mb-3">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                    <h5 class="text-success">Pembayaran Lunas!</h5>
+                    <p class="text-muted small">Booking Anda telah dikonfirmasi.</p>
+                    <button onclick="window.print()" class="btn btn-success btn-block">
+                        <i class="fas fa-print mr-1"></i> Cetak Tiket / Bukti
+                    </button>
+                </div>
+            </div>
+            @endif
+
         </div>
     </div>
+</div>
 
-    <script>
-        function confirmCancel(id) {
-            $('#cancelModal').modal('show');
+<script>
+    // Script untuk Custom File Input (Bootstrap 4) agar nama file muncul
+    document.addEventListener('DOMContentLoaded', function () {
+        const fileInput = document.getElementById('bukti_bayar');
+        if(fileInput){
+            fileInput.addEventListener('change', function(e){
+                var fileName = e.target.files[0].name;
+                var nextSibling = e.target.nextElementSibling;
+                nextSibling.innerText = fileName;
+            })
         }
-    </script>
+    });
+</script>
 @endsection

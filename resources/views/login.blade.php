@@ -1,117 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
+<x-guest-layout>
+    <x-authentication-card>
+        <x-slot name="logo">
+            <x-authentication-card-logo />
+        </x-slot>
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login E-Sewa</title>
+        <x-validation-errors class="mb-4" />
 
-    <!-- Google Font: Source Sans Pro -->
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <!-- icheck bootstrap -->
-    <link rel="stylesheet" href="{{ asset('lte/plugins/icheck-bootstrap/icheck-bootstrap.min.css') }}">
-    <!-- Theme style -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
-</head>
-
-<body class="hold-transition login-page" style="background-image: url('{{ asset('img/body-login.png') }}'); background-size: cover; background-repeat: no-repeat; background-position: center;">
-    <!-- Preloader -->
-    <div class="preloader flex-column justify-content-center align-items-center">
-        <img class="animation__shake" src="{{ asset('img/logo.png') }}" alt="AdminLTELogo" height="180"
-            width="150">
-        <h2 class="mt-4"><b>DISPORA SEMARANG</b></h2>
-    </div>
-    <div class="login-box">
-        <!-- /.login-logo -->
-        <div class="card card-outline card-danger">
-            <div class="card-header text-center">
-                <a href="{{ url('/') }}" class="h1"><b style="color: red;"
-                        onmouseover="this.style.color='black'" onmouseout="this.style.color='red'">E-Sewa
-                        Fasilitas</b></a>
+        @session('status')
+            <div class="mb-4 font-medium text-sm text-green-600">
+                {{ $value }}
             </div>
-            <div class="card-body">
-                <h2 class="login-box-msg">DISPORA SEMARANG</h2>
-                <form action="{{ route('login-proses') }}" method="post">
-                    @csrf
-                    <div class="input-group mt-3">
-                        <input type="text" name="username" class="form-control" placeholder="Username">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-user"></span>
-                            </div>
-                        </div>
-                    </div>
-                    @error('username')
-                        <small>{{ $message }}</small>
-                    @enderror
+        @endsession
 
-                    <div class="input-group mt-3">
-                        <input type="password" name="password" class="form-control" placeholder="Password">
-                        <div class="input-group-append">
-                            <div class="input-group-text">
-                                <span class="fas fa-lock"></span>
-                            </div>
-                        </div>
-                    </div>
-                    @error('password')
-                        <small>{{ $message }}</small>
-                    @enderror
+        <form method="POST" action="{{ route('login') }}">
+            @csrf
 
-                    <div class="row mt-3">
-                        <!-- /.col -->
-                        <div class="col-4">
-                            <button type="submit" class="btn btn-danger btn-block">Login</button>
-                        </div>
-                        <!-- /.col -->
-                        <p class="col-6 m-2">
-                            <a href="{{ url('/register') }}" class="text-center"
-                                style="color:rgb(59, 63, 75); text-decoration: underline;"
-                                onmouseover="this.style.color='black'"
-                                onmouseout="this.style.color='rgb(28, 33, 47)'">Registrasi Pengguna</a>
-                        </p>
-                    </div>
-                </form>
+            <div>
+                <x-label for="email" value="{{ __('Email') }}" />
+                <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
             </div>
-            <!-- /.card-body -->
-        </div>
-        <!-- /.card -->
-    </div>
-    <!-- /.login-box -->
 
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <!-- Bootstrap 4 -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- AdminLTE JS -->
-    <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
-    {{-- aler2 --}}
-    <script src="{{ asset('lte/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <div class="mt-4">
+                <x-label for="password" value="{{ __('Password') }}" />
+                <x-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="current-password" />
+            </div>
 
-    @if ($message = Session::get('success'))
-        <script>
-            Swal.fire({
-                title: "Berhasil!",
-                text: {!! json_encode($message) !!},
-                icon: "success"
-            });
-        </script>
-    @endif
+            <div class="block mt-4">
+                <label for="remember_me" class="flex items-center">
+                    <x-checkbox id="remember_me" name="remember" />
+                    <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+                </label>
+            </div>
 
-    @if ($message = Session::get('error'))
-        <script>
-            Swal.fire({
-                title: "Gagal!",
-                text: {!! json_encode($message) !!},
-                icon: "error"
-            });
-        </script>
-    @endif
+            <div class="flex items-center justify-end mt-4">
+                @if (Route::has('password.request'))
+                    <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('password.request') }}">
+                        {{ __('Forgot your password?') }}
+                    </a>
+                @endif
 
-
-</body>
-
-</html>
+                <x-button class="ms-4">
+                    {{ __('Log in') }}
+                </x-button>
+            </div>
+        </form>
+    </x-authentication-card>
+</x-guest-layout>

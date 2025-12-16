@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('role')->default('user'); // Default role = user
             $table->string('foto', 2048)->nullable();
+            $table->boolean('is_locked')->default(0);
             $table->rememberToken();
             $table->softDeletes();
             $table->timestamps();

@@ -14,44 +14,25 @@ class Jadwal extends Model
 
     protected $fillable = [
         'fasilitas_id',
-        'checkout_id',
         'tanggal',
         'jam_mulai',
         'jam_selesai',
-        'status'
+        'status' // tersedia, terbooking, selesai, batal
     ];
 
-    /**
-     * Define relationship with Fasilitas model
-     */
-// Each schedule belongs to a facility
     public function fasilitas() {
         return $this->belongsTo(Fasilitas::class);
     }
 
-    // Each schedule can belong to a checkout
-    public function checkout() {
-        return $this->belongsTo(Checkout::class);
-    }
-
-    /**
-     * The checkouts that belong to the jadwal.
-     */
     public function checkouts()
     {
-        return $this->belongsToMany(Checkout::class, 'checkout_jadwal')
-                    ->using(CheckoutJadwal::class)
+        return $this->belongsToMany(Checkout::class, 'checkout_jadwal', 'jadwal_id', 'checkout_id')
                     ->withTimestamps();
     }
 
-    // Calculate duration in hours
     public function getDurasiAttribute() {
-        $mulaiParts = explode(':', $this->jam_mulai);
-        $selesaiParts = explode(':', $this->jam_selesai);
-
-        $mulaiJam = (int)$mulaiParts[0];
-        $selesaiJam = (int)$selesaiParts[0];
-
-        return $selesaiJam - $mulaiJam;
+        $mulai = (int) explode(':', $this->jam_mulai)[0];
+        $selesai = (int) explode(':', $this->jam_selesai)[0];
+        return $selesai - $mulai;
     }
 }

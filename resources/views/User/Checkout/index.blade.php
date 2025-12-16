@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Booking Fasilitas</h1>
+                    <h1 class="m-0">Riwayat Checkout</h1>
                 </div>
             </div>
         </div>
@@ -31,7 +31,7 @@
 
             <div class="row">
                 <!-- Form Booking Fasilitas -->
-                <div class="col-md-6">
+                {{-- <div class="col-md-6">
                     <div class="card card-dark">
                         <div class="card-header">
                             <h3 class="card-title">Form Booking Lapangan</h3>
@@ -165,10 +165,10 @@
                             </div>
                         </form>
                     </div>
-                </div>
+                </div> --}}
 
                 <!-- Daftar Booking -->
-                <div class="col-md-6">
+                <div class="col-md-12">
                     <div class="card card-warning">
                         <div class="card-header">
                             <h3 class="card-title"><i class="fas fa-shopping-cart mr-2"></i> List Booking Saya</h3>
@@ -207,7 +207,7 @@
                                             </td>
                                             <td>Rp {{ number_format($checkout->total_bayar, 0, ',', '.') }}</td>
                                             <td>
-                                                @if ($checkout->status == 'fee')
+                                                @if ($checkout->status == 'kompensasi')
                                                     <span class="badge badge-warning">DP</span>
                                                 @elseif($checkout->status == 'lunas')
                                                     <span class="badge badge-success">Lunas</span>
@@ -222,7 +222,7 @@
                                                             class="btn btn-xs btn-info" title="Lihat Detail">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
-                                                        @if ($checkout->status == 'fee')
+                                                        @if ($checkout->status == 'kompensasi')
                                                             <a href="{{ route('user.checkout.pelunasan', $checkout->id) }}"
                                                                 class="btn btn-xs btn-success" title="Lunasi Pembayaran">
                                                                 <i class="fas fa-money-bill"></i>

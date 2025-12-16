@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Fasilitas;
+use Illuminate\Http\Request;
 
 class BerandaController extends Controller
 {
     public function index()
     {
-        $fasilitas = Fasilitas::all(); // ambil data dari database
-        return view('beranda', compact('fasilitas'));
+        // Tampilkan fasilitas di landing page (hanya yang aktif)
+        $fasilitas = Fasilitas::where('ketersediaan', 'aktif')->get();
+
+        return view('welcome', compact('fasilitas'));
     }
 }

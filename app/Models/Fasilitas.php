@@ -10,80 +10,60 @@ class Fasilitas extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $table = 'fasilitas'; // Nama tabel eksplisit
+
     protected $fillable = [
         'nama_fasilitas',
         'deskripsi',
         'tipe',
+        'kategori',     // Futsal, Tenis, dll
         'lokasi',
         'foto',
         'harga_sewa',
-        'ketersediaan',
-        'petugas_fasilitas_id'
+        'ketersediaan',      // aktif, nonaktif, maintenance
+        'status_approval',   // draft, pending, approved, rejected
+        'admin_fasilitas_id', // FK ke Admin Pembuat
+        'admin_pembayaran_id' // FK ke Admin Keuangan
     ];
 
-    // Mutator atau accessor untuk url
-    public function getFotoFasilitasUrlAttribute()
-    {
-        return $this->foto ? asset('storage/' . $this->foto) : asset('default-user.png');
-    }
-    protected $appends = ['foto_fasilitas_url'];
+    // --- LOGIKA TAMPILAN (ICON & WARNA) ---
+    public const CATEGORY_ICONS = [
+        'futsal' => ['icon' => 'ion ion-ios-football', 'color' => 'bg-danger'],
+        'tenis' => ['icon' => 'ion ion-ios-tennisball', 'color' => 'bg-success'],
+        'voli' => ['icon' => 'fas fa-volleyball-ball', 'color' => 'bg-warning'],
+        'badminton' => ['icon' => 'fas fa-feather', 'color' => 'bg-orange'],
+        'basket' => ['icon' => 'fas fa-basketball-ball', 'color' => 'bg-info'],
+        'default' => ['icon' => 'fas fa-hockey-puck', 'color' => 'bg-primary']
+    ];
 
-    /**
-     * Define relationship with Jadwal model
-     */
-    
-    public function jadwals()
+    public function getIconAttribute()
     {
+        $kategori = strtolower($this->kategori ?? '');
+        return self::CATEGORY_ICONS[$kategori]['icon'] ?? self::CATEGORY_ICONS['default']['icon'];
+    }
+
+    public function getIconColorAttribute()
+    {
+        $kategori = strtolower($this->kategori ?? '');
+        return self::CATEGORY_ICONS[$kategori]['color'] ?? self::CATEGORY_ICONS['default']['color'];
+    }
+
+    public function getFotoUrlAttribute()
+    {
+        return $this->foto ? asset('storage/' . $this->foto) : asset('img/default-facility.png');
+    }
+
+    // --- RELASI ---
+
+    public function jadwals() {
         return $this->hasMany(Jadwal::class);
     }
-    /* Define relationship with PetugasFasilitas model
-     */
-    public function petugasFasilitas()
-    {
-        return $this->belongsTo(PetugasFasilitas::class);
+
+    public function adminFasilitas() {
+        return $this->belongsTo(Admin::class, 'admin_fasilitas_id');
     }
 
-    /**
-     * Get formatted price
-     */
-    public function getFormattedPriceAttribute()
-    {
-        return 'Rp ' . number_format($this->harga_sewa, 0, ',', '.');
-    }
-
-    /**
-     * Get availability status badge
-     */
-    public function getStatusBadgeAttribute()
-    {
-        switch ($this->ketersediaan) {
-            case 'aktif':
-                return '<span class="badge badge-success">Aktif</span>';
-            case 'nonaktif':
-                return '<span class="badge badge-danger">Non-Aktif</span>';
-            case 'maintanace':
-                return '<span class="badge badge-warning">Maintenance</span>';
-            default:
-                return '<span class="badge badge-secondary">Unknown</span>';
-        }
-    }
-
-    /**
-     * Check if facility is available on a specific date
-     */
-    public function isAvailableOn($date)
-    {
-        // Check if facility is active
-        if ($this->ketersediaan !== 'aktif') {
-            return false;
-        }
-
-        // Count available slots on that date
-        $availableSlots = $this->jadwals()
-                              ->where('tanggal', $date)
-                              ->where('status', 'tersedia')
-                              ->count();
-
-        return $availableSlots > 0;
+    public function adminPembayaran() {
+        return $this->belongsTo(Admin::class, 'admin_pembayaran_id');
     }
 }

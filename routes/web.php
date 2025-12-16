@@ -1,189 +1,166 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\FasilitasController;
-use App\Http\Controllers\Admin\ProfileAdminController;
-use App\Http\Controllers\Admin\RiwayatController;
-use App\Http\Controllers\Admin\JadwalController;
-//Done//
-use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\LogoutController;
-use App\Http\Controllers\BerandaController;
 
-use App\Http\Controllers\User\CheckoutController;
-use App\Http\Controllers\User\BookingController;
+// AUTH & LANDING
+use App\Http\Controllers\BerandaController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\LogoutController;
+
+// User
+use App\Http\Controllers\User\BerandaController as UserBerandaController;
+use App\Http\Controllers\User\BookingController as UserBookingController;
+use App\Http\Controllers\User\CheckoutController as UserCheckoutController;
+use App\Http\Controllers\User\RiwayatController as UserRiwayatController;
 use App\Http\Controllers\User\UserController;
 
-use App\Http\Controllers\PetugasFasilitas\DashboardController as PetugasFasilitasDashboardController;
-use App\Http\Controllers\PetugasFasilitas\FasilitasController as PetugasFasilitasController;
-use App\Http\Controllers\PetugasFasilitas\JadwalController as PetugasFasilitasJadwalController;
-use App\Http\Controllers\PetugasFasilitas\BookingController as PetugasFasilitasBookingController;
-use App\Http\Controllers\PetugasFasilitas\ProfileController as PetugasFasilitasProfileController;
+// Admin General
+use App\Http\Controllers\Admin\DashboardController as SharedDashboard;
+use App\Http\Controllers\Admin\ProfileController as SharedProfile;
 
-use App\Http\Controllers\PetugasPembayaran\DashboardController as PetugasPembayaranDashboardController;
-use App\Http\Controllers\PetugasPembayaran\PembayaranController as PetugasPembayaranController;
-use App\Http\Controllers\PetugasPembayaran\ProfileController as PetugasPembayaranProfileController;
-use App\Http\Controllers\PetugasPembayaran\KeuanganController;
+// Admin Fasilitas
+use App\Http\Controllers\Admin\Fasilitas\FasilitasController;
+use App\Http\Controllers\Admin\Fasilitas\JadwalController;
+use App\Http\Controllers\Admin\Fasilitas\BookingController;
 
+// Admin Pembayaran
+use App\Http\Controllers\Admin\Pembayaran\PembayaranController;
+use App\Http\Controllers\Admin\Pembayaran\KeuanganController;
 
-
-Route::get('/laravel', function () {
-    return view('welcome');
-});
-// as Guest //
-Route::get('/', [BerandaController::class, 'index']);
-Route::get('/register', function () {
-    return view('auth.register');
-})->name('register');
-Route::post('/register/proses', [RegisterController::class,'register_proses'])->name('register-proses');
-Route::post('/login/proses', [LoginController::class,'login_proses'])->name('login-proses');
-Route::get('/login', [LoginController::class,'login'])->name('login');
-Route::post('/logout', [LogoutController::class,'logout'])->name('logout');
+// Super Admin
+use App\Http\Controllers\Admin\Super\UsersController;
 
 
-// ADMIN //
-Route::middleware(['auth:admin', 'admin'])->name('admin.')->group(function () {
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard'); //
-    // Fasilitas (CRUD + restore)
-    Route::get('/petugas/fasilitas', [FasilitasController::class, 'index'])->name('fasilitas.index');
-    Route::get('/fasilitas/tambah', [FasilitasController::class, 'tambah'])->name('fasilitas.tambah');
-    Route::post('/fasilitas/tambah', [FasilitasController::class, 'store'])->name('fasilitas.store');
-    Route::post('/fasilitas/gunakan', [FasilitasController::class, 'store_gunakan'])->name('fasilitas.storeG');
-    Route::get('/fasilitas/{id}/gunakan', [FasilitasController::class, 'gunakan'])->name('fasilitas.gunakan');
-    Route::get('/fasilitas/{id}/edit', [FasilitasController::class, 'edit'])->name('fasilitas.edit');
-    Route::put('/fasilitas/{id}', [FasilitasController::class, 'update'])->name('fasilitas.update');
-    Route::post('/fasilitas/{id}/restore', [FasilitasController::class, 'restore'])->name('fasilitas.restore');
-    Route::delete('/fasilitas/{id}', [FasilitasController::class,'delete'])->name('fasilitas.delete');
-    // Kelola Jadwal
-    Route::prefix('jadwal')->name('jadwal.')->group(function () {
-        Route::get('/', [JadwalController::class, 'index'])->name('index');
-        Route::post('/generate', [JadwalController::class, 'generate'])->name('generate');
-        Route::get('/tambah', [JadwalController::class, 'create'])->name('create');
-        Route::post('/store', [JadwalController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [JadwalController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [JadwalController::class, 'update'])->name('update');
-        Route::delete('/{id}', [JadwalController::class, 'destroy'])->name('destroy');
-    });
-    // Riwayat
-    Route::get('/riwayat-general', [RiwayatController::class, 'index'])->name('riwayat.index');
-    // Profile
-    Route::get('/admin/profile', [ProfileAdminController::class, 'edit'])->name('profile.edit');
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// ============================================================================
+// 1. GUEST ROUTES (Landing Page & Auth)
+// ============================================================================
+
+Route::get('/', [BerandaController::class, 'index'])->name('landing');
+
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [LoginController::class, 'login'])->name('login');
+    Route::post('/login/proses', [LoginController::class, 'login_proses'])->name('login-proses');
+
+    Route::get('/register', function () {
+        return view('auth.register');
+    })->name('register');
+    Route::post('/register/proses', [RegisterController::class, 'register_proses'])->name('register-proses');
 });
 
+Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 
-// PETUGAS FASILITAS //
-Route::middleware(['auth:petugas_fasilitas', 'petugas_fasilitas'])->name('petugas_fasilitas.')->prefix('petugas-fasilitas')->group(function () {
-    // Dashboard
-    Route::get('/dashboard', [PetugasFasilitasDashboardController::class, 'index'])->name('dashboard');
 
-    // Fasilitas Management
-    Route::prefix('fasilitas')->name('fasilitas.')->group(function () {
-        Route::get('/', [PetugasFasilitasController::class, 'index'])->name('index');
-        Route::get('/create', [PetugasFasilitasController::class, 'create'])->name('create');
-        Route::post('/store', [PetugasFasilitasController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [PetugasFasilitasController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [PetugasFasilitasController::class, 'update'])->name('update');
-        Route::delete('/{id}', [PetugasFasilitasController::class, 'destroy'])->name('destroy');
-        Route::post('/{id}/restore', [PetugasFasilitasController::class, 'restore'])->name('restore');
-        Route::put('/{id}/toggle-status', [PetugasFasilitasController::class, 'toggleStatus'])->name('toggle-status');
-    });
+// ============================================================================
+// 2. USER ROUTES (Masyarakat)
+// Middleware: Login sebagai 'web' (User) dan Role 'user'
+// ============================================================================
 
-    // Jadwal Management
-    Route::prefix('jadwal')->name('jadwal.')->group(function () {
-        Route::get('/', [PetugasFasilitasJadwalController::class, 'index'])->name('index');
-        Route::post('/generate', [PetugasFasilitasJadwalController::class, 'generate'])->name('generate');
-        Route::get('/create', [PetugasFasilitasJadwalController::class, 'create'])->name('create');
-        Route::post('/store', [PetugasFasilitasJadwalController::class, 'store'])->name('store');
-        Route::get('/{id}/edit', [PetugasFasilitasJadwalController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [PetugasFasilitasJadwalController::class, 'update'])->name('update');
-        Route::delete('/{id}', [PetugasFasilitasJadwalController::class, 'destroy'])->name('destroy');
-        Route::get('/{id}/detail', [PetugasFasilitasJadwalController::class, 'detail'])->name('detail');
-    });
+Route::middleware(['auth:web', 'role:user'])->name('user.')->group(function () {
 
-    // Kelola Booking
-    Route::prefix('booking')->name('booking.')->group(function () {
-        Route::get('/', [PetugasFasilitasBookingController::class, 'daftarBooking'])->name('daftar');
-        Route::get('/{id}/detail', [PetugasFasilitasBookingController::class, 'show'])->name('detail');
-        Route::put('/{id}/update-status', [PetugasFasilitasBookingController::class, 'updateStatus'])->name('update-status');
-        Route::put('/{id}/cancel', [PetugasFasilitasBookingController::class, 'cancelBooking'])->name('cancel');
-    });
+    // Beranda User (Setelah Login)
+    Route::get('/beranda', [UserBerandaController::class, 'beranda'])->name('fasilitas');
 
-    // Riwayat Booking
-    Route::get('/riwayat', [PetugasFasilitasBookingController::class, 'riwayat'])->name('riwayat');
+    // Detail Fasilitas & Booking
+    Route::get('/fasilitas/{id}/detail', [UserBookingController::class, 'show'])->name('fasilitas.detail');
 
-    // Profile Management
+    // Checkout & Pembayaran
+    Route::get('/checkout', [UserCheckoutController::class, 'index'])->name('checkout');
+    Route::post('/checkout/store', [UserCheckoutController::class, 'store'])->name('checkout.store');
+
+    // Halaman Detail Transaksi (Invoice) & Upload Bukti
+    Route::get('/checkout/detail/{id}', [UserCheckoutController::class, 'detail'])->name('checkout.detail');
+    Route::put('/checkout/{id}/upload-bukti', [UserCheckoutController::class, 'uploadBukti'])->name('checkout.upload_bukti');
+
+    // Pembatalan & Cetak
+    Route::put('/checkout/cancel/{id}', [UserCheckoutController::class, 'cancel'])->name('checkout.cancel');
+    Route::get('/checkout/{id}/print', [UserCheckoutController::class, 'print'])->name('checkout.print');
+
+    // API Helper untuk Cek Jadwal (AJAX)
+    Route::get('/api/check-jadwal/{fasilitasId}/{tanggal}', [UserCheckoutController::class, 'checkJadwal']);
+
+    // Riwayat Pemesanan
+    Route::get('/riwayat', [UserRiwayatController::class, 'riwayat'])->name('riwayat');
+    // Route::get('/riwayat/receipt/{id}', [UserRiwayatController::class, 'downloadReceipt'])->name('riwayat.receipt'); // Diganti checkout.print
+
+    // Profile User
     Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', [PetugasFasilitasProfileController::class, 'edit'])->name('edit');
-        Route::put('/update', [PetugasFasilitasProfileController::class, 'update'])->name('update');
-        Route::put('/update-password', [PetugasFasilitasProfileController::class, 'updatePassword'])->name('update-password');
-        Route::put('/update-account', [PetugasFasilitasProfileController::class, 'updateAccount'])->name('update-account');
-        Route::post('/add-account', [PetugasFasilitasProfileController::class, 'addAccount'])->name('add-account');
+        Route::get('/', [UserController::class, 'profile'])->name('edit');
+        Route::put('/update', [UserController::class, 'updateProfile'])->name('update');
+        Route::put('/update-account', [UserController::class, 'updateAccount'])->name('update-account');
+        Route::put('/update-password', [UserController::class, 'updatePassword'])->name('update-password');
     });
 });
 
 
-// PETUGAS PEMBAYARAN //
-Route::middleware(['auth:petugas_pembayarans', 'petugas_pembayarans'])->name('petugas_pembayaran.')->prefix('petugas-pembayaran')->group(function () {
-    // Dashboard
-    Route::get('/dashboard', [PetugasPembayaranDashboardController::class, 'index'])->name('dashboard');
+// ============================================================================
+// 3. ADMIN ROUTES
+// Middleware Utama: Login sebagai 'admin' (Semua role masuk sini)
+// ============================================================================
 
-    // Verifikasi Pembayaran
-    Route::prefix('pembayaran')->name('pembayaran.')->group(function () {
-        Route::get('/', [PetugasPembayaranController::class, 'index'])->name('index');
-        Route::get('/{id}', [PetugasPembayaranController::class, 'show'])->name('show');
-        Route::put('/{id}/verifikasi', [PetugasPembayaranController::class, 'verifikasi'])->name('verifikasi');
-        Route::put('/{id}/tolak', [PetugasPembayaranController::class, 'tolak'])->name('tolak');
-        Route::put('/{id}/toggle-status', [PetugasPembayaranController::class, 'toggleStatus'])->name('toggle-status');
+Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(function () {
+
+    // A. SHARED ROUTES (Semua Admin bisa akses ini)
+    // ------------------------------------------------------------
+    // 1 Route Dashboard menghandle semua role
+    Route::get('/dashboard', [SharedDashboard::class, 'index'])->name('dashboard');
+
+    // 1 Route Profile menghandle semua role
+    Route::get('/profile', [SharedProfile::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [SharedProfile::class, 'update'])->name('profile.update');
+
+
+    // B. ROUTES KHUSUS (Dibatasi Middleware Role)
+    // ------------------------------------------------------------
+
+    // 1. SUPER ADMIN (Kepala Dinas)
+    Route::middleware(['role:super_admin'])->name('super.')->group(function () {
+        Route::resource('users', UsersController::class);
+        // Route::get('/logs', ...);
     });
 
-    // Kelola Keuangan
-    Route::prefix('keuangan')->name('keuangan.')->group(function () {
-        Route::get('/', [KeuanganController::class, 'index'])->name('index');
+    // 2. ADMIN FASILITAS (Staff Prasarana)
+    // Note: Tambahkan 'super_admin' jika Kadin boleh akses menu ini juga
+    Route::middleware(['role:super_admin,admin_fasilitas'])->prefix('fasilitas')->name('fasilitas.')->group(function () {
+
+        // CRUD Fasilitas
+        Route::resource('data', FasilitasController::class);
+        Route::post('/data/{id}/restore', [FasilitasController::class, 'restore'])->name('restore');
+
+        // Jadwal
+        Route::prefix('jadwal')->name('jadwal.')->group(function () {
+            Route::get('/', [JadwalController::class, 'index'])->name('index');
+            Route::post('/generate', [JadwalController::class, 'generate'])->name('generate');
+            Route::delete('/bulk-delete', [JadwalController::class, 'bulkDestroy'])->name('bulk_destroy');
+        });
+
+        // ROUTE BOOKING
+        Route::prefix('booking')->name('booking.')->controller(BookingController::class)->group(function () {
+            Route::get('/', 'daftarBooking')->name('index');
+            Route::get('/{id}', 'show')->name('show');
+            Route::put('/{id}/cancel', 'cancelBooking')->name('cancel');
+        });
+    });
+
+    // 3. ADMIN PEMBAYARAN (Staff Keuangan)
+    Route::middleware(['role:super_admin,admin_pembayaran'])->prefix('keuangan')->name('keuangan.')->group(function () {
+
+        // Verifikasi
+        Route::get('/verifikasi', [PembayaranController::class, 'index'])->name('verifikasi.index');
+        Route::get('/verifikasi/{id}', [PembayaranController::class, 'show'])->name('verifikasi.show');
+        Route::put('/verifikasi/{id}/confirm', [PembayaranController::class, 'verifikasi'])->name('verifikasi.confirm');
+        Route::put('/verifikasi/{id}/reject', [PembayaranController::class, 'tolak'])->name('verifikasi.reject');
+
+        // Laporan
         Route::get('/transaksi', [KeuanganController::class, 'transaksi'])->name('transaksi');
-        Route::get('/ringkasan', [KeuanganController::class, 'ringkasan'])->name('ringkasan');
-        Route::get('/transaksi/export', [KeuanganController::class, 'exportTransaksi'])->name('transaksi.export');
-        Route::get('/ringkasan/export/{type}', [KeuanganController::class, 'exportRingkasan'])->name('ringkasan.export');
+        Route::get('/export', [KeuanganController::class, 'exportTransaksi'])->name('export');
     });
 
-    // Profile Management
-    Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', [PetugasPembayaranProfileController::class, 'edit'])->name('edit');
-        Route::put('/update', [PetugasPembayaranProfileController::class, 'update'])->name('update');
-        Route::put('/update-password', [PetugasPembayaranProfileController::class, 'updatePassword'])->name('update-password');
-        Route::put('/update-account', [PetugasPembayaranProfileController::class, 'updateAccount'])->name('update-account');
-    });
 });
-
-
-// USER //
-Route::middleware(['auth:web', 'user:user'])->name('user.')->group(function () {
-    // Fasilitas
-    Route::get('/fasilitas', [UserController::class, 'beranda'])->name('fasilitas');
-    // Profile
-    Route::get('/profile', [UserController::class, 'profile'])->name('profile');
-    Route::put('/profile/update', [UserController::class, 'updateProfile'])->name('update');
-    Route::put('/profile/update-account', [UserController::class, 'updateAccount'])->name('update-account');
-    Route::put('/profile/update-password', [UserController::class, 'updatePassword'])->name('update-password');
-    // Riwayat dan Bukti Pembayaran
-    Route::get('/riwayat', [BookingController::class, 'riwayat'])->name('riwayat');
-    Route::get('/riwayat/receipt/{id}', [BookingController::class, 'downloadReceipt'])->name('riwayat.receipt');
-    // Booking
-    Route::get('/lapangan-tenis', [BookingController::class, 'tenis'])->name('tenis');
-    Route::get('/lapangan-voli', [BookingController::class, 'voli'])->name('voli');
-    Route::get('/lapangan-futsal', [BookingController::class, 'futsal'])->name('futsal');
-    // Checkout
-    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
-    Route::post('/checkout/store', [CheckoutController::class, 'store'])->name('checkout.store');
-    Route::get('/checkout/pelunasan/{id}', [CheckoutController::class, 'pelunasan'])->name('checkout.pelunasan');
-    Route::post('/checkout/pelunasan/{id}', [CheckoutController::class, 'prosesLunasi'])->name('checkout.proses-lunasi');
-    Route::get('/checkout/detail/{id}', [CheckoutController::class, 'detail'])->name('checkout.detail');
-    Route::put('/checkout/cancel/{id}', [CheckoutController::class, 'cancel'])->name('checkout.cancel');
-    // API Route untuk cek jadwal
-    Route::get('/api/check-jadwal/{fasilitasId}/{tanggal}', [CheckoutController::class, 'checkJadwal']);
-});
-
-
-// ------------------------------------------------DUMB ROUTE (below)---------------------------------------------------- //
-

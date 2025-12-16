@@ -12,68 +12,48 @@ class Checkout extends Model
 
     protected $fillable = [
         'user_id',
-        'jadwals_id', // Main reference jadwal ID
+        'jadwals_id', // ID Jadwal Utama (Referensi)
         'total_bayar',
-        'status',
+        'status',     // kompensasi, pending, lunas, batal
     ];
 
-    /**
-     * Define relationship with User model
-     */
-     // Each checkout belongs to a user
     public function user() {
         return $this->belongsTo(User::class);
     }
 
-    // Each checkout has one main jadwal (for reference)
-    public function jadwal() {
+    // Relasi ke Jadwal Utama
+    public function jadwalUtama() {
         return $this->belongsTo(Jadwal::class, 'jadwals_id');
     }
 
-    // Each checkout has many associated jadwals
+    // Relasi ke BANYAK Jadwal (Pivot)
     public function jadwals()
     {
-        return $this->belongsToMany(Jadwal::class, 'checkout_jadwal')
-                    ->using(CheckoutJadwal::class)
+        return $this->belongsToMany(Jadwal::class, 'checkout_jadwal', 'checkout_id', 'jadwal_id')
                     ->withTimestamps();
     }
 
-    // Each checkout can have multiple payments
-    public function pembayaran() {
-        return $this->hasMany(PemasukanSewa::class);
+    public function pemasukans() {
+        return $this->hasMany(Pemasukan::class, 'checkout_id');
     }
 
-    // Each checkout has one history record
-    public function riwayat() {
-        return $this->hasOne(Riwayat::class);
+    // --- HELPER ATTRIBUTES ---
+
+    public function getSisaTagihanAttribute()
+    {
+        if ($this->status == 'lunas') return 0;
+        return $this->total_bayar * 0.5; // Asumsi sisa selalu 50%
     }
 
-    // Calculate remaining payment
-    public function getSisaPembayaranAttribute() {
-        if ($this->status === 'lunas') {
-            return 0;
-        }
-
-        $totalBayar = $this->total_bayar;
-        $sudahDibayar = $this->pembayaran()->sum('jumlah_bayar');
-
-        return $totalBayar - $sudahDibayar;
-    }
-
-    /**
-     * Get payment status badge
-     */
     public function getStatusBadgeAttribute()
     {
-        switch ($this->status) {
-            case 'fee':
-                return '<span class="badge badge-warning">DP</span>';
-            case 'lunas':
-                return '<span class="badge badge-success">Lunas</span>';
-            case 'batal':
-                return '<span class="badge badge-danger">Batal</span>';
-            default:
-                return '<span class="badge badge-secondary">Unknown</span>';
-        }
+        $badges = [
+            'kompensasi' => '<span class="badge badge-warning">Sudah DP (Belum Lunas)</span>',
+            'pending'    => '<span class="badge badge-info">Verifikasi Pelunasan</span>',
+            'lunas'      => '<span class="badge badge-success">Lunas</span>',
+            'batal'      => '<span class="badge badge-danger">Batal</span>',
+        ];
+
+        return $badges[$this->status] ?? '<span class="badge badge-secondary">Unknown</span>';
     }
 }

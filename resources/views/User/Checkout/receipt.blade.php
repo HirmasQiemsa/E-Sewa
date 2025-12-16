@@ -108,7 +108,7 @@
                     @foreach($payments as $payment)
                     <tr>
                         <td>{{ date('d/m/Y H:i', strtotime($payment->tanggal_bayar)) }}</td>
-                        <td>{{ $payment->status == 'fee' ? 'Pembayaran DP' : 'Pelunasan' }}</td>
+                        <td>{{ $payment->status == 'kompensasi' ? 'Pembayaran DP' : 'Pelunasan' }}</td>
                         <td>{{ ucfirst($payment->metode_pembayaran) }}</td>
                         <td class="text-right">Rp {{ number_format($payment->jumlah_bayar, 0, ',', '.') }}</td>
                     </tr>

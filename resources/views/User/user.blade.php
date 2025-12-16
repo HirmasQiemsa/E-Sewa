@@ -33,9 +33,165 @@
     <link rel="stylesheet" href="{{ asset('lte/plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css') }}">
     <!-- Toastr -->
     <link rel="stylesheet" href="{{ asset('lte/plugins/toastr/toastr.min.css') }}">
+    {{-- Flatpickr --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css">
 
     <style>
-        /* HAPUS: Semua loading untuk navigasi internal - hanya untuk logout */
+        /* ============================================================================
+           FLATPICK CUSTOM STYLES
+           ============================================================================ */
+        /* --- STYLE INDIKATOR KALENDER --- */
+        .flatpickr-day {
+            position: relative;
+        }
+
+        /* Titik Indikator */
+        .event-dot {
+            position: absolute;
+            bottom: 2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            content: '';
+            display: block;
+        }
+
+        /* Warna Prioritas */
+        .status-fee {
+            background-color: #ffc107 !important;
+            border-color: #ffc107 !important;
+            color: #fff;
+        }
+
+        /* Warning */
+        .status-fee::after {
+            content: '';
+            @extend .event-dot;
+            background: #fff;
+        }
+
+        /* Dot putih biar kontras */
+
+        .status-pending {
+            background-color: #17a2b8 !important;
+            border-color: #17a2b8 !important;
+            color: #fff;
+        }
+
+        /* Info */
+        .status-lunas {
+            background-color: #28a745 !important;
+            border-color: #28a745 !important;
+            color: #fff;
+        }
+
+        /* Success */
+
+        /* Hover effect agar tetap terbaca */
+        .flatpickr-day.status-fee:hover,
+        .flatpickr-day.status-pending:hover,
+        .flatpickr-day.status-lunas:hover {
+            opacity: 0.8;
+        }
+
+        /* ============================================================================
+           USER PROFILE SIDEBAR STYLING (UPDATED)
+           ============================================================================ */
+        .user-profile {
+            padding: 15px 10px;
+            margin-bottom: 10px;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+            /* Warna border bawaan AdminLTE light */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        .user-profile .image {
+            display: block;
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 10px auto;
+            /* Center image horizontally */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .user-profile .image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid #e9ecef;
+            /* Border halus */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-profile .info {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+
+        .user-profile .info h6 {
+            color: #343a40;
+            /* Warna teks gelap untuk sidebar putih */
+            margin-bottom: 5px;
+            font-weight: 700;
+            font-size: 1rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-profile .info .role-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: #dc3545;
+            /* Merah Dispora */
+            color: #fff;
+            border-radius: 50px;
+            /* Pill shape */
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(220, 53, 69, 0.3);
+        }
+
+        /* --- LOGIKA SAAT SIDEBAR COLLAPSED (MINI) --- */
+        .sidebar-mini.sidebar-collapse .user-profile {
+            padding: 15px 0;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        /* Gambar mengecil dan tetap di tengah */
+        .sidebar-mini.sidebar-collapse .user-profile .image {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto;
+            /* Force center */
+        }
+
+        .sidebar-mini.sidebar-collapse .user-profile .image img {
+            border-width: 2px;
+        }
+
+        /* Sembunyikan Teks Nama & Role saat collapse */
+        .sidebar-mini.sidebar-collapse .user-profile .info {
+            opacity: 0;
+            height: 0;
+            margin: 0;
+            overflow: hidden;
+            transform: translateY(10px);
+        }
+
+
+        /* ============================================================================
+           LOGOUT PROGRESS BAR - TETAP DIPERTAHANKAN UNTUK UX FEEDBACK
+           ============================================================================ */
         .logout-progress-bar {
             position: fixed;
             top: 0;
@@ -56,38 +212,23 @@
         }
 
         @keyframes logout-gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
         }
 
-        /* Critical CSS for footer positioning */
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            overflow-x: hidden;
-        }
-
-        .wrapper {
-            min-height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .content-wrapper {
-            flex: 1 0 auto;
-            padding-bottom: 60px;
-            /* Exact footer height */
-        }
-
-        .main-footer {
-            flex-shrink: 0;
-            height: 60px;
-            /* Exact height */
-        }
-
-        /* HANYA untuk initial load - tetap dipertahankan */
+        /* ============================================================================
+           PRELOADER - DISEMBUNYIKAN SECARA DEFAULT (DOKUMENTASI TETAP ADA)
+           Uncomment baris display untuk mengaktifkan kembali jika diperlukan
+           ============================================================================ */
         .preloader.initial-only {
             position: fixed;
             top: 0;
@@ -96,7 +237,10 @@
             height: 100%;
             z-index: 9999;
             background-color: rgba(244, 246, 249, 0.95);
-            display: flex;
+            /* display: flex; */
+            /* UNCOMMENT untuk mengaktifkan preloader */
+            display: none;
+            /* DEFAULT: Preloader disembunyikan */
             flex-direction: column;
             justify-content: center;
             align-items: center;
@@ -114,7 +258,7 @@
             display: none;
         }
 
-        /* Animation for logo */
+        /* Animasi logo preloader */
         .animation__gentle {
             animation: gentle-pulse 1.5s ease-in-out infinite;
         }
@@ -136,7 +280,6 @@
             }
         }
 
-        /* Fade in for text */
         .fade-in-text {
             animation: fadeIn 0.8s ease forwards;
             opacity: 0;
@@ -152,22 +295,184 @@
             }
         }
 
-        /* TAMBAHAN: Disable AdminLTE default transitions yang memperlambat */
-        .content-wrapper,
-        .main-sidebar,
-        .navbar,
-        .nav-link,
-        a {
-            transition: none !important;
-            animation: none !important;
+        /* ============================================================================
+           SMOOTH SIDEBAR ANIMATIONS - IMPLEMENTASI BARU
+           ============================================================================ */
+
+        /* Override AdminLTE default transitions untuk sidebar yang lebih smooth */
+        .main-sidebar {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            will-change: transform;
         }
 
-        /* TAMBAHAN: Optimasi untuk navigasi cepat */
+        /* Animasi saat sidebar collapse/expand */
+        .sidebar-collapse .main-sidebar {
+            transform: translateX(-250px);
+        }
+
+        .sidebar-mini.sidebar-collapse .main-sidebar {
+            transform: translateX(0);
+        }
+
+        /* Content wrapper smooth transition */
+        .content-wrapper {
+            transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            will-change: margin-left;
+        }
+
+        /* ============================================================================
+           ANIMASI MENU ITEMS - IMPLEMENTASI BARU
+           ============================================================================ */
+
+        /* Base styles untuk semua nav items */
+        .nav-sidebar .nav-item {
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Staggered animation untuk menu items */
+        .nav-sidebar .nav-item:nth-child(1) {
+            animation: slideInLeft 0.6s ease forwards 0.1s;
+        }
+
+        .nav-sidebar .nav-item:nth-child(2) {
+            animation: slideInLeft 0.6s ease forwards 0.2s;
+        }
+
+        .nav-sidebar .nav-item:nth-child(3) {
+            animation: slideInLeft 0.6s ease forwards 0.3s;
+        }
+
+        .nav-sidebar .nav-item:nth-child(4) {
+            animation: slideInLeft 0.6s ease forwards 0.4s;
+        }
+
+        .nav-sidebar .nav-item:nth-child(5) {
+            animation: slideInLeft 0.6s ease forwards 0.5s;
+        }
+
+        /* Keyframe untuk slide in animation */
+        @keyframes slideInLeft {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Hover effects untuk menu items - DIPERBAIKI */
+        .nav-sidebar .nav-link {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 6px;
+            margin: 2px 4px 2px 4px;
+            /* margin kiri lebih besar, kanan lebih kecil */
+            padding: 8px 12px;
+            /* padding yang proporsional */
+            max-width: calc(100% - 16px);
+            /* pastikan tidak melampaui batas */
+            box-sizing: border-box;
+        }
+
+        /* Efek hover dengan smooth scale dan background - DIPERBAIKI */
+        .nav-sidebar .nav-link:hover {
+            transform: translateX(3px) scale(1.01);
+            /* gerakan lebih kecil */
+            box-shadow: 0 3px 4px rgba(0, 0, 0, 0.12);
+            margin-right: 2px;
+            /* margin kanan saat hover */
+        }
+
+        /* Ripple effect saat klik */
+        .nav-sidebar .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+            z-index: 0;
+        }
+
+        .nav-sidebar .nav-link:active::before {
+            width: 100px;
+            height: 100px;
+        }
+
+        /* Icon animations */
+        .nav-sidebar .nav-icon {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-sidebar .nav-link:hover .nav-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        /* Search form animation */
+        .form-inline {
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: slideInTop 0.5s ease forwards 0.1s;
+        }
+
+        @keyframes slideInTop {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================================================
+           FIX STICKY FOOTER & LAYOUT
+           ============================================================================ */
+
+        /* Pastikan HTML dan BODY mengambil tinggi penuh */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        /* Wrapper utama menjadi Flex Container */
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            /* Pastikan minimal setinggi layar */
+        }
+
+        /* Content Wrapper akan mengambil sisa ruang yang ada (Flex Grow) */
+        .content-wrapper {
+            flex: 1;
+            /* Hapus atau reset min-height bawaan AdminLTE jika mengganggu */
+            min-height: auto !important;
+            display: flex;
+            /* Opsional: Agar child content bisa diatur */
+            flex-direction: column;
+        }
+
+        /* Pastikan Main Content di dalam wrapper juga mengisi ruang */
+        .content {
+            flex: 1;
+        }
+
+        /* Footer tidak boleh menyusut */
+        .main-footer {
+            flex-shrink: 0;
+        }
+
+        /* Optimasi untuk navigasi cepat */
         .fast-navigation {
             transition: none !important;
             animation: none !important;
         }
 
+        /* Carousel dan komponen lain */
         .carousel-overlay {
             position: absolute;
             bottom: 0;
@@ -217,15 +522,40 @@
             transform: translateY(0);
             transition: transform 0.3s ease;
         }
+
+        /* ============================================================================
+           RESPONSIVE ANIMATIONS
+           ============================================================================ */
+
+        /* Disable animations pada perangkat dengan motion sensitivity */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .nav-sidebar .nav-link:hover {
+                transform: none;
+            }
+
+            .main-sidebar {
+                transition-duration: 0.2s;
+            }
+        }
     </style>
 </head>
 
 <body class="hold-transition sidebar-mini sidebar-collapse layout-fixed">
-    <!-- HANYA untuk logout: Progress bar -->
+    <!-- LOGOUT PROGRESS BAR - TETAP DIPERTAHANKAN -->
     <div id="logoutProgressBar" class="logout-progress-bar"></div>
 
     <div class="wrapper" id="pageContent">
-        <!-- TETAP: Initial preloader untuk first page load -->
+        <!-- PRELOADER - DISEMBUNYIKAN TAPI DOKUMENTASI TETAP ADA -->
+        <!-- Uncomment display: flex di CSS .preloader.initial-only untuk mengaktifkan -->
         <div class="preloader initial-only" id="initialPreloader">
             <img class="animation__gentle" src="{{ asset('img/logo.png') }}" alt="DISPORA Logo" height="180"
                 width="150">
@@ -237,11 +567,9 @@
             <!-- Left navbar links -->
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <!-- HAPUS semua loading untuk navigasi - biarkan default -->
                     <a class="nav-link d-flex align-items-center fast-navigation" data-widget="pushmenu"
                         href="{{ route('user.fasilitas') }}" role="button">
-                        <img class="me-2" src="{{ asset('img/logo.png') }}" alt="AdminLTELogo" height="40"
-                            width="40">
+                        <img class="me-2" src="{{ asset('img/logo.png') }}" alt="AdminLTELogo" height="40" width="40">
                         <b style="font-size: 1.5rem; margin-left: 1rem; color: white;"
                             onmouseover="this.style.color='yellow'" onmouseout="this.style.color='white'">E-Sewa
                             Fasilitas DISPORA SEMARANG
@@ -253,95 +581,101 @@
 
         <!-- Main Sidebar Container -->
         <aside class="main-sidebar sidebar-light-danger elevation-4">
-            <!-- Sidebar -->
+
             <div class="sidebar">
-                <!-- SidebarSearch Form -->
-                <div class="form-inline">
-                    <div class="input-group" data-widget="sidebar-search">
-                        <input class="form-control form-control-sidebar mt-4" type="search" placeholder="Search"
-                            aria-label="Search">
-                        <div class="input-group-append">
-                            <button class="btn btn-sidebar mt-4">
-                                <i class="fas fa-search fa-fw "></i>
-                            </button>
+
+                @auth
+                    <div class="user-profile">
+                        <div class="image">
+                            {{-- Logika Foto: Cek apakah user punya foto, jika tidak pakai default --}}
+                            @if(Auth::user()->foto)
+                                <img src="{{ asset('storage/' . Auth::user()->foto) }}" alt="{{ Auth::user()->name }}">
+                            @else
+                                <img src="{{ asset('img/default-user.png') }}" alt="User">
+                                {{-- Pastikan ada default-user.png di public/img --}}
+                            @endif
+                        </div>
+                        <div class="info">
+                            {{-- Nama User --}}
+                            <h6 title="{{ Auth::user()->name }}">{{ Str::limit(Auth::user()->name, 15) }}</h6>
+
+                            {{-- Filter Role: User -> Masyarakat --}}
+                            @php
+                                $roleName = Auth::user()->role;
+                                if ($roleName === 'user') {
+                                    $roleDisplay = 'Masyarakat';
+                                } elseif ($roleName === 'admin') {
+                                    $roleDisplay = 'Admin'; // Atau biarkan default
+                                } else {
+                                    $roleDisplay = ucfirst($roleName);
+                                }
+                            @endphp
+
+                            <span class="role-badge">{{ $roleDisplay }}</span>
                         </div>
                     </div>
-                </div>
-                <!-- Sidebar Menu -->
+                @endauth
+
                 <nav class="mt-2">
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
                         data-accordion="false">
-                        <li class="nav-item active mt-2">
-                            <!-- HAPUS loading - navigasi langsung -->
+
+                        <li class="nav-item mt-2">
                             <a href="{{ route('user.fasilitas') }}"
-                                class="nav-link active bg-danger fast-navigation">
+                                class="nav-link {{ request()->routeIs('user.fasilitas') ? 'active' : '' }} bg-danger fast-navigation">
                                 <i class="nav-icon fas fa-book"></i>
-                                <p>
-                                    Fasilitas
-                                </p>
-                            </a>
-                        </li>
-                    </ul>
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
-                        data-accordion="false">
-                        <li class="nav-item active mt-2">
-                            <!-- HAPUS loading - navigasi langsung -->
-                            <a href="{{ route('user.riwayat') }}" class="nav-link active bg-danger fast-navigation">
-                                <i class="nav-icon fas fa-history"></i>
-                                <p>
-                                    Riwayat
-                                </p>
+                                <p>Beranda</p>
                             </a>
                         </li>
 
-                        <!-- logout -->
-                        <li class="nav-item active mt-2">
-                            <!-- HAPUS loading - navigasi langsung -->
-                            <a href="{{ route('user.profile') }}" class="nav-link active bg-primary fast-navigation">
-                                <i class="nav-icon fas fa-user"></i>
-                                <p>
-                                    User Profile
-                                </p>
+                        <li class="nav-item mt-2">
+                            <a href="{{ route('user.riwayat') }}"
+                                class="nav-link {{ request()->routeIs('user.riwayat') ? 'active' : '' }} bg-danger fast-navigation">
+                                <i class="nav-icon fas fa-history"></i>
+                                <p>Riwayat</p>
                             </a>
                         </li>
-                        <li class="nav-item active mt-2">
-                            <!-- HANYA ini yang ada loading -->
-                            <form method="POST" action="{{ route('logout') }}" id="logout-form" class="logout-form-with-loading">
+
+                        <li class="nav-item mt-2">
+                            <a href="{{ route('user.profile') }}"
+                                class="nav-link {{ request()->routeIs('user.profile') ? 'active' : '' }} bg-primary fast-navigation">
+                                <i class="nav-icon fas fa-user"></i>
+                                <p>User Profile</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item mt-2">
+                            <form method="POST" action="{{ route('logout') }}" id="logout-form"
+                                class="logout-form-with-loading">
                                 @csrf
-                                <a href="{{ route('logout') }}" class="nav-link active bg-primary"
+                                <a href="{{ route('logout') }}" class="nav-link bg-primary"
                                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                     <i class="nav-icon fas fa-times-circle"></i>
-                                    <p>
-                                        Logout
-                                    </p>
+                                    <p>Logout</p>
                                 </a>
                             </form>
                         </li>
                     </ul>
                 </nav>
-                <!-- /.sidebar-menu -->
             </div>
-            <!-- /.sidebar -->
         </aside>
 
-        <!-- Content Wrapper. Contains page content -->
+        <!-- Content Wrapper -->
         <div class="content-wrapper">
             @yield('content')
         </div>
-        <!-- /.content-wrapper -->
 
         <footer class="main-footer bg-dark">
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-12">
-                        <strong>Copyright &copy; 2025 <a href="#">E-SEWA</a>.</strong>
+                        <strong>Copyright &copy; 2025 <a href="#">E-SEWA FASILITAS</a>.</strong>
                         All rights reserved.
                     </div>
                 </div>
             </div>
         </footer>
     </div>
-    <!-- ./wrapper -->
 
     <!-- jQuery -->
     <script src="{{ asset('lte/jquery/jquery.min.js') }}"></script>
@@ -351,7 +685,6 @@
 
     <!-- jQuery UI 1.11.4 -->
     <script src="{{ asset('lte/jquery-ui/jquery-ui.min.js') }}"></script>
-    <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
     <script>
         $.widget.bridge('uibutton', $.ui.button)
     </script>
@@ -373,14 +706,18 @@
     <script src="{{ asset('lte/tempusdominus-bootstrap-4/js/tempusdominus-bootstrap-4.min.js') }}"></script>
     <script src="{{ asset('lte/summernote/summernote-bs4.min.js') }}"></script>
     <script src="{{ asset('lte/overlayScrollbars/js/jquery.overlayScrollbars.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+
 
     <!-- Notification plugins -->
     <script src="{{ asset('lte/plugins/toastr/toastr.min.js') }}"></script>
     <script src="{{ asset('lte/plugins/sweetalert2/sweetalert2.min.js') }}"></script>
 
-    <!-- MINIMAL: Hanya untuk initial load dan logout -->
+    <!-- ENHANCED LOADER dengan Smooth Sidebar Animations -->
     <script>
-        class MinimalLoader {
+        class EnhancedLoader {
             constructor() {
                 this.logoutProgressBar = document.getElementById('logoutProgressBar');
                 this.isLoading = false;
@@ -388,17 +725,19 @@
             }
 
             init() {
-                this.handleInitialLoad();
+                this.handlePreloader();
+                this.setupSmoothSidebar();
                 this.setupLogoutOnly();
-                this.disableAdminLTETransitions();
                 this.setupFooterControl();
+                this.initMenuAnimations();
             }
 
-            // Handle initial page load preloader
-            handleInitialLoad() {
+            // Handle preloader (disembunyikan tapi bisa diaktifkan)
+            handlePreloader() {
                 const initialPreloader = document.getElementById('initialPreloader');
 
-                if (initialPreloader) {
+                // Jika preloader diaktifkan (uncomment display: flex di CSS)
+                if (initialPreloader && initialPreloader.style.display !== 'none') {
                     window.addEventListener('load', () => {
                         setTimeout(() => {
                             initialPreloader.classList.add('fade-out');
@@ -410,20 +749,74 @@
                 }
             }
 
-            // HANYA untuk logout
+            // Setup smooth sidebar animations
+            setupSmoothSidebar() {
+                // Override AdminLTE PushMenu untuk animasi yang lebih smooth
+                if (typeof AdminLTE !== 'undefined' && AdminLTE.PushMenu) {
+                    // Custom smooth toggle function
+                    const originalToggle = AdminLTE.PushMenu.prototype.toggle;
+                    AdminLTE.PushMenu.prototype.toggle = function () {
+                        const body = document.body;
+                        const sidebar = document.querySelector('.main-sidebar');
+
+                        // Add smooth transition class
+                        sidebar.style.transition = 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+
+                        // Call original toggle
+                        originalToggle.call(this);
+
+                        // Trigger menu item animations when sidebar opens
+                        if (!body.classList.contains('sidebar-collapse')) {
+                            this.animateMenuItems();
+                        }
+                    }.bind(this);
+                }
+            }
+
+            // Animate menu items dengan staggered effect
+            animateMenuItems() {
+                const menuItems = document.querySelectorAll('.nav-sidebar .nav-item');
+
+                menuItems.forEach((item, index) => {
+                    // Reset animation
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateX(-20px)';
+
+                    // Trigger animation dengan delay
+                    setTimeout(() => {
+                        item.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+                        item.style.opacity = '1';
+                        item.style.transform = 'translateX(0)';
+                    }, index * 100);
+                });
+            }
+
+            // Initialize menu animations pada page load
+            initMenuAnimations() {
+                // Delay initial animations
+                setTimeout(() => {
+                    const menuItems = document.querySelectorAll('.nav-sidebar .nav-item');
+                    menuItems.forEach((item, index) => {
+                        setTimeout(() => {
+                            item.style.opacity = '1';
+                            item.style.transform = 'translateX(0)';
+                        }, index * 100);
+                    });
+                }, 300);
+            }
+
+            // LOGOUT Progress Bar (tetap dipertahankan)
             showLogoutLoading() {
                 if (this.isLoading) return;
 
                 this.isLoading = true;
                 this.logoutProgressBar.classList.add('active');
-
                 this.animateLogoutProgress();
             }
 
-            // Animate logout progress bar
             animateLogoutProgress() {
                 let width = 0;
-                const increment = 100 / (500 / 15); // 500ms duration
+                const increment = 100 / (500 / 15);
 
                 const animate = () => {
                     if (width < 90 && this.isLoading) {
@@ -435,7 +828,6 @@
 
                 animate();
 
-                // Complete after 500ms
                 setTimeout(() => {
                     this.logoutProgressBar.style.width = '100%';
                     setTimeout(() => {
@@ -446,41 +838,12 @@
                 }, 500);
             }
 
-            // Setup HANYA untuk logout
             setupLogoutOnly() {
                 document.addEventListener('submit', (e) => {
                     if (e.target.classList.contains('logout-form-with-loading')) {
                         this.showLogoutLoading();
                     }
                 });
-            }
-
-            // Disable AdminLTE default transitions yang memperlambat
-            disableAdminLTETransitions() {
-                // Disable pushmenu animation
-                if (typeof AdminLTE !== 'undefined' && AdminLTE.PushMenu) {
-                    AdminLTE.PushMenu.options = {
-                        ...AdminLTE.PushMenu.options,
-                        animationSpeed: 0
-                    };
-                }
-
-                // Disable sidebar transitions
-                const style = document.createElement('style');
-                style.textContent = `
-                    .main-sidebar {
-                        transition: none !important;
-                        animation: none !important;
-                    }
-                    .content-wrapper {
-                        transition: none !important;
-                        animation: none !important;
-                    }
-                    .nav-link {
-                        transition: none !important;
-                    }
-                `;
-                document.head.appendChild(style);
             }
 
             // Footer visibility control
@@ -493,7 +856,7 @@
                     const availableHeight = windowHeight - navbarHeight;
 
                     if (contentHeight > (availableHeight - footerHeight)) {
-                        $(window).scroll(function() {
+                        $(window).scroll(function () {
                             if ($(window).scrollTop() + windowHeight >= $(document).height() - 10) {
                                 $('.main-footer').addClass('footer-visible').removeClass('footer-hidden');
                             } else {
@@ -515,15 +878,34 @@
             }
         }
 
-        // Initialize minimal loader
-        document.addEventListener('DOMContentLoaded', () => {
-            window.minimalLoader = new MinimalLoader();
+        // Handle sidebar collapse state for user profile
+        $('[data-widget="pushmenu"]').on('click', function () {
+            // Let the AdminLTE handle the actual collapse
+            // The CSS will take care of the visual changes
+            setTimeout(function () {
+                // Force refresh of profile section layout
+                $('.user-profile').toggleClass('refreshed').toggleClass('refreshed');
+            }, 300);
+        });
 
-            // Global function untuk logout saja
+        // Also check initial state on page load
+        if ($('body').hasClass('sidebar-collapse')) {
+            $('.user-profile').addClass('sidebar-collapsed');
+        } else {
+            $('.user-profile').removeClass('sidebar-collapsed');
+        }
+
+        // Initialize enhanced loader
+        document.addEventListener('DOMContentLoaded', () => {
+            window.enhancedLoader = new EnhancedLoader();
+
+            // Global function untuk logout
             window.showLogoutLoader = () => {
-                window.minimalLoader.showLogoutLoading();
+                window.enhancedLoader.showLogoutLoading();
             };
         });
+
+
     </script>
 </body>
 

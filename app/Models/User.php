@@ -2,93 +2,39 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use App\Traits\HasFotoUrl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
+use App\Traits\HasFotoUrl;
 
 class User extends Authenticatable
 {
-    use HasApiTokens;
-
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory;
-    use HasFotoUrl;
-    use Notifiable;
-    use TwoFactorAuthenticatable;
-    use SoftDeletes;
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-
+    use HasApiTokens, HasFactory, HasFotoUrl, Notifiable;
 
     protected $fillable = [
-        'username', 'name', 'password', 'alamat', 'no_hp', 'role','foto','email','no_ktp'
+        'username', 'name', 'password', 'alamat', 'no_hp',
+        'role', 'foto', 'email', 'no_ktp',
+        'is_locked' // Kolom baru untuk fitur Banned/Lock
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
-        'password',
-        'remember_token',
-        'two_factor_recovery_codes',
-        'two_factor_secret',
+        'password', 'remember_token',
     ];
 
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array<int, string>
-     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'is_locked' => 'boolean',
+    ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+    // Relasi ke Checkout (Riwayat Booking)
+    public function checkouts() {
+        return $this->hasMany(Checkout::class);
     }
 
-    // Mutator atau accessor untuk url
-    // public function getUserProfilePhotoUrlAttribute()
-    // {
-    //     return $this->profile_photo_path ? asset('storage/' . $this->profile_photo_path) : asset('default-avatar.png');
-    // }
-
-    // relasi
-    // Each facility has many schedules
-    public function jadwals() {
-        return $this->hasMany(Jadwal::class);
-    }
-
-    // Method to check availability on a specific date
-    public function isAvailableOn($date) {
-        if ($this->ketersediaan !== 'aktif') {
-            return false;
-        }
-
-        $availableSlots = $this->jadwals()
-                          ->where('tanggal', $date)
-                          ->where('status', 'tersedia')
-                          ->count();
-
-        return $availableSlots > 0;
+    // Relasi ke Activity Logs (Jika user melakukan aksi yang dicatat)
+    public function activityLogs() {
+        return $this->hasMany(ActivityLog::class);
     }
 }
