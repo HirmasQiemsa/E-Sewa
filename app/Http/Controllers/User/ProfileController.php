@@ -4,34 +4,26 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\User;
 use App\Models\Admin;
-use App\Models\AdminFasilitas;
-use App\Models\AdminPembayaran;
-use App\Models\Checkout;
-use Carbon\Carbon;
-use App\Models\Fasilitas;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 
-
-class UserController extends Controller
+class ProfileController extends Controller
 {
-
-
     /**
      * Display user profile page
      */
-    public function profile()
+    public function index()
     {
         $user = Auth::user();
-        return view('User.Profile.edit', compact('user'));
+        // Pastikan view-nya ada di resources/views/User/Profile/edit.blade.php
+        return view('User.profile', compact('user'));
     }
 
     /**
-     * Update user profile information
+     * Update user profile information (Nama, HP, Alamat, Foto)
      */
     public function updateProfile(Request $request)
     {
@@ -45,11 +37,11 @@ class UserController extends Controller
                 'min_digits:10',
                 Rule::unique('users')->ignore($user->id),
             ],
+            // Hapus unique check no_ktp jika memang user bisa punya akun tanpa KTP valid (opsional)
             'no_ktp' => [
                 'nullable',
                 'numeric',
-                'min_digits:16',
-                'max_digits:16',  // Memastikan KTP tepat 16 digit
+                'digits:16', // Gunakan 'digits' untuk panjang pas 16
                 Rule::unique('users')->ignore($user->id),
             ],
             'alamat' => 'required|string',
@@ -57,35 +49,34 @@ class UserController extends Controller
         ]);
 
         try {
-            // Handle photo upload if provided
+            // Handle photo upload
             if ($request->hasFile('foto')) {
-                // Remove old photo if exists
+                // Hapus foto lama jika bukan default
                 if ($user->foto && Storage::disk('public')->exists($user->foto)) {
                     Storage::disk('public')->delete($user->foto);
                 }
 
-                // Upload new photo
+                // Upload foto baru
                 $filePath = $request->file('foto')->store('users', 'public');
                 $validated['foto'] = $filePath;
             }
 
-            // Update user profile
             $user->update($validated);
 
-            return redirect()->route('user.profile')->with('success', 'Informasi profil berhasil diperbarui.');
+            return redirect()->route('user.fasilitas')->with('success', 'Informasi profil berhasil diperbarui.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
         }
     }
 
     /**
-     * Update user account information (username and email)
+     * Update user account information (Username & Email)
      */
     public function updateAccount(Request $request)
     {
         $user = Auth::user();
 
-        $validated = $request->validate([
+        $request->validate([
             'username' => [
                 'required',
                 'alpha_num',
@@ -98,29 +89,21 @@ class UserController extends Controller
             ],
         ]);
 
-        // Check if username exists in other tables
-        $username = $request->username;
-
-        $existsInAdmin = Admin::where('username', $username)
-            ->exists();
-
-        $existsInFasilitas = AdminFasilitas::where('username', $username)
-            ->exists();
-
-        $existsInPembayaran = AdminPembayaran::where('username', $username)
-            ->exists();
-
-        if ($existsInAdmin || $existsInFasilitas || $existsInPembayaran) {
-            return back()->withErrors(['username' => 'Username sudah digunakan oleh petugas atau admin.'])->withInput();
+        // Cek duplikasi username di tabel ADMINS (Semua Staff)
+        // Karena kita sudah gabung tabel admin_fasilitas & pembayaran ke tabel 'admins'
+        if (Admin::where('username', $request->username)->exists()) {
+            return back()->withErrors(['username' => 'Username ini tidak tersedia (digunakan oleh sistem).'])->withInput();
         }
 
         try {
-            // Update account info
-            $user->update($validated);
+            $user->update([
+                'username' => $request->username,
+                'email' => $request->email
+            ]);
 
-            return redirect()->route('user.profile')->with('success', 'Informasi akun berhasil diperbarui.');
+            return redirect()->route('user.index')->with('success', 'Informasi akun berhasil diperbarui.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
+            return back()->with('error', 'Gagal update akun: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -136,19 +119,18 @@ class UserController extends Controller
 
         $user = Auth::user();
 
-        // Check current password
         if (!Hash::check($request->current_password, $user->password)) {
-            return back()->withErrors(['current_password' => 'Password saat ini tidak sesuai.']);
+            return back()->withErrors(['current_password' => 'Password saat ini salah.']);
         }
 
         try {
-            // Update password
-            $user->password = Hash::make($request->password);
-            $user->save();
+            $user->update([
+                'password' => Hash::make($request->password)
+            ]);
 
-            return redirect()->route('user.profile')->with('success', 'Password berhasil diubah.');
+            return redirect()->route('user.index')->with('success', 'Password berhasil diubah.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return back()->with('error', 'Gagal ubah password: ' . $e->getMessage());
         }
     }
 }

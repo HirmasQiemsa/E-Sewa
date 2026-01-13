@@ -39,30 +39,27 @@
                                     <select name="fasilitas_id" id="fasilitas_id" class="form-control" required>
                                         <option value="">-- Pilih Fasilitas --</option>
                                         @foreach ($myFasilitas as $f)
-                                            {{-- Logic Cek Status --}}
                                             @php
-                                                $isDisabled = $f->ketersediaan !== 'aktif' || $f->status_approval !== 'approved';
+                                                // LOGIC BARU: Hanya disable jika Nonaktif atau Maintenance
+                                                // Kita abaikan status_approval
+                                                $isDisabled = $f->ketersediaan !== 'aktif';
 
-                                                // Pesan tambahan di label opsi
                                                 $statusText = '';
-                                                if ($f->status_approval !== 'approved') {
-                                                    $statusText = ' (Belum Disetujui Kepala Dinas)';
-                                                } elseif ($f->ketersediaan !== 'aktif') {
+                                                if ($isDisabled) {
                                                     $statusText = ' (Status: ' . ucfirst($f->ketersediaan) . ')';
                                                 }
                                             @endphp
 
                                             <option value="{{ $f->id }}" {{ $isDisabled ? 'disabled' : '' }}
-                                                class="{{ $isDisabled ? 'text-danger' : '' }}">
-                                                {{ $f->nama_fasilitas }} - {{ $f->lokasi }}
-                                                {{ $statusText }}
+                                                class="{{ $isDisabled ? 'text-danger' : 'text-dark' }}">
+                                                {{ $f->nama_fasilitas }} - {{ $f->lokasi }} {{ $statusText }}
                                             </option>
                                         @endforeach
                                     </select>
-                                    {{-- Helper text kecil di bawah --}}
+
                                     <small class="text-muted">
-                                        <i class="fas fa-info-circle"></i> Fasilitas yang sedang <b>Nonaktif</b>,
-                                        <b>Maintenance</b>, atau <b>Belum Disetujui</b> tidak dapat dipilih.
+                                        <i class="fas fa-info-circle"></i> Fasilitas harus berstatus <b>Aktif</b> agar bisa
+                                        dibuatkan jadwal.
                                     </small>
                                 </div>
 
@@ -185,12 +182,35 @@
                                             <td>{{ \Carbon\Carbon::parse($j->tanggal)->format('d M Y') }}</td>
                                             <td>{{ substr($j->jam_mulai, 0, 5) }} - {{ substr($j->jam_selesai, 0, 5) }}</td>
                                             <td>
-                                                @if($j->status == 'tersedia')
-                                                    <span class="badge badge-success">Tersedia</span>
-                                                @elseif($j->status == 'terbooking')
-                                                    <span class="badge badge-warning">Booked</span>
+                                                {{-- 1. PRIORITAS TERTINGGI: Jika sudah terbooking, status fasilitas tidak
+                                                masalah (karena sudah laku) --}}
+                                                @if($j->status == 'terbooking')
+                                                    <span class="badge badge-warning text-white">
+                                                        <i class="fas fa-user-check mr-1"></i> Booked
+                                                    </span>
+
+                                                    {{-- 2. PRIORITAS KEDUA: Cek Status Fasilitas Induk --}}
+                                                    {{-- Jika Fasilitas Maintenance/Nonaktif, maka jadwal ini otomatis dianggap
+                                                    tidak valid --}}
+                                                @elseif($j->fasilitas->ketersediaan != 'aktif')
+                                                    <span class="badge badge-secondary"
+                                                        title="Fasilitas sedang {{ $j->fasilitas->ketersediaan }}">
+                                                        <i class="fas fa-ban mr-1"></i> {{ ucfirst($j->fasilitas->ketersediaan) }}
+                                                    </span>
+
+                                                    {{-- 3. PRIORITAS KETIGA: Status Jadwal Normal --}}
+                                                @elseif($j->status == 'tersedia')
+                                                    <span class="badge badge-success">
+                                                        <i class="fas fa-check-circle mr-1"></i> Tersedia
+                                                    </span>
+
+                                                @elseif($j->status == 'batal')
+                                                    <span class="badge badge-danger">
+                                                        <i class="fas fa-times-circle mr-1"></i> Dibatalkan
+                                                    </span>
+
                                                 @else
-                                                    <span class="badge badge-danger">{{ $j->status }}</span>
+                                                    <span class="badge badge-info">{{ ucfirst($j->status) }}</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -214,7 +234,9 @@
             </div>
         </div>
     </section>
+@endsection
 
+@section('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const checkAll = document.getElementById('checkAll');

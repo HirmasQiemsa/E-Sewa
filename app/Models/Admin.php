@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use App\Traits\HasFotoUrl; // Pastikan trait ini ada
+use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\HasFotoUrl;
 
 class Admin extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasFotoUrl, Notifiable;
+    use HasApiTokens, HasFactory, HasFotoUrl, Notifiable, SoftDeletes;
 
     protected $table = 'admins';
 

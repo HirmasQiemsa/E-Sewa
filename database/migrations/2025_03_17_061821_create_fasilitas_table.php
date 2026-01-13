@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('lokasi');
             $table->integer('harga_sewa')->default(0);
             $table->enum('ketersediaan', ['aktif', 'nonaktif', 'maintenance'])->default('nonaktif');
-            $table->enum('status_approval', ['draft', 'pending', 'approved', 'rejected'])->default('draft');
+            // $table->enum('status_approval', ['draft', 'pending', 'approved', 'rejected'])->default('draft');
             $table->foreignId('admin_fasilitas_id')->nullable()->constrained('admins')->nullOnDelete();
             $table->foreignId('admin_pembayaran_id')->nullable()->constrained('admins')->nullOnDelete();
             $table->softDeletes();

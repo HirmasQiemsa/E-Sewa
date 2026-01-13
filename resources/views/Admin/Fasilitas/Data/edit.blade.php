@@ -9,7 +9,8 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('admin.fasilitas.data.index') }}">Data Fasilitas</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.fasilitas.data.index') }}">Data Fasilitas</a>
+                        </li>
                         <li class="breadcrumb-item active">Edit</li>
                     </ol>
                 </div>
@@ -19,19 +20,13 @@
 
     <section class="content">
         <div class="container-fluid">
-            {{-- Alert Status Approval --}}
-            @if ($fasilitas->status_approval != 'approved')
-                <div class="alert alert-warning">
-                    <h5><i class="icon fas fa-exclamation-triangle"></i> Menunggu Persetujuan</h5>
-                    Fasilitas ini belum disetujui oleh Kepala Dinas (Super Admin). Anda belum dapat mengaktifkannya untuk publik.
-                    Status saat ini: <b>{{ ucfirst($fasilitas->status_approval) }}</b>
-                </div>
-            @endif
-
-            <form action="{{ route('admin.fasilitas.data.update', $fasilitas->id) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.fasilitas.data.update', $fasilitas->id) }}" method="POST"
+                enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
+
                 <div class="row">
+                    {{-- KOLOM KIRI: INPUT UTAMA --}}
                     <div class="col-md-8">
                         <div class="card card-primary card-outline">
                             <div class="card-header">
@@ -42,81 +37,116 @@
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Nama Fasilitas <span class="text-danger">*</span></label>
-                                            <input type="text" name="nama_fasilitas" class="form-control @error('nama_fasilitas') is-invalid @enderror"
+                                            <input type="text" name="nama_fasilitas"
+                                                class="form-control @error('nama_fasilitas') is-invalid @enderror"
                                                 value="{{ old('nama_fasilitas', $fasilitas->nama_fasilitas) }}" required>
-                                            @error('nama_fasilitas') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                                            @error('nama_fasilitas')
+                                                <span class="invalid-feedback">{{ $message }}</span>
+                                            @enderror
                                         </div>
 
+                                        {{-- BAGIAN KATEGORI --}}
                                         <div class="form-group">
                                             <label>Kategori</label>
-                                            <select name="kategori_select" id="kategori_select" class="form-control select2" style="width: 100%;">
+
+                                            @php
+                                                $dbKategori = $fasilitas->kategori;
+                                                $isDbCustom = !array_key_exists($dbKategori, \App\Models\Fasilitas::CATEGORY_ICONS);
+                                                $currentSelect = old('kategori_select', ($isDbCustom ? 'lainnya' : $dbKategori));
+                                                $showInput = $currentSelect == 'lainnya';
+                                                $currentInputValue = old('kategori_baru', ($isDbCustom ? $dbKategori : ''));
+                                            @endphp
+
+                                            {{-- Select Box --}}
+                                            <select name="kategori_select" id="kategori_select" class="form-control select2"
+                                                style="width: 100%;">
                                                 @foreach (\App\Models\Fasilitas::CATEGORY_ICONS as $key => $details)
-                                                    <option value="{{ $key }}" {{ $fasilitas->kategori == $key ? 'selected' : '' }}>
+                                                    @if($key == 'default') @continue @endif
+                                                    <option value="{{ $key }}" {{ $currentSelect == $key ? 'selected' : '' }}>
                                                         {{ ucfirst($key) }}
                                                     </option>
                                                 @endforeach
-                                                <option value="lainnya" {{ !array_key_exists($fasilitas->kategori, \App\Models\Fasilitas::CATEGORY_ICONS) ? 'selected' : '' }}>Lainnya</option>
+                                                {{-- <option value="lainnya" {{ $currentSelect == 'lainnya' ? 'selected' : '' }}>
+                                                    Lainnya (Input Manual)
+                                                </option> --}}
                                             </select>
 
+                                            {{-- Input Text Manual --}}
                                             <input type="text" name="kategori_baru" id="kategori_baru"
-                                                class="form-control mt-2"
-                                                value="{{ !array_key_exists($fasilitas->kategori, \App\Models\Fasilitas::CATEGORY_ICONS) ? $fasilitas->kategori : '' }}"
-                                                placeholder="Masukkan nama kategori baru..."
-                                                style="display: {{ !array_key_exists($fasilitas->kategori, \App\Models\Fasilitas::CATEGORY_ICONS) ? 'block' : 'none' }}">
+                                                class="form-control mt-2 @error('kategori_baru') is-invalid @enderror"
+                                                value="{{ $currentInputValue }}" placeholder="Ketik nama kategori baru..."
+                                                style="display: {{ $showInput ? 'block' : 'none' }}">
+
+                                            @error('kategori_baru')
+                                                <span class="error invalid-feedback"
+                                                    style="display: block">{{ $message }}</span>
+                                            @enderror
                                         </div>
 
                                         <div class="form-group">
-                                            <label>Tipe Lantai</label>
-                                            <input type="text" name="tipe" class="form-control" value="{{ old('tipe', $fasilitas->tipe) }}" required>
+                                            <label>Tipe Lantai / Jenis</label>
+                                            <input type="text" name="tipe" class="form-control"
+                                                value="{{ old('tipe', $fasilitas->tipe) }}"
+                                                placeholder="Contoh: Indoor / Outdoor / Rumput Sintetis">
                                         </div>
                                     </div>
 
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label>Harga Sewa / Jam</label>
+                                            <label>Harga Sewa / Jam <span class="text-danger">*</span></label>
                                             <div class="input-group">
-                                                <div class="input-group-prepend"><span class="input-group-text">Rp</span></div>
-                                                <input type="number" name="harga_sewa" class="form-control" value="{{ old('harga_sewa', $fasilitas->harga_sewa) }}" required>
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">Rp</span>
+                                                </div>
+                                                <input type="number" name="harga_sewa" class="form-control"
+                                                    value="{{ old('harga_sewa', $fasilitas->harga_sewa) }}" required
+                                                    min="0">
                                             </div>
                                         </div>
 
                                         <div class="form-group">
-                                            <label>Lokasi Detail</label>
-                                            <textarea name="lokasi" class="form-control" rows="2" required>{{ old('lokasi', $fasilitas->lokasi) }}</textarea>
+                                            <label>Lokasi Detail <span class="text-danger">*</span></label>
+                                            <textarea name="lokasi" class="form-control" rows="2"
+                                                required>{{ old('lokasi', $fasilitas->lokasi) }}</textarea>
                                         </div>
 
                                         <div class="form-group">
                                             <label>Status Ketersediaan</label>
                                             <select name="ketersediaan" class="form-control">
-                                                {{-- Logic Disable Aktif jika belum diapprove --}}
-                                                <option value="aktif"
-                                                    {{ $fasilitas->ketersediaan == 'aktif' ? 'selected' : '' }}
-                                                    {{ $fasilitas->status_approval != 'approved' ? 'disabled' : '' }}>
-                                                    Aktif {{ $fasilitas->status_approval != 'approved' ? '(Perlu Approval)' : '' }}
+                                                <option value="aktif" {{ $fasilitas->ketersediaan == 'aktif' ? 'selected' : '' }}>
+                                                    Aktif (Siap Disewa)
                                                 </option>
-
-                                                <option value="nonaktif" {{ $fasilitas->ketersediaan == 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
-                                                <option value="maintenance" {{ $fasilitas->ketersediaan == 'maintenance' ? 'selected' : '' }}>Maintenance</option>
+                                                <option value="nonaktif" {{ $fasilitas->ketersediaan == 'nonaktif' ? 'selected' : '' }}>
+                                                    Nonaktif (Disembunyikan)
+                                                </option>
+                                                <option value="maintenance" {{ $fasilitas->ketersediaan == 'maintenance' ? 'selected' : '' }}>
+                                                    Maintenance (Perbaikan)
+                                                </option>
                                             </select>
-                                            @if($fasilitas->status_approval != 'approved')
-                                                <small class="text-danger"><i class="fas fa-lock"></i> Menunggu persetujuan Dinas untuk mengaktifkan.</small>
-                                            @endif
+                                            <small class="text-muted">
+                                                <i class="fas fa-info-circle"></i> Mengubah ke Nonaktif/Maintenance akan
+                                                membatalkan jadwal kosong di masa depan.
+                                            </small>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="form-group">
                                     <label>Deskripsi Lengkap</label>
-                                    <textarea name="deskripsi" class="form-control" rows="4">{{ old('deskripsi', $fasilitas->deskripsi) }}</textarea>
+                                    <textarea name="deskripsi" class="form-control"
+                                        rows="4">{{ old('deskripsi', $fasilitas->deskripsi) }}</textarea>
                                 </div>
                             </div>
                             <div class="card-footer">
-                                <button type="submit" class="btn btn-primary"><i class="fas fa-save mr-1"></i> Simpan Perubahan</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save mr-1"></i> Simpan Perubahan
+                                </button>
                                 <a href="{{ route('admin.fasilitas.data.index') }}" class="btn btn-secondary">Batal</a>
                             </div>
                         </div>
                     </div>
 
+                    {{-- KOLOM KANAN: FOTO & PENANGGUNG JAWAB --}}
                     <div class="col-md-4">
                         <div class="card card-outline card-info">
                             <div class="card-header">
@@ -125,16 +155,19 @@
                             <div class="card-body text-center">
                                 <div id="image-preview" class="mb-3">
                                     @if($fasilitas->foto)
-                                        <img src="{{ asset('storage/' . $fasilitas->foto) }}" class="img-fluid rounded border" style="max-height: 200px;">
+                                        <img src="{{ asset('storage/' . $fasilitas->foto) }}" class="img-fluid rounded border"
+                                            style="max-height: 200px; width: 100%; object-fit: cover;">
                                     @else
-                                        <div class="text-muted py-4 border rounded bg-light">Belum ada foto</div>
+                                        <div class="text-muted py-4 border rounded bg-light">
+                                            <i class="fas fa-image fa-3x mb-2"></i><br>Belum ada foto
+                                        </div>
                                     @endif
                                 </div>
                                 <div class="custom-file text-left">
-                                    <input type="file" name="foto" class="custom-file-input" id="foto">
+                                    <input type="file" name="foto" class="custom-file-input" id="foto" accept="image/*">
                                     <label class="custom-file-label" for="foto">Ganti Foto...</label>
                                 </div>
-                                <small class="text-muted mt-2 d-block">Maksimal 2MB (JPG, PNG)</small>
+                                <small class="text-muted mt-2 d-block">Maksimal 10MB (JPG, PNG)</small>
                             </div>
                         </div>
 
@@ -144,14 +177,16 @@
                             </div>
                             <div class="card-body">
                                 <div class="form-group">
-                                    <label>Petugas Pembayaran</label>
-                                    <select name="admin_pembayaran_id" class="form-control select2">
+                                    <label>Petugas Pembayaran <span class="text-danger">*</span></label>
+                                    <select name="admin_pembayaran_id" class="form-control select2" required>
+                                        <option value="" disabled>-- Pilih Petugas --</option>
                                         @foreach($adminPembayaran as $admin)
                                             <option value="{{ $admin->id }}" {{ $fasilitas->admin_pembayaran_id == $admin->id ? 'selected' : '' }}>
                                                 {{ $admin->name }}
                                             </option>
                                         @endforeach
                                     </select>
+                                    <small class="text-muted">Petugas ini yang akan memverifikasi pembayaran sewa.</small>
                                 </div>
                             </div>
                         </div>
@@ -163,32 +198,115 @@
 @endsection
 
 @section('scripts')
-<script>
-    $(document).ready(function() {
-        // Initialize Select2
-        $('.select2').select2({ theme: 'bootstrap4' });
+    <script>
+        $(document).ready(function () {
+            // ===== FITUR 1: TOGGLE KATEGORI MANUAL =====
+            function toggleKategoriManual() {
+                const selectedValue = $('#kategori_select').val();
 
-        // Logic Kategori Lainnya
-        $('#kategori_select').on('change', function() {
-            if($(this).val() == 'lainnya') {
-                $('#kategori_baru').slideDown().focus();
-            } else {
-                $('#kategori_baru').slideUp();
-            }
-        });
-
-        // Preview Image Logic
-        $('#foto').on('change', function() {
-            const file = this.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#image-preview').html(`<img src="${e.target.result}" class="img-fluid rounded border" style="max-height: 200px;">`);
-                    $('.custom-file-label').text(file.name);
+                if (selectedValue === 'lainnya') {
+                    $('#kategori_baru').slideDown(300).focus();
+                    $('#kategori_baru').prop('required', true);
+                } else {
+                    $('#kategori_baru').slideUp(300);
+                    $('#kategori_baru').prop('required', false);
+                    $('#kategori_baru').val(''); // Kosongkan nilai
                 }
-                reader.readAsDataURL(file);
             }
+
+            // Init Select2
+            $('.select2').select2({
+                theme: 'bootstrap4',
+                width: '100%'
+            });
+
+            // Event handler untuk perubahan select
+            $('#kategori_select').on('change select2:select', function () {
+                toggleKategoriManual();
+            });
+
+            // Trigger saat halaman load (untuk kondisi awal/edit)
+            toggleKategoriManual();
+
+            // ===== FITUR 2: PREVIEW FOTO REAL-TIME =====
+            $('#foto').on('change', function (e) {
+                const file = this.files[0];
+                const label = $('.custom-file-label');
+                const previewContainer = $('#image-preview');
+
+                if (file) {
+                    // Validasi ukuran file (10MB)
+                    if (file.size > 10 * 1024 * 1024) {
+                        alert('⚠️ File terlalu besar! Maksimal 10MB.');
+                        this.value = '';
+                        label.text('Ganti Foto...');
+                        return;
+                    }
+
+                    // Validasi tipe file
+                    if (!file.type.match('image.*')) {
+                        alert('⚠️ File harus berupa gambar!');
+                        this.value = '';
+                        label.text('Ganti Foto...');
+                        return;
+                    }
+
+                    // Tampilkan loading
+                    previewContainer.html(`
+                    <div class="text-muted py-4">
+                        <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
+                        <br>Memuat preview...
+                    </div>
+                `);
+
+                    // Baca file dan tampilkan preview
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        previewContainer.html(`
+                        <img src="${e.target.result}"
+                             class="img-fluid rounded border shadow-sm"
+                             style="max-height: 200px; width: 100%; object-fit: cover;">
+                    `);
+                        label.text(file.name);
+                    };
+
+                    reader.onerror = function () {
+                        alert('❌ Gagal membaca file!');
+                        previewContainer.html(`
+                        <div class="text-danger py-4">
+                            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+                            <br>Gagal memuat gambar
+                        </div>
+                    `);
+                    };
+
+                    reader.readAsDataURL(file);
+                } else {
+                    // User membatalkan pilihan file - kembalikan ke foto asli
+                    label.text('Ganti Foto...');
+
+                    @if($fasilitas->foto)
+                        previewContainer.html(`
+                            <img src="{{ asset('storage/' . $fasilitas->foto) }}"
+                                 class="img-fluid rounded border"
+                                 style="max-height: 200px; width: 100%; object-fit: cover;">
+                        `);
+                    @else
+                        previewContainer.html(`
+                            <div class="text-muted py-4 border rounded bg-light">
+                                <i class="fas fa-image fa-3x mb-2"></i><br>Belum ada foto
+                            </div>
+                        `);
+                    @endif
+            }
+            });
+
+            // Update label file input saat dipilih (untuk Bootstrap 4)
+            $('.custom-file-input').on('change', function () {
+                const fileName = $(this).val().split('\\').pop();
+                $(this).siblings('.custom-file-label').addClass('selected').html(fileName);
+            });
         });
-    });
-</script>
+    </script>
 @endsection

@@ -13,7 +13,7 @@ use App\Http\Controllers\User\BerandaController as UserBerandaController;
 use App\Http\Controllers\User\BookingController as UserBookingController;
 use App\Http\Controllers\User\CheckoutController as UserCheckoutController;
 use App\Http\Controllers\User\RiwayatController as UserRiwayatController;
-use App\Http\Controllers\User\UserController;
+use App\Http\Controllers\User\ProfileController as UserProfileController;
 
 // Admin General
 use App\Http\Controllers\Admin\DashboardController as SharedDashboard;
@@ -25,11 +25,14 @@ use App\Http\Controllers\Admin\Fasilitas\JadwalController;
 use App\Http\Controllers\Admin\Fasilitas\BookingController;
 
 // Admin Pembayaran
-use App\Http\Controllers\Admin\Pembayaran\PembayaranController;
+use App\Http\Controllers\Admin\Pembayaran\VerifikasiController;
 use App\Http\Controllers\Admin\Pembayaran\KeuanganController;
 
 // Super Admin
-use App\Http\Controllers\Admin\Super\UsersController;
+use App\Http\Controllers\Admin\Super\UserController;
+use App\Http\Controllers\Admin\Super\ApprovalController;
+use App\Http\Controllers\Admin\Super\UserPublicController;
+use App\Http\Controllers\Admin\Super\LaporanController;
 
 
 
@@ -87,15 +90,15 @@ Route::middleware(['auth:web', 'role:user'])->name('user.')->group(function () {
     Route::get('/api/check-jadwal/{fasilitasId}/{tanggal}', [UserCheckoutController::class, 'checkJadwal']);
 
     // Riwayat Pemesanan
-    Route::get('/riwayat', [UserRiwayatController::class, 'riwayat'])->name('riwayat');
+    Route::get('/riwayat', [UserRiwayatController::class, 'index'])->name('riwayat');
     // Route::get('/riwayat/receipt/{id}', [UserRiwayatController::class, 'downloadReceipt'])->name('riwayat.receipt'); // Diganti checkout.print
 
     // Profile User
     Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', [UserController::class, 'profile'])->name('edit');
-        Route::put('/update', [UserController::class, 'updateProfile'])->name('update');
-        Route::put('/update-account', [UserController::class, 'updateAccount'])->name('update-account');
-        Route::put('/update-password', [UserController::class, 'updatePassword'])->name('update-password');
+        Route::get('/', [UserProfileController::class, 'index'])->name('index');
+        Route::put('/update', [UserProfileController::class, 'updateProfile'])->name('update');
+        Route::put('/account', [UserProfileController::class, 'updateAccount'])->name('account');
+        Route::put('/password', [UserProfileController::class, 'updatePassword'])->name('password');
     });
 });
 
@@ -109,10 +112,10 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
 
     // A. SHARED ROUTES (Semua Admin bisa akses ini)
     // ------------------------------------------------------------
-    // 1 Route Dashboard menghandle semua role
+    // Route Dashboard menghandle semua role
     Route::get('/dashboard', [SharedDashboard::class, 'index'])->name('dashboard');
 
-    // 1 Route Profile menghandle semua role
+    // Route Profile menghandle semua role
     Route::get('/profile', [SharedProfile::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [SharedProfile::class, 'update'])->name('profile.update');
 
@@ -122,8 +125,31 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
 
     // 1. SUPER ADMIN (Kepala Dinas)
     Route::middleware(['role:super_admin'])->name('super.')->group(function () {
-        Route::resource('users', UsersController::class);
-        // Route::get('/logs', ...);
+        // A. Manajemen User Staff (Admin Fasilitas & Pembayaran)
+        // Menggunakan Resource Controller standar
+        // Route yang terbentuk: admin.super.users.index, create, store, edit, update, destroy
+        Route::resource('users', UserController::class)->except(['show']);
+
+        // B. Approval Fasilitas
+        // Pakai custom route karena butuh aksi spesifik (action approve/reject)
+        Route::prefix('approval')->name('approval.')->controller(ApprovalController::class)->group(function () {
+            Route::get('/', 'index')->name('index');        // admin.super.approval.index
+            Route::get('/{id}', 'show')->name('show');      // admin.super.approval.show
+            Route::put('/{id}', 'action')->name('action');  // admin.super.approval.action (Proses Approve/Reject)
+        });
+        // === [NEW] MANAJEMEN MASYARAKAT ===
+        Route::prefix('masyarakat')->name('masyarakat.')->controller(UserPublicController::class)->group(function() {
+            Route::get('/', 'index')->name('index');
+            Route::get('/{id}', 'show')->name('show');
+            Route::put('/{id}/lock', 'lock')->name('lock'); // Untuk lock/unlock akun
+            Route::delete('/{id}', 'destroy')->name('destroy');
+        });
+
+        // === [NEW] LAPORAN & MONITORING ===
+        Route::prefix('laporan')->name('laporan.')->controller(LaporanController::class)->group(function() {
+            Route::get('/transaksi', 'transaksi')->name('transaksi');
+            Route::get('/log', 'log')->name('log');
+        });
     });
 
     // 2. ADMIN FASILITAS (Staff Prasarana)
@@ -132,7 +158,8 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
 
         // CRUD Fasilitas
         Route::resource('data', FasilitasController::class);
-        Route::post('/data/{id}/restore', [FasilitasController::class, 'restore'])->name('restore');
+        Route::put('data/{id}/restore', [FasilitasController::class, 'restore'])->name('data.restore');
+        Route::put('/data/{id}/toggle-status', [FasilitasController::class, 'toggleStatus'])->name('data.toggle_status');
 
         // Jadwal
         Route::prefix('jadwal')->name('jadwal.')->group(function () {
@@ -144,23 +171,35 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
         // ROUTE BOOKING
         Route::prefix('booking')->name('booking.')->controller(BookingController::class)->group(function () {
             Route::get('/', 'daftarBooking')->name('index');
-            Route::get('/{id}', 'show')->name('show');
+            Route::get('/{id}', 'show')->name('detail');
             Route::put('/{id}/cancel', 'cancelBooking')->name('cancel');
+            Route::put('/{id}/update-status', 'updateStatus')->name('update-status');
         });
     });
 
     // 3. ADMIN PEMBAYARAN (Staff Keuangan)
     Route::middleware(['role:super_admin,admin_pembayaran'])->prefix('keuangan')->name('keuangan.')->group(function () {
 
-        // Verifikasi
-        Route::get('/verifikasi', [PembayaranController::class, 'index'])->name('verifikasi.index');
-        Route::get('/verifikasi/{id}', [PembayaranController::class, 'show'])->name('verifikasi.show');
-        Route::put('/verifikasi/{id}/confirm', [PembayaranController::class, 'verifikasi'])->name('verifikasi.confirm');
-        Route::put('/verifikasi/{id}/reject', [PembayaranController::class, 'tolak'])->name('verifikasi.reject');
+        // A. VERIFIKASI (Operasional)
+        Route::controller(VerifikasiController::class)->prefix('verifikasi')->name('verifikasi.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/{id}', 'show')->name('show');
+            Route::put('/{id}/confirm', 'verifikasi')->name('confirm');
+            Route::put('/{id}/reject', 'tolak')->name('reject');
+        });
 
-        // Laporan
-        Route::get('/transaksi', [KeuanganController::class, 'transaksi'])->name('transaksi');
-        Route::get('/export', [KeuanganController::class, 'exportTransaksi'])->name('export');
+        // B. KEUANGAN (Laporan & Statistik)
+        Route::controller(KeuanganController::class)->group(function () {
+            // 1. Route Index & Ringkasan (INI YANG HILANG DAN BIKIN ERROR)
+            Route::get('/', 'index')->name('index');
+            Route::get('/ringkasan', 'ringkasan')->name('ringkasan'); // <--- INI SOLUSINYA
+            Route::get('/export/ringkasan/{type}', 'exportRingkasan')->name('export_ringkasan');
+
+            // 2. Route Transaksi
+            Route::get('/transaksi', 'transaksi')->name('transaksi');
+            // Ubah nama route export agar spesifik (export_transaksi) karena ada export_ringkasan juga
+            Route::get('/export/transaksi', 'exportTransaksi')->name('export_transaksi');
+        });
     });
 
 });

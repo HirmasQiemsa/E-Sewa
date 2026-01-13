@@ -24,6 +24,7 @@ return new class extends Migration
             $table->text('keterangan')->nullable();
             $table->foreignId('admin_id')->nullable()->constrained('admins')->nullOnDelete();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

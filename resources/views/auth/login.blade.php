@@ -6,7 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Login | E-Sewa DISPORA</title>
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/icheck-bootstrap@3.0.1/icheck-bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
@@ -23,12 +24,13 @@
         /* Efek kaca (Glassmorphism) sedikit pada card */
         .login-box .card {
             background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
             border-radius: 10px;
         }
 
         .login-logo a b {
-            color: #c0392b !important; /* Warna merah Dispora */
+            color: #c0392b !important;
+            /* Warna merah Dispora */
         }
     </style>
 </head>
@@ -56,7 +58,7 @@
 
                     <div class="input-group mb-3">
                         <input type="text" name="username" class="form-control @error('username') is-invalid @enderror"
-                               placeholder="Username" value="{{ old('username') }}" required autofocus>
+                            placeholder="Username" value="{{ old('username') }}" required autofocus>
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-user"></span>
@@ -68,8 +70,9 @@
                     </div>
 
                     <div class="input-group mb-3">
-                        <input type="password" name="password" class="form-control @error('password') is-invalid @enderror"
-                               placeholder="Password" required>
+                        <input type="password" name="password"
+                            class="form-control @error('password') is-invalid @enderror" placeholder="Password"
+                            required>
                         <div class="input-group-append">
                             <div class="input-group-text">
                                 <span class="fas fa-lock"></span>
@@ -83,7 +86,7 @@
                     <div class="row">
                         <div class="col-8">
                             <div class="icheck-danger">
-                                <input type="checkbox" id="remember">
+                                <input type="checkbox" id="remember" name="remember">
                                 <label for="remember">
                                     Ingat Saya
                                 </label>
@@ -103,8 +106,8 @@
                     </a>
                 </div>
             </div>
-            </div>
         </div>
+    </div>
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
@@ -133,4 +136,5 @@
         </script>
     @endif
 </body>
+
 </html>

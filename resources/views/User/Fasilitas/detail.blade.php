@@ -1,9 +1,38 @@
-@extends('User.user')
+@extends('User.component')
+
+@push('css')
+    {{-- CUSTOM CSS UNTUK FIX UI --}}
+    <style>
+        /* Fix Flatpickr ketimpa elemen lain */
+        .flatpickr-calendar {
+            z-index: 1050 !important;
+            /* Di atas sticky top & modal bootstrap */
+        }
+
+        /* Fix Sticky Sidebar agar tidak menutupi alert/modal */
+        .sticky-sidebar {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 20px;
+            z-index: 10;
+            /* Z-index rendah agar tidak menutupi alert */
+        }
+    </style>
+@endpush
 
 @section('content')
-
     <div class="container py-4">
-
+        {{-- DEBUG: TAMPILKAN SEMUA ERROR VALIDASI --}}
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        <!-- Breadcrumb -->
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb bg-transparent p-0">
                 <li class="breadcrumb-item"><a href="{{ route('user.fasilitas') }}">Beranda</a></li>
@@ -13,14 +42,35 @@
 
         <div class="row">
             <div class="col-md-4 mb-4">
-                <div class="card shadow-sm border-0 rounded-lg sticky-top" style="top: 20px; z-index: 1;">
-                    <img src="{{ asset('storage/' . $fasilitas->foto) }}" class="card-img-top"
-                        alt="{{ $fasilitas->nama_fasilitas }}" style="height: 250px; object-fit: cover;">
+                {{-- FIX: Ganti inline style dengan class sticky-sidebar --}}
+                <div class="card shadow-sm border-0 rounded-lg sticky-sidebar">
+                    {{-- FIX IMAGE: Tambahkan onerror untuk fallback image jika gagal load --}}
+                    <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center overflow-hidden"
+                        style="height: 250px; position: relative;">
+
+                        {{-- 1. Cek apakah ada data foto di database --}}
+                        @if($fasilitas->foto)
+                            <img src="{{ asset('storage/' . $fasilitas->foto) }}" alt="{{ $fasilitas->nama_fasilitas }}"
+                                style="width: 100%; height: 100%; object-fit: cover;"
+                                onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none');">
+                        @endif
+
+                        {{-- 2. Fallback Icon (Akan muncul jika foto null ATAU error loading) --}}
+                        {{-- Class 'd-none' ditambahkan jika foto ada, tapi akan dihapus oleh JS onerror jika gagal load
+                        --}}
+                        <div class="{{ $fasilitas->foto ? 'd-none' : '' }} text-center text-white-50">
+                            <i class="fas fa-image-slash fa-4x mb-2"></i>
+                            <p class="m-0 small">Foto tidak tersedia</p>
+                        </div>
+
+                    </div>
+
                     <div class="card-body">
                         <h3 class="font-weight-bold">{{ $fasilitas->nama_fasilitas }}</h3>
                         <div class="mb-3">
-                            <span
-                                class="badge {{ $fasilitas->icon_color ?? 'bg-primary' }} p-2">{{ $fasilitas->kategori ?? 'Olahraga' }}</span>
+                            <span class="badge {{ $fasilitas->icon_color ?? 'bg-primary' }} p-2">
+                                {{ $fasilitas->kategori ?? 'Olahraga' }}
+                            </span>
                         </div>
 
                         <p class="text-muted"><i class="fas fa-map-marker-alt mr-2 text-danger"></i>
@@ -65,7 +115,8 @@
                                             required>
                                     </div>
                                     <small class="text-muted mt-1 d-block">
-                                        <i class="fas fa-info-circle text-info"></i> Jadwal booking diperbarui setiap bulan sekali.
+                                        <i class="fas fa-info-circle text-info"></i> Jadwal booking diperbarui setiap bulan
+                                        sekali.
                                     </small>
                                 </div>
                             </div>
@@ -93,6 +144,7 @@
                                 @error('jadwal_ids') <small class="text-danger">{{ $message }}</small> @enderror
                             </div>
 
+                            {{-- RINGKASAN PESANAN (Tetap Sama) --}}
                             <div class="card bg-light border-0 mt-4">
                                 <div class="card-body">
                                     <h6 class="font-weight-bold text-dark mb-3 border-bottom pb-2">
@@ -136,7 +188,9 @@
             </div>
         </div>
     </div>
+@endsection
 
+@push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const fasilitasId = document.getElementById('fasilitas_id').value;
@@ -153,16 +207,15 @@
             // 1. Inisialisasi Flatpickr (Kalender)
             const fp = flatpickr("#tanggal_booking", {
                 locale: "id",
-                dateFormat: "Y-m-d",            // Format value
-                altInput: true,                 // Aktifkan tampilan alternatif
-                altFormat: "l, d F Y",          // Format tampilan
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "l, d F Y",
                 minDate: "today",
                 maxDate: endOfMonth,
                 disableMobile: "true",
-                defaultDate: "{{ request('date', date('Y-m-d')) }}",
+                defaultDate: "{{ request('date') }}", // Hapus date('Y-m-d') agar tidak otomatis load hari ini jika kosong
 
                 onReady: function (selectedDates, dateStr, instance) {
-                    // dateStr disini mengikuti dateFormat (Y-m-d)
                     if (dateStr) {
                         loadJadwal(dateStr);
                     }
@@ -177,6 +230,9 @@
                 onDayCreate: function (dObj, dStr, fp, dayElem) {
                     if (dayElem.classList.contains("flatpickr-disabled")) {
                         dayElem.addEventListener("click", function () {
+                            // FIX: Tutup kalender dulu sebelum alert muncul
+                            fp.close();
+
                             if (typeof Swal !== 'undefined') {
                                 Swal.fire({
                                     icon: 'info',
@@ -190,7 +246,7 @@
                 }
             });
 
-            // FUNGSI: Load Jadwal dari API
+// FUNGSI: Load Jadwal (Revisi Visual: Expired vs Booked)
             function loadJadwal(tanggal) {
                 placeholder.classList.add('d-none');
                 jadwalContainer.classList.add('d-none');
@@ -204,32 +260,74 @@
                         jadwalContainer.classList.remove('d-none');
 
                         if (data.length === 0) {
-                            jadwalContainer.innerHTML = `
-                                <div class="col-12 text-center py-4">
-                                    <i class="far fa-calendar-times fa-3x text-muted mb-3"></i>
-                                    <p class="text-muted">Tidak ada jadwal tersedia untuk tanggal ini.</p>
-                                </div>`;
+                            jadwalContainer.innerHTML = `<div class="col-12 text-center py-4"><p class="text-muted">Tidak ada jadwal tersedia.</p></div>`;
                             return;
                         }
 
-                        data.forEach(slot => {
-                            const isBooked = slot.status !== 'tersedia';
-                            const jamDisplay = slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5);
+                        // --- PREPARE DATA WAKTU SEKARANG ---
+                        const now = new Date();
+                        const currentHour = now.getHours();
+                        const year = now.getFullYear();
+                        const month = String(now.getMonth() + 1).padStart(2, '0');
+                        const day = String(now.getDate()).padStart(2, '0');
+                        const todayStr = `${year}-${month}-${day}`;
 
+                        data.forEach(slot => {
+                            // 1. Status Awal (Dari Database)
+                            let isBooked = slot.status !== 'tersedia';
+                            let isExpired = false;
+
+                            // 2. TIME VALIDATION (Expired check)
+                            if (tanggal === todayStr) {
+                                const slotHour = parseInt(slot.jam_mulai.split(':')[0]);
+                                if (slotHour <= currentHour) {
+                                    isExpired = true;
+                                }
+                            }
+
+                            // 3. RENDER VISUAL
+                            const jamDisplay = slot.jam_mulai.substring(0, 5) + ' - ' + slot.jam_selesai.substring(0, 5);
                             const col = document.createElement('div');
                             col.className = 'col-6 col-md-4 col-lg-3 mb-3';
 
-                            let btnClass = isBooked ? 'btn-light text-muted border' : 'btn-outline-primary';
-                            let cursor = isBooked ? 'not-allowed' : 'pointer';
-                            let icon = isBooked ? '<i class="fas fa-lock ml-1"></i>' : '';
+                            let btnClass = '';
+                            let cursor = '';
+                            let icon = '';
+                            let isDisabled = false;
 
+                            // --- LOGIKA WARNA TOMBOL ---
+                            if (isExpired) {
+                                // KASUS 1: EXPIRED (Lewat Jam) -> Abu-abu Gelap
+                                btnClass = 'btn-secondary disabled border-0 text-white-50';
+                                cursor = 'not-allowed';
+                                icon = '<i class="fas fa-history ml-1"></i>';
+                                isDisabled = true;
+
+                            } else if (isBooked) {
+                                // KASUS 2: BOOKED (Punya Orang) -> KUNING (Warning)
+                                // Kita pakai btn-warning, text-dark biar kontras
+                                btnClass = 'btn-warning disabled text-dark border-warning';
+                                cursor = 'not-allowed';
+                                icon = '<i class="fas fa-lock ml-1"></i>';
+                                isDisabled = true;
+
+                            } else {
+                                // KASUS 3: TERSEDIA -> Biru (Primary)
+                                btnClass = 'btn-outline-primary';
+                                cursor = 'pointer';
+                                icon = '';
+                                isDisabled = false;
+                            }
+
+                            // Render HTML
                             col.innerHTML = `
                                 <div class="btn ${btnClass} btn-block py-2 position-relative slot-btn"
                                      id="btn-slot-${slot.id}"
-                                     onclick="toggleSlot(${slot.id}, ${isBooked})"
+                                     onclick="${isDisabled ? '' : `toggleSlot(${slot.id}, false)`}"
                                      style="cursor: ${cursor}; transition: all 0.2s;">
                                     ${jamDisplay} ${icon}
-                                    <input type="checkbox" name="jadwal_ids[]" id="input-slot-${slot.id}" value="${slot.id}" style="display:none;">
+
+                                    ${!isDisabled ? `<input type="checkbox" name="jadwal_ids[]" id="input-slot-${slot.id}" value="${slot.id}" style="display:none;">` : ''}
                                 </div>
                             `;
                             jadwalContainer.appendChild(col);
@@ -238,38 +336,31 @@
                     .catch(err => {
                         loading.classList.add('d-none');
                         console.error(err);
-                        jadwalContainer.innerHTML = '<div class="col-12"><p class="text-danger text-center">Gagal memuat jadwal. Silakan refresh.</p></div>';
                     });
             }
 
-            // FUNGSI: Toggle Slot (Fix Logic: Tambah/Kurang)
+            // FUNGSI: Toggle Pilihan Slot
             window.toggleSlot = function (id, isBooked) {
                 if (isBooked) return;
 
                 const btn = document.getElementById(`btn-slot-${id}`);
                 const input = document.getElementById(`input-slot-${id}`);
-
-                // Cek index di array
                 const index = selectedSlots.indexOf(id);
 
                 if (index > -1) {
-                    // SUDAH ADA -> HAPUS
                     selectedSlots.splice(index, 1);
                     btn.classList.remove('btn-primary', 'text-white', 'shadow');
                     btn.classList.add('btn-outline-primary');
                     input.checked = false;
                 } else {
-                    // BELUM ADA -> TAMBAH
                     selectedSlots.push(id);
                     btn.classList.remove('btn-outline-primary');
                     btn.classList.add('btn-primary', 'text-white', 'shadow');
                     input.checked = true;
                 }
-
                 updateSummary();
             }
 
-            // FUNGSI: Update Harga
             function updateSummary() {
                 const totalDurasi = selectedSlots.length;
                 const totalHarga = totalDurasi * hargaPerJam;
@@ -294,4 +385,4 @@
             }
         });
     </script>
-@endsection
+@endpush

@@ -1,13 +1,12 @@
-@extends('User.user')
+@extends('User.component')
 
 @section('content')
-
-
-
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
-                <div class="col-sm-6"><h1 class="m-0 font-weight-bold">Riwayat Pemesanan</h1></div>
+                <div class="col-sm-6">
+                    <h1 class="m-0 font-weight-bold">Riwayat Pemesanan</h1>
+                </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="{{ route('user.fasilitas') }}">Beranda</a></li>
@@ -22,7 +21,7 @@
         <div class="container-fluid">
 
             {{-- Notifikasi --}}
-            @if (session('success'))
+            {{-- @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show">
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
                     <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
@@ -33,7 +32,7 @@
                     <button type="button" class="close" data-dismiss="alert">&times;</button>
                     <i class="fas fa-exclamation-circle mr-2"></i> {{ session('error') }}
                 </div>
-            @endif
+            @endif --}}
 
             <div class="card mb-4 shadow-sm border-0">
                 <div class="card-header bg-white py-3">
@@ -42,16 +41,18 @@
                 <div class="card-body">
                     <form id="filter-form" action="{{ route('user.riwayat') }}" method="GET">
                         <div class="row">
-                            <div class="col-md-3">
+
+                            <div class="col-md-4">
                                 <div class="form-group mb-md-0">
-                                    <label class="small text-muted">Status Booking</label>
-                                    <select id="status-filter" name="status" class="form-control custom-select">
-                                        <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>Semua Status</option>
-                                        <option value="fee" {{ request('status') == 'kompensasi' ? 'selected' : '' }}>Belum Lunas (DP)</option>
-                                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu Verifikasi</option>
-                                        <option value="lunas" {{ request('status') == 'lunas' ? 'selected' : '' }}>Lunas</option>
-                                        <option value="batal" {{ request('status') == 'batal' ? 'selected' : '' }}>Dibatalkan</option>
-                                    </select>
+                                    <label class="small text-muted">Pencarian</label>
+                                    <div class="input-group">
+                                        <input type="text" name="search" class="form-control"
+                                            placeholder="Cari ID, Fasilitas, Lokasi..." value="{{ request('search') }}">
+                                        <div class="input-group-append">
+                                            <button type="submit" class="btn btn-primary"><i
+                                                    class="fas fa-search"></i></button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -60,26 +61,38 @@
                                     <label class="small text-muted">Pilih Bulan</label>
                                     <div class="input-group">
                                         <div class="input-group-prepend">
-                                            <span class="input-group-text bg-white"><i class="far fa-calendar-alt"></i></span>
+                                            <span class="input-group-text bg-white"><i
+                                                    class="far fa-calendar-alt"></i></span>
                                         </div>
                                         <input type="text" id="calendar-filter" class="form-control bg-white"
-                                               placeholder="Lihat Kalender..." readonly>
-                                        <input type="hidden" name="month" id="month-value" value="{{ request('month') }}">
+                                            placeholder="Lihat Kalender..." readonly>
+                                        <input type="hidden" name="date" id="date-value" value="{{ request('date') }}">
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <div class="form-group mb-md-0">
-                                    <label class="small text-muted">Pencarian</label>
-                                    <div class="input-group">
-                                        <input type="text" name="search" class="form-control"
-                                               placeholder="Cari ID, Fasilitas, Lokasi..."
-                                               value="{{ request('search') }}">
-                                        <div class="input-group-append">
-                                            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
-                                        </div>
-                                    </div>
+                                    <label class="small text-muted">Status Booking</label>
+                                    <select id="status-filter" name="status" class="form-control custom-select">
+                                        <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>Semua
+                                            Status</option>
+
+                                        {{-- PERBAIKAN: Value harus sama dengan ENUM di database --}}
+                                        <option value="kompensasi"
+                                            {{ request('status') == 'kompensasi' ? 'selected' : '' }}>
+                                            Belum Lunas (DP)
+                                        </option>
+                                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>
+                                            Menunggu Verifikasi
+                                        </option>
+                                        <option value="lunas" {{ request('status') == 'lunas' ? 'selected' : '' }}>
+                                            Lunas
+                                        </option>
+                                        <option value="batal" {{ request('status') == 'batal' ? 'selected' : '' }}>
+                                            Dibatalkan
+                                        </option>
+                                    </select>
                                 </div>
                             </div>
 
@@ -114,45 +127,108 @@
                             @forelse($checkouts as $index => $checkout)
                                 <tr>
                                     <td class="pl-4 align-middle">{{ $checkouts->firstItem() + $index }}</td>
+
+                                    {{-- ID BOOKING & TANGGAL --}}
                                     <td class="align-middle">
-                                        <span class="font-weight-bold text-primary">#{{ $checkout->id }}</span><br>
-                                        <small class="text-muted">{{ $checkout->created_at->format('d M Y H:i') }}</small>
+                                        <span class="font-weight-bold text-primary">#{{ $checkout->id }}</span>
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="far fa-clock mr-1"></i>
+                                            {{ $checkout->created_at->format('d M Y H:i') }}
+                                        </small>
                                     </td>
+
+                                    {{-- FASILITAS & LOKASI (Dibuat Vertikal) --}}
                                     <td class="align-middle">
-                                        @if($checkout->jadwal && $checkout->jadwal->fasilitas)
-                                            <span class="d-block font-weight-bold">{{ $checkout->jadwal->fasilitas->nama_fasilitas }}</span>
-                                            <small class="text-muted"><i class="fas fa-map-marker-alt mr-1"></i> {{ $checkout->jadwal->fasilitas->lokasi }}</small>
+                                        {{-- Ambil fasilitas dari jadwal pertama (asumsi 1 checkout = 1 fasilitas) --}}
+                                        @php
+                                            $fasilitas = $checkout->jadwals->first()->fasilitas ?? null;
+                                        @endphp
+
+                                        @if ($fasilitas)
+                                            {{-- Nama Fasilitas (Tebal) --}}
+                                            <span class="d-block font-weight-bold text-dark" style="font-size: 1rem;">
+                                                {{ $fasilitas->nama_fasilitas }}
+                                            </span>
+
+                                            {{-- Lokasi (Di bawahnya, text kecil & abu-abu) --}}
+                                            <small class="d-block text-muted mt-1">
+                                                <i class="fas fa-map-marker-alt mr-1 text-danger"></i>
+                                                {{ $fasilitas->lokasi }}
+                                            </small>
                                         @else
-                                            <span class="text-muted">- Data Terhapus -</span>
+                                            <span class="text-muted font-italic">- Data Fasilitas Terhapus -</span>
                                         @endif
                                     </td>
+
+                                    {{-- JADWAL MAIN (Handling Multiple Jam) --}}
                                     <td class="align-middle">
-                                        @if($checkout->jadwal)
-                                            <span class="d-block">{{ \Carbon\Carbon::parse($checkout->jadwal->tanggal)->format('d M Y') }}</span>
-                                            <small class="text-info">{{ substr($checkout->jadwal->jam_mulai, 0, 5) }} - {{ substr($checkout->jadwal->jam_selesai, 0, 5) }}</small>
-                                        @else - @endif
+                                        @if ($checkout->jadwals->count() > 0)
+                                            {{-- Tanggal Main (Ambil dari jadwal pertama) --}}
+                                            <div class="mb-1">
+                                                <i class="far fa-calendar-alt text-secondary mr-1"></i>
+                                                <span class="font-weight-bold">
+                                                    {{ \Carbon\Carbon::parse($checkout->jadwals->first()->tanggal)->isoFormat('dddd, D MMMM Y') }}
+                                                </span>
+                                            </div>
+
+                                            {{-- List Jam Main (Looping) --}}
+                                            <div class="d-flex flex-wrap gap-1">
+                                                @foreach ($checkout->jadwals->sortBy('jam_mulai') as $jadwal)
+                                                    <span
+                                                        class="badge badge-light border border-secondary text-secondary mr-1 mb-1"
+                                                        style="font-size: 0.85rem;">
+                                                        {{ substr($jadwal->jam_mulai, 0, 5) }} -
+                                                        {{ substr($jadwal->jam_selesai, 0, 5) }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
                                     </td>
-                                    <td class="align-middle font-weight-bold">Rp {{ number_format($checkout->total_bayar, 0, ',', '.') }}</td>
-                                    <td class="align-middle">
+
+                                    {{-- TOTAL BIAYA --}}
+                                    <td class="align-middle font-weight-bold text-success">
+                                        Rp {{ number_format($checkout->total_bayar, 0, ',', '.') }}
+                                    </td>
+
+                                    {{-- STATUS --}}
+                                    <td class="align-middle text-center">
                                         @if ($checkout->status == 'kompensasi')
-                                            <span class="badge badge-warning p-2">Belum Lunas (DP)</span>
+                                            <span class="badge badge-warning p-2 d-block w-100">Belum Lunas (DP)</span>
                                         @elseif($checkout->status == 'pending')
-                                            <span class="badge badge-info p-2">Menunggu Verifikasi</span>
+                                            <span class="badge badge-info p-2 d-block w-100">Verifikasi Admin</span>
                                         @elseif($checkout->status == 'lunas')
-                                            <span class="badge badge-success p-2">Lunas</span>
+                                            <span class="badge badge-success p-2 d-block w-100">Lunas</span>
                                         @elseif($checkout->status == 'batal')
-                                            <span class="badge badge-danger p-2">Dibatalkan</span>
+                                            <span class="badge badge-danger p-2 d-block w-100">Dibatalkan</span>
                                         @endif
                                     </td>
+
+                                    {{-- OPSI --}}
                                     <td class="align-middle text-center">
                                         <div class="btn-group">
+                                            @php
+                                                $isKompensasi = $checkout->status === 'kompensasi';
+                                            @endphp
+
                                             <a href="{{ route('user.checkout.detail', $checkout->id) }}"
-                                               class="btn btn-sm {{ $checkout->status == 'kompensasi' ? 'btn-success font-weight-bold' : 'btn-default' }}"
-                                               title="Lihat Detail">
-                                                @if($checkout->status == 'kompensasi') Bayar @else <i class="fas fa-eye"></i> @endif
+                                                class="btn btn-sm {{ $isKompensasi ? 'btn-success font-weight-bold' : 'btn-default border' }}"
+                                                title="Lihat Detail">
+                                                @if ($isKompensasi)
+                                                    Bayar <i class="fas fa-arrow-right ml-1"></i>
+                                                @else
+                                                    <i class="fas fa-eye"></i> Detail
+                                                @endif
                                             </a>
-                                            @if (in_array($checkout->status, ['kompensasi']))
-                                                <button type="button" class="btn btn-sm btn-danger" onclick="confirmCancel({{ $checkout->id }})"><i class="fas fa-times"></i></button>
+
+                                            @if ($isKompensasi)
+                                                <button type="button" class="btn btn-sm btn-danger ml-1"
+                                                    onclick="confirmCancel({{ $checkout->id }})"
+                                                    title="Batalkan Pesanan">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
                                             @endif
                                         </div>
                                     </td>
@@ -160,7 +236,8 @@
                             @empty
                                 <tr>
                                     <td colspan="7" class="text-center py-5">
-                                        <img src="{{ asset('img/no-data.svg') }}" alt="Kosong" style="height: 100px; opacity: 0.5;">
+                                        <img src="{{ asset('img/no-data.svg') }}" alt="Kosong"
+                                            style="height: 100px; opacity: 0.5;">
                                         <p class="text-muted mt-3">Belum ada riwayat pemesanan.</p>
                                     </td>
                                 </tr>
@@ -184,7 +261,8 @@
                 </div>
                 <div class="modal-body text-center py-4">
                     <p>Apakah Anda yakin ingin membatalkan pesanan ini?</p>
-                    <small class="text-danger font-weight-bold">Perhatian: Uang DP yang sudah ditransfer tidak dapat dikembalikan.</small>
+                    <small class="text-danger font-weight-bold">Perhatian: Uang DP yang sudah ditransfer tidak dapat
+                        dikembalikan.</small>
                 </div>
                 <div class="modal-footer justify-content-center bg-light">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Kembali</button>
@@ -197,47 +275,50 @@
         </div>
     </div>
 
+@endsection
+
+@push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 1. LOGIKA KALENDER PINTAR (FLATPICKR)
-            // Terima data dari Controller
+            // 1. Ambil Data Calendar (Marker) dari Controller
             const calendarData = @json($calendarData);
-            // Contoh data: {"2023-11-21": "fee", "2023-11-25": "lunas"}
+            // Data contoh: {"2026-01-10": "kompensasi", "2026-01-12": "lunas"}
 
             const calendarInput = document.getElementById("calendar-filter");
-            const hiddenMonthInput = document.getElementById("month-value");
+            const hiddenDateInput = document.getElementById(
+            "date-value"); // Pastikan ID ini ada di HTML input hidden
             const filterForm = document.getElementById("filter-form");
 
+            // 2. Konfigurasi Flatpickr
             flatpickr(calendarInput, {
                 locale: "id",
+                dateFormat: "Y-m-d", // Format nilai yang dikirim ke server (2026-01-10)
+                altInput: true, // Aktifkan input alternatif (tampilan user)
+                altFormat: "j F Y", // Format tampilan user (10 Januari 2026)
                 disableMobile: "true",
-                plugins: [
-                    new monthSelectPlugin({
-                        shorthand: true, // Tampilkan bulan singkat (Jan, Feb)
-                        dateFormat: "Y-m", // Format value: 2023-11
-                        altFormat: "F Y", // Format tampilan: November 2023
-                        theme: "material_blue"
-                    })
-                ],
-                // Saat bulan dipilih, submit form
+                defaultDate: "{{ request('date') }}", // Muat tanggal terpilih jika ada
+
+                // Event saat tanggal dipilih
                 onChange: function(selectedDates, dateStr, instance) {
-                    hiddenMonthInput.value = dateStr;
-                    filterForm.submit();
+                    if (hiddenDateInput) {
+                        hiddenDateInput.value = dateStr; // Isi input hidden
+                        filterForm.submit(); // Submit form otomatis
+                    }
                 },
-                // Logika Mewarnai Tanggal (Marker)
+
+                // Logika Mewarnai Tanggal (Marker Status)
                 onDayCreate: function(dObj, dStr, fp, dayElem) {
-                    // Konversi tanggal elemen ke Y-m-d
+                    // Konversi tanggal elemen ke format Y-m-d lokal
                     const dateObj = dayElem.dateObj;
-                    // Trik timezone offset agar akurat
                     const offset = dateObj.getTimezoneOffset();
                     const localDate = new Date(dateObj.getTime() - (offset * 60 * 1000));
                     const dateString = localDate.toISOString().split('T')[0];
 
-                    // Cek apakah tanggal ini ada di data booking user
+                    // Cek apakah tanggal ini ada di data riwayat user
                     if (calendarData[dateString]) {
                         const status = calendarData[dateString];
 
-                        // Tambahkan class sesuai status prioritas
+                        // Tambahkan class CSS dot warna sesuai status
                         if (status === 'kompensasi') {
                             dayElem.classList.add('status-fee');
                             dayElem.title = "Menunggu Pelunasan (DP)";
@@ -252,18 +333,26 @@
                 }
             });
 
-            // 2. Auto Submit Status Filter
-            document.getElementById('status-filter').addEventListener('change', function() {
-                filterForm.submit();
-            });
+            // 3. Auto Submit Status Filter
+            const statusFilter = document.getElementById('status-filter');
+            if (statusFilter) {
+                statusFilter.addEventListener('change', function() {
+                    filterForm.submit();
+                });
+            }
         });
 
         // Fungsi Bantuan Lainnya
-        function openPrintWindow(url) { window.open(url, '_blank', 'width=800,height=600'); }
+        function openPrintWindow(url) {
+            window.open(url, '_blank', 'width=800,height=600');
+        }
+
         function confirmCancel(id) {
-            document.getElementById('cancel-form').action = "{{ url('/checkout/cancel') }}/" + id;
-            $('#cancelModal').modal('show');
+            const cancelForm = document.getElementById('cancel-form');
+            if (cancelForm) {
+                cancelForm.action = "{{ url('/checkout/cancel') }}/" + id;
+                $('#cancelModal').modal('show');
+            }
         }
     </script>
-
-@endsection
+@endpush

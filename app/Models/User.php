@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\softDeletes;
 use App\Traits\HasFotoUrl;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, HasFotoUrl, Notifiable;
+    use HasApiTokens, HasFactory, HasFotoUrl, Notifiable, SoftDeletes;
 
     protected $fillable = [
         'username', 'name', 'password', 'alamat', 'no_hp',

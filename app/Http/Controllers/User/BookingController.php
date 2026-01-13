@@ -15,18 +15,35 @@ use Illuminate\Support\Facades\DB;
 class BookingController extends Controller
 {
     /**
-     * Display dinamis facilities
+     * Halaman Detail Fasilitas
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        // Ambil data fasilitas beserta jadwalnya
-        $fasilitas = Fasilitas::with(['jadwals' => function($q) {
-            $q->where('tanggal', '>=', date('Y-m-d'))
-              ->where('status', 'tersedia');
-        }])->findOrFail($id);
+        // 1. Ambil Data Fasilitas
+        // Gunakan findOrFail agar jika ID ngawur langsung 404
+        $fasilitas = Fasilitas::findOrFail($id);
 
-        // Return ke view detail fasilitas
-        return view('User.Fasilitas.detail', compact('fasilitas'));
+        // 2. [BARU] CEK STATUS KETERSEDIAAN (VALIDASI BACKEND)
+        // Jika status bukan 'aktif', tendang user kembali ke beranda
+        if ($fasilitas->ketersediaan !== 'aktif') {
+            return redirect()->route('user.fasilitas')
+                ->with('error', 'Maaf, fasilitas ini sedang tidak aktif atau dalam perbaikan.');
+        }
+
+        // 3. Ambil Jadwal (Hanya load jadwal jika lolos validasi di atas)
+        // Load jadwal mulai hari ini ke depan
+        $fasilitas->load(['jadwals' => function($q) {
+            $q->where('tanggal', '>=', \Carbon\Carbon::today())
+              ->where('status', 'tersedia')
+              ->orderBy('tanggal')
+              ->orderBy('jam_mulai');
+        }]);
+
+        // Cek apakah user request tanggal spesifik dari kalender?
+        // Jika ada parameter ?date=2025-10-10, kita bisa filter tampilan di view nanti
+        $selectedDate = $request->query('date', null);
+
+        return view('User.Fasilitas.detail', compact('fasilitas', 'selectedDate'));
     }
 
 

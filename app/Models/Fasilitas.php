@@ -21,18 +21,18 @@ class Fasilitas extends Model
         'foto',
         'harga_sewa',
         'ketersediaan',      // aktif, nonaktif, maintenance
-        'status_approval',   // draft, pending, approved, rejected
+        // 'status_approval',   // fitur bagus, tapi di-skip dulu
         'admin_fasilitas_id', // FK ke Admin Pembuat
         'admin_pembayaran_id' // FK ke Admin Keuangan
     ];
 
     // --- LOGIKA TAMPILAN (ICON & WARNA) ---
     public const CATEGORY_ICONS = [
-        'futsal' => ['icon' => 'ion ion-ios-football', 'color' => 'bg-danger'],
+        'futsal' => ['icon' => 'ion ion-ios-football', 'color' => 'bg-info'],
         'tenis' => ['icon' => 'ion ion-ios-tennisball', 'color' => 'bg-success'],
         'voli' => ['icon' => 'fas fa-volleyball-ball', 'color' => 'bg-warning'],
         'badminton' => ['icon' => 'fas fa-feather', 'color' => 'bg-orange'],
-        'basket' => ['icon' => 'fas fa-basketball-ball', 'color' => 'bg-info'],
+        'basket' => ['icon' => 'fas fa-basketball-ball', 'color' => 'bg-danger'],
         'default' => ['icon' => 'fas fa-hockey-puck', 'color' => 'bg-primary']
     ];
 

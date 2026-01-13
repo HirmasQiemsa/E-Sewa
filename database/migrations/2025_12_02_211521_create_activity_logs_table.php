@@ -22,8 +22,8 @@ return new class extends Migration
             // Terhadap objek apa? (Polymorphic sederhana)
             $table->string('subject_type')->nullable();
             $table->unsignedBigInteger('subject_id')->nullable();
-
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

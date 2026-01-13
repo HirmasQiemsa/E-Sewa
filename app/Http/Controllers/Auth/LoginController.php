@@ -33,9 +33,13 @@ class LoginController extends Controller
             'password' => $request->password,
         ];
 
-        // 1. CEK USER (MASYARAKAT)
-        // Kita cek 'is_locked' juga. Jika terkunci, tolak.
-        if (Auth::guard('web')->attempt($credentials)) {
+        // 1. TANGKAP NILAI CHECKBOX
+        // Jika dicentang = true, jika tidak = false
+        $remember = $request->boolean('remember');
+
+        // 2. CEK USER (MASYARAKAT)
+        // Tambahkan $remember sebagai parameter kedua
+        if (Auth::guard('web')->attempt($credentials, $remember)) {
             $user = Auth::guard('web')->user();
 
             if ($user->is_locked) {
@@ -47,9 +51,9 @@ class LoginController extends Controller
             return redirect()->route('user.fasilitas')->with('success', 'Selamat Datang, ' . $user->name);
         }
 
-        // 2. CEK ADMIN (STAFF)
-        // Kita cek 'is_active' juga. Jika tidak aktif, tolak.
-        if (Auth::guard('admin')->attempt($credentials)) {
+        // 3. CEK ADMIN (STAFF)
+        // Tambahkan $remember sebagai parameter kedua juga
+        if (Auth::guard('admin')->attempt($credentials, $remember)) {
             $admin = Auth::guard('admin')->user();
 
             if (!$admin->is_active) {
@@ -61,7 +65,7 @@ class LoginController extends Controller
             return redirect()->route('admin.dashboard')->with('success', 'Selamat Datang Admin ' . $admin->name);
         }
 
-        // 3. GAGAL
+        // 4. GAGAL
         return back()->with('error', 'Username atau Password salah.');
     }
 }

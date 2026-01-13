@@ -13,15 +13,67 @@
     <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
 
     <style>
-        /* Hero Section Style */
+        /* =========================================
+           1. LOGIKA PRELOADER (MIRIP ADMIN LAYOUT)
+           ========================================= */
+        .preloader.initial-only {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background-color: #ffffff;
+            display: flex; /* Default tampil */
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        /* Class untuk animasi menghilang */
+        .preloader.initial-only.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        /* Class untuk benar-benar hilang dari layout (display: none) */
+        .preloader.initial-only.hidden {
+            display: none !important;
+        }
+
+        /* Animasi Logo Berdenyut (Gentle Pulse) */
+        .animation__gentle {
+            animation: gentle-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes gentle-pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .fade-in-text {
+            animation: fadeIn 1.5s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* =========================================
+           2. STYLE HALAMAN (HERO, CARD, DLL)
+           ========================================= */
         .hero-section {
             position: relative;
             background-image: url('{{ asset('img/sports-facilities-bg.jpg') }}');
-            /* Pastikan gambar ini ada */
             background-size: cover;
             background-position: center;
             height: 500px;
-            /* Tinggi banner */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -36,7 +88,6 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.6);
-            /* Gelapkan gambar background */
             z-index: 1;
         }
 
@@ -74,7 +125,6 @@
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
         }
 
-        /* Card Style */
         .small-box {
             transition: transform 0.3s ease;
             border-radius: 10px;
@@ -87,14 +137,12 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
         }
 
-        /* Feature Icons */
         .feature-box {
             padding: 30px 20px;
             text-align: center;
             background: white;
             border-radius: 10px;
             margin-top: -50px;
-            /* Efek overlap ke atas hero */
             position: relative;
             z-index: 3;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
@@ -103,27 +151,20 @@
         .feature-icon {
             font-size: 2.5rem;
             color: #dc3545;
-            /* Warna Merah Navbar */
             margin-bottom: 15px;
         }
 
-        /* 1. MODIFIKASI BENTUK LOGO (Seperti Perisai/Tag) */
         .brand-logo-container {
             width: 45px;
             height: 45px;
             display: flex;
             align-items: center;
             justify-content: center;
-
-            /* RAHASIA BENTUK "MERUNCING": */
-            /* Urutan: Kiri-Atas, Kanan-Atas, Kanan-Bawah, Kiri-Bawah */
             border-radius: 0 0 10px 10px;
-
             overflow: hidden;
             background-color: white;
             margin-left: 0.8rem;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            /* Sedikit bayangan biar cantik */
         }
 
         .brand-image-custom {
@@ -138,8 +179,13 @@
 </head>
 
 <body class="hold-transition layout-top-nav">
-    <div class="wrapper">
 
+    <div class="preloader initial-only" id="initialPreloader">
+        <img class="animation__gentle" src="{{ asset('img/logo.png') }}" alt="LogoDispora" height="120" width="100">
+        <h3 class="mt-3 text-dark font-weight-bold fade-in-text" style="letter-spacing: 2px;">DISPORA SEMARANG</h3>
+    </div>
+
+    <div class="wrapper">
         <nav class="main-header navbar navbar-expand-md navbar-light navbar-white shadow-sm">
             <div class="container">
                 <a href="#" class="navbar-brand">
@@ -171,6 +217,7 @@
                 </div>
             </div>
         </nav>
+
         <div class="content-wrapper">
 
             <div class="hero-section">
@@ -218,53 +265,40 @@
                     <div class="row mb-3">
                         <div class="col-12 text-center">
                             <h2 class="font-weight-bold">Fasilitas Kami</h2>
-                            <p class="text-muted">Pilihan fasilitas yang siap digunakan</p>
+                            <p class="text-muted">
+                                Berikut beberapa fasilitas tersedia yang dikelola oleh Dinas Kepemudaan dan Olahraga Kota Semarang
+                            </p>
                         </div>
                     </div>
 
                     <div class="row">
-                        <div class="col-lg-4 col-md-6">
-                            <div class="small-box bg-info">
-                                <div class="inner">
-                                    <h3>Futsal</h3>
-                                    <p>GOR Indoor Manunggal Jati</p>
+                        @forelse($fasilitas as $item)
+                            <div class="col-lg-4 col-md-6 mb-4">
+                                <div class="small-box {{ $item->icon_color }} shadow-sm h-100">
+                                    <div class="inner">
+                                        <h3>{{ $item->kategori ? ucwords($item->kategori) : 'Umum' }}</h3>
+                                        <p class="font-weight-bold" style="font-size: 1.1rem">{{ $item->nama_fasilitas }}</p>
+                                        <p class="mb-0"><i class="fas fa-map-marker-alt mr-1"></i>
+                                            {{ Str::limit($item->lokasi, 30) }}</p>
+                                        <h4 class="mt-2 font-weight-bold">
+                                            Rp {{ number_format($item->harga_sewa, 0, ',', '.') }}
+                                        </h4>
+                                    </div>
+                                    <div class="icon">
+                                        <i class="{{ $item->icon }}"></i>
+                                    </div>
+                                    <a href="{{ route('login') }}" class="small-box-footer">
+                                        Lihat Detail <i class="fas fa-arrow-circle-right"></i>
+                                    </a>
                                 </div>
-                                <div class="icon">
-                                    <i class="ion ion-ios-football"></i>
-                                </div>
-                                <a href="{{ route('login') }}" class="small-box-footer">
-                                    Lihat Detail <i class="fas fa-arrow-circle-right"></i>
-                                </a>
                             </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6">
-                            <div class="small-box bg-success">
-                                <div class="inner">
-                                    <h3>Tenis</h3>
-                                    <p>GOR Manunggal Jati & Tri Lomba Juang</p>
+                        @empty
+                            <div class="col-12 text-center py-5">
+                                <div class="alert alert-light">
+                                    <i class="fas fa-info-circle mr-1"></i> Belum ada fasilitas yang aktif saat ini.
                                 </div>
-                                <div class="icon">
-                                    <i class="ion ion-ios-tennisball"></i>
-                                </div>
-                                <a href="{{ route('login') }}" class="small-box-footer">
-                                    Lihat Detail <i class="fas fa-arrow-circle-right"></i>
-                                </a>
                             </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6">
-                            <div class="small-box bg-warning">
-                                <div class="inner">
-                                    <h3>Badminton</h3>
-                                    <p>GOR Tri Lomba Juang</p>
-                                </div>
-                                <div class="icon">
-                                    <i class="fas fa-feather"></i>
-                                </div>
-                                <a href="{{ route('login') }}" class="small-box-footer">
-                                    Lihat Detail <i class="fas fa-arrow-circle-right"></i>
-                                </a>
-                            </div>
-                        </div>
+                        @endforelse
                     </div>
                 </div>
             </div>
@@ -309,9 +343,40 @@
             </div>
         </footer>
     </div>
+
     <script src="{{ asset('lte/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('lte/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
     <script src="{{ asset('lte/dist/js/adminlte.min.js') }}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const preloader = document.getElementById('initialPreloader');
+
+            if (preloader) {
+                // Event saat halaman selesai load (gambar, css, dll)
+                window.addEventListener('load', () => {
+                    // Kasih delay dikit biar logo kelihatan (estetik)
+                    setTimeout(() => {
+                        // Tambah class untuk animasi opacity 0
+                        preloader.classList.add('fade-out');
+
+                        // Setelah animasi CSS selesai (0.5s), set display:none
+                        setTimeout(() => {
+                            preloader.classList.add('hidden');
+                        }, 500);
+                    }, 500); // Delay awal 500ms
+                });
+
+                // Fallback: Paksa hilang setelah 3 detik jika window.load macet
+                setTimeout(() => {
+                    if (!preloader.classList.contains('hidden')) {
+                        preloader.classList.add('fade-out');
+                        setTimeout(() => { preloader.classList.add('hidden'); }, 500);
+                    }
+                }, 3000);
+            }
+        });
+    </script>
 </body>
 
 </html>

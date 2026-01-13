@@ -9,7 +9,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('admin.fasilitas.index') }}">Kelola
+                        <li class="breadcrumb-item"><a href="{{ route('admin.fasilitas.data.index') }}">Kelola
                                 Fasilitas</a></li>
                         <li class="breadcrumb-item active">Tambah Fasilitas</li>
                     </ol>
@@ -33,7 +33,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('admin.fasilitas.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.fasilitas.data.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="row">
                     <div class="col-md-8">
@@ -183,7 +183,7 @@
                                 <button type="submit" class="btn btn-success btn-block">
                                     <i class="fas fa-plus-circle mr-1"></i> Tambahkan Fasilitas
                                 </button>
-                                <a href="{{ route('admin.fasilitas.index') }}"
+                                <a href="{{ route('admin.fasilitas.data.index') }}"
                                     class="btn btn-outline-secondary btn-block mt-2">
                                     <i class="fas fa-arrow-left mr-1"></i> Batal
                                 </a>

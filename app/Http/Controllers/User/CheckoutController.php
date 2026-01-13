@@ -7,7 +7,7 @@ use App\Models\Checkout;
 use App\Models\Fasilitas;
 use App\Models\Jadwal;
 use App\Models\Pemasukan;
-use App\Models\Riwayat;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -36,7 +36,7 @@ class CheckoutController extends Controller
         }
 
         // Dapatkan booking pengguna
-        $checkouts = Checkout::with(['jadwals', 'jadwal.fasilitas'])
+        $checkouts = Checkout::with(['jadwals', 'jadwals.fasilitas'])
                         ->where('user_id', Auth::id())
                         ->whereIn('status', ['kompensasi', 'lunas'])
                         ->latest()
@@ -70,67 +70,63 @@ class CheckoutController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate input
-        $validated = $request->validate([
+        // 1. Validasi Input (Sudah Oke)
+        $request->validate([
             'fasilitas_id' => 'required|exists:fasilitas,id',
             'tanggal_booking' => 'required|date|after_or_equal:today',
-            'jadwal_ids' => 'required|array',
+            'jadwal_ids' => 'required|array|min:1',
             'jadwal_ids.*' => 'exists:jadwals,id',
             'total_durasi' => 'required|integer|min:1',
             'total_bayar' => 'required|numeric|min:1',
             'dp_value' => 'required|numeric|min:1',
         ]);
 
-        // Check if jadwals are still available
+        // 2. Cek Ketersediaan (Sudah Oke)
         $jadwals = Jadwal::whereIn('id', $request->jadwal_ids)->get();
-
         foreach ($jadwals as $jadwal) {
             if ($jadwal->status !== 'tersedia') {
-                return back()->with('error', 'Jadwal yang dipilih sudah dibooking. Silakan pilih jadwal lain.');
+                return back()->with('error', 'Maaf, salah satu jadwal yang dipilih baru saja dibooking orang lain.');
             }
         }
 
-        // Begin DB transaction
         DB::beginTransaction();
         try {
-            // 1. Create checkout record
+            // 3. Buat Data Checkout
             $checkout = Checkout::create([
                 'user_id' => Auth::id(),
-                'jadwals_id' => $request->jadwal_ids[0], // Use first jadwal ID as reference
+                'jadwals_id' => $request->jadwal_ids[0],
                 'total_bayar' => $request->total_bayar,
-                'status' => 'kompensasi', // DP paid status
-            ]);
-
-            // 2. Attach jadwals to checkout using pivot and update jadwal status
-            foreach ($jadwals as $jadwal) {
-                // Attach jadwal to checkout
-                $checkout->jadwals()->attach($jadwal->id);
-
-                // Update jadwal status separately
-                $jadwal->update([
-                    'status' => 'terbooking'
-                ]);
-            }
-
-            // 3. Record DP payment
-            Pemasukan::create([
-                'checkout_id' => $checkout->id,
-                'fasilitas_id' => $request->fasilitas_id,
-                'tanggal_bayar' => now(),
-                'jumlah_bayar' => $request->dp_value,
-                'metode_pembayaran' => 'transfer', // Default assumption
                 'status' => 'kompensasi',
             ]);
 
-            // Commit transaction
+            // 4. Update Status Jadwal
+            foreach ($jadwals as $jadwal) {
+                $checkout->jadwals()->attach($jadwal->id);
+                $jadwal->update(['status' => 'terbooking']);
+            }
+
+            // 5. Catat Tagihan DP
+            Pemasukan::create([
+                'checkout_id' => $checkout->id,
+                'fasilitas_id' => $request->fasilitas_id,
+                'user_id' => Auth::id(),
+                'tanggal_bayar' => now(),
+                'jumlah_bayar' => $request->dp_value,
+                'metode_pembayaran' => 'transfer',
+                'status' => 'lunas', // DP awal dianggap lunas (Logic bisnis Anda)
+            ]);
+
+            // 6. [PERBAIKAN] Gunakan Helper Log agar konsisten
+            $this->recordLog($checkout, 'CREATE', 'User membuat pesanan baru #' . $checkout->id);
+
             DB::commit();
 
-            return redirect()->route('user.riwayat', $checkout->id)
-                ->with('success', 'Booking berhasil! DP 50% telah dibayar.');
+            return redirect()->route('user.riwayat')
+                ->with('success', 'Fasilitas Berhasil Dibooking! <br>Jangan lupa pelunasan ya.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan sistem: ' . $e->getMessage());
         }
     }
 
@@ -139,7 +135,7 @@ class CheckoutController extends Controller
      */
     public function pelunasan($id)
     {
-        $checkout = Checkout::with(['jadwal.fasilitas', 'user'])
+        $checkout = Checkout::with(['jadwals.fasilitas', 'user'])
                           ->where('id', $id)
                           ->where('user_id', Auth::id())
                           ->where('status', 'kompensasi')
@@ -195,33 +191,23 @@ class CheckoutController extends Controller
      */
     public function uploadBukti(Request $request, $id)
     {
-        // 1. Validasi File
         $request->validate([
-            'bukti_bayar' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Maksimal 2MB
+            'bukti_bayar' => 'required|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        // 2. Cari Data Checkout
         $checkout = Checkout::with('jadwals')->where('id', $id)
             ->where('user_id', Auth::id())
             ->firstOrFail();
 
         DB::beginTransaction();
         try {
-            // 3. Upload File ke Storage
-            // File akan disimpan di: storage/app/public/bukti_bayar
             $path = $request->file('bukti_bayar')->store('bukti_bayar', 'public');
 
-            // 4. Tentukan Jenis Pembayaran (DP atau Pelunasan)
-            // Jika status masih 'kompensasi', berarti ini bayar DP.
-            // Tapi tunggu, di sistem lama Anda, DP otomatis terbayar saat booking?
-            // Mari asumsikan flow baru: User upload bukti untuk verifikasi manual.
-
             $jenis = ($checkout->status == 'kompensasi') ? 'DP' : 'Pelunasan';
-            $jumlah = ($jenis == 'DP')
-                      ? $checkout->total_bayar * 0.5
-                      : $checkout->total_bayar * 0.5; // Sisa 50%
+            // Logic hitung jumlah (Sederhana: 50% dari total)
+            $jumlah = $checkout->total_bayar * 0.5;
 
-            // 5. Simpan Record Pembayaran
+            // Simpan Record Pembayaran
             Pemasukan::create([
                 'checkout_id'       => $checkout->id,
                 'fasilitas_id'      => $checkout->jadwals->first()->fasilitas_id ?? null,
@@ -229,18 +215,20 @@ class CheckoutController extends Controller
                 'tanggal_bayar'     => now(),
                 'jumlah_bayar'      => $jumlah,
                 'metode_pembayaran' => 'transfer',
-                'bukti_bayar'       => $path,      // Path file
+                'bukti_bayar'       => $path,
                 'keterangan'        => "Pembayaran $jenis via Upload User",
-                'status'            => 'pending'   // Menunggu Admin
+                'status'            => 'pending'
             ]);
 
-            // 6. Update Status Checkout jadi 'pending'
-            // Agar user tahu sedang diverifikasi dan tidak bisa upload lagi
+            // Update Status Checkout
             $checkout->update(['status' => 'pending']);
+
+            // [PERBAIKAN] Gunakan Helper Log
+            $this->recordLog($checkout, 'UPLOAD', 'User mengupload bukti pembayaran untuk #' . $checkout->id);
 
             DB::commit();
 
-            return redirect()->back()->with('success', 'Bukti pembayaran berhasil diupload! Mohon tunggu verifikasi admin.');
+            return redirect()->back()->with('success', 'Transaksi Pelunasan Berhasil!<br>Mohon tunggu validasi.');
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -253,22 +241,65 @@ class CheckoutController extends Controller
      */
     public function detail($id)
     {
-        $checkout = Checkout::with(['jadwal.fasilitas', 'user'])
-                          ->where('id', $id)
-                          ->where('user_id', Auth::id())
-                          ->firstOrFail();
+        // 1. Ambil Data Checkout
+        $checkout = Checkout::with(['jadwals.fasilitas', 'user'])
+            ->where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
 
-        // Get all jadwals for this checkout using pivot relationship
-        $jadwals = $checkout->jadwals()
-                          ->orderBy('jam_mulai', 'asc')
-                          ->get();
+        // 2. Ambil List Jadwal
+        $jadwals = $checkout->jadwals->sortBy('jam_mulai');
 
-        // Get payment history
+        // 3. Logic View Helper
+        $jadwalPertama = $jadwals->first();
+        $fasilitas     = $jadwalPertama ? $jadwalPertama->fasilitas : null;
+        $jamMulai      = $jadwals->min('jam_mulai');
+        $jamSelesai    = $jadwals->max('jam_selesai');
+        $totalDurasi   = $jadwals->count();
+
+        // 4. Riwayat Pembayaran (Ganti sorting pakai created_at agar lebih stabil)
         $pembayaran = Pemasukan::where('checkout_id', $checkout->id)
-                                 ->orderBy('tanggal_bayar', 'asc')
-                                 ->get();
+            ->orderBy('created_at', 'asc')
+            ->get();
 
-        return view('User.Checkout.detail_checkout', compact('checkout', 'jadwals', 'pembayaran'));
+        // --- [NEW] LOGIKA KEUANGAN DIPINDAHKAN KESINI ---
+        // Hitung total uang yang sudah diverifikasi (LUNAS)
+        $sudahBayar = $pembayaran->where('status', 'lunas')->sum('jumlah_bayar');
+
+        // Hitung sisa tagihan (Pastikan tidak minus, minimal 0)
+        $sisaTagihan = max(0, $checkout->total_bayar - $sudahBayar);
+
+        // Hitung harga per jam untuk ditampilkan di view
+        $hargaPerJam = $totalDurasi > 0 ? $checkout->total_bayar / $totalDurasi : 0;
+
+        // Hitung total uang dengan status pending
+        $uangPending = $pembayaran->where('status', 'pending')->sum('jumlah_bayar');
+
+        // Total tagihan asli
+        $totalTagihan = $checkout->total_bayar;
+
+        // Sisa akhir yang harus dibayar user (setelah memperhitungkan pending)
+        $sisaAkhir = $totalTagihan - ($sudahBayar + $uangPending);
+
+        // ------------------------------------------------
+
+        // 5. Kirim ke View (Tambahkan variabel baru)
+        return view('User.Checkout.detail', compact(
+            'checkout',
+            'jadwals',
+            'pembayaran',
+            'fasilitas',
+            'jadwalPertama',
+            'jamMulai',
+            'jamSelesai',
+            'totalDurasi',
+            'sudahBayar',
+            'hargaPerJam',
+            'uangPending',
+            'totalTagihan',
+            'sisaAkhir',
+            'sisaTagihan'
+        ));
     }
 
     /**
@@ -276,41 +307,28 @@ class CheckoutController extends Controller
      */
     public function cancel(Request $request, $id)
     {
-        $checkout = Checkout::where('id', $id)
-                          ->where('user_id', Auth::id())
-                          ->where('status', 'kompensasi')
-                          ->firstOrFail();
+        $checkout = Checkout::with('jadwals')
+            ->where('id', $id)
+            ->where('user_id', Auth::id())
+            ->where('status', 'kompensasi')
+            ->firstOrFail();
 
         DB::beginTransaction();
         try {
-            // 1. Update checkout status
-            $checkout->update([
-                'status' => 'batal'
-            ]);
+            // Update Status Checkout
+            $checkout->update(['status' => 'batal']);
 
-            // 2. Get all jadwals before detaching to update their status
-            $jadwals = $checkout->jadwals;
-
-            // 3. Detach all jadwals from checkout (remove pivot relationships)
-            $checkout->jadwals()->detach();
-
-            // 4. Update each jadwal's status back to available
-            foreach ($jadwals as $jadwal) {
-                $jadwal->update([
-                    'status' => 'tersedia'
-                ]);
+            // Kembalikan Status Jadwal
+            foreach ($checkout->jadwals as $jadwal) {
+                $jadwal->update(['status' => 'tersedia']);
             }
 
-            // 5. Create cancellation record in riwayat
-            Riwayat::create([
-                'checkout_id' => $checkout->id,
-                'waktu_selesai' => now(),
-                'feedback' => 'Dibatalkan oleh pengguna'
-            ]);
+            // [PERBAIKAN] Gunakan Helper Log
+            $this->recordLog($checkout, 'CANCEL', 'User membatalkan pesanan #' . $checkout->id);
 
             DB::commit();
-            return redirect()->route('user.riwayat')
-                ->with('success', 'Booking berhasil dibatalkan.');
+            return redirect()->route('user.riwayat')->with('success', 'Booking berhasil dibatalkan.');
+
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());

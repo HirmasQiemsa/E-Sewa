@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Pemasukan;
 use App\Models\Jadwal;
 use App\Models\ActivityLog;
+use App\Models\Admin;
 
 class DashboardController extends Controller
 {
@@ -20,11 +21,35 @@ class DashboardController extends Controller
 
         switch ($user->role) {
             case 'super_admin':
-                // Data Kepala Dinas
+                // 1. Statistik Utama
+                $data['total_pendapatan'] = Pemasukan::where('status', 'lunas')
+                    ->whereYear('created_at', date('Y'))  // Filter Tahun Ini
+                    ->sum('jumlah_bayar');
                 $data['total_user'] = User::count();
-                $data['total_pendapatan'] = Pemasukan::where('status', 'lunas')->sum('jumlah_bayar');
-                // Tambahan: Log Aktivitas Terbaru (Limit 5)
-                $data['recent_activities'] = ActivityLog::with('user')->latest()->take(5)->get();
+                $data['total_staff'] = Admin::where('role', '!=', 'super_admin')->count();
+
+                /// 2. [MODIFIKASI] Ganti "Pending Approval" dengan "Total Fasilitas Aktif"
+                // Agar dashboard tetap penuh tapi isinya relevan
+                // $data['pending_approvals'] = Fasilitas::where('status_approval', 'pending')->latest()->take(5)->get(); // HIDDEN
+                // $data['pending_count'] = Fasilitas::where('status_approval', 'pending')->count(); // HIDDEN
+
+                $data['fasilitas_count'] = Fasilitas::count();
+                $data['fasilitas_aktif'] = Fasilitas::where('ketersediaan', 'aktif')->count();
+
+                // 3. Log Aktivitas Terbaru (Audit Trail)
+                // Pastikan model ActivityLog sudah sesuai relasinya
+                $data['recent_logs'] = ActivityLog::with('admin')->latest()->take(7)->get();
+
+                // 4. Data Grafik (Contoh: Pendapatan per Bulan tahun ini)
+                // Ini logic sederhana untuk chart
+                $pendapatanBulanan = Pemasukan::selectRaw('MONTH(created_at) as bulan, SUM(jumlah_bayar) as total')
+                    ->where('status', 'lunas')
+                    ->whereYear('created_at', date('Y'))
+                    ->groupBy('bulan')
+                    ->pluck('total', 'bulan')->toArray();
+
+                $data['chart_values'] = array_values(array_replace(array_fill(1, 12, 0), $pendapatanBulanan));
+
                 return view('Admin.Super.dashboard', compact('data'));
 
             case 'admin_fasilitas':
@@ -60,27 +85,61 @@ class DashboardController extends Controller
 
             case 'admin_pembayaran':
                 // Data Staff Keuangan
-                $data['total_pemasukan'] = Pemasukan::where('status', 'lunas')->sum('jumlah_bayar');
-                $data['transaksi_hari_ini'] = Pemasukan::whereDate('created_at', now())->count();
-                $data['menunggu_verifikasi'] = Checkout::where('status', 'pending')->count();
+                $adminId = Auth::id();
 
-                // Data Grafik Donut (Status Pembayaran)
+                // 0. DAPATKAN ID FASILITAS YANG DIPEGANG ADMIN INI
+                $myFasilitasIds = Fasilitas::where('admin_pembayaran_id', $adminId)->pluck('id');
+
+                // 0. QUERY BASE CHECKOUT (Filter Checkout berdasarkan Fasilitas Admin)
+                // Kita buat base query biar tidak nulis ulang whereHas berkali-kali
+                $checkoutQuery = Checkout::whereHas('jadwals.fasilitas', function($q) use ($adminId) {
+                    $q->where('admin_pembayaran_id', $adminId);
+                });
+
+                // 1. Total Pemasukan (Filter by Fasilitas ID di tabel Pemasukan)
+                $data['total_pemasukan'] = Pemasukan::whereIn('fasilitas_id', $myFasilitasIds)
+                                            ->whereIn('status', ['lunas'])
+                                            ->sum('jumlah_bayar');
+
+                // 2. Transaksi Hari Ini (Filter by Fasilitas ID)
+                $data['transaksi_hari_ini'] = Pemasukan::whereIn('fasilitas_id', $myFasilitasIds)
+                                            ->whereDate('created_at', now())
+                                            ->whereIn('status', ['lunas', 'pending'])
+                                            ->count();
+
+                // 3. Menunggu Verifikasi (Filter by Checkout milik Admin)
+                // Gunakan 'clone' agar query base tidak berubah
+                $data['menunggu_verifikasi'] = (clone $checkoutQuery)->where('status', 'pending')->count();
+
+                // 4. Hitung Rata-rata Nilai Booking
+                $data['rata_rata_booking'] = (clone $checkoutQuery)
+                                            ->whereNotIn('status', ['batal', 'ditolak'])
+                                            ->avg('total_bayar');
+
+                // 5. Data Grafik Donut (Status Pembayaran - Filtered)
                 $data['status_counts'] = [
-                    'lunas' => Pemasukan::where('status', 'lunas')->count(),
-                    'dp'    => Pemasukan::where('status', 'kompensasi')->count(), // fee/kompensasi
-                    'pending' => Pemasukan::where('status', 'pending')->count(),
-                    'batal' => Pemasukan::where('status', 'batal')->count(),
+                    'lunas'      => (clone $checkoutQuery)->where('status', 'lunas')->count(),
+                    'kompensasi' => (clone $checkoutQuery)->where('status', 'kompensasi')->count(),
+                    'pending'    => (clone $checkoutQuery)->where('status', 'pending')->count(),
+                    'batal'      => (clone $checkoutQuery)->where('status', 'batal')->count(),
                 ];
 
-                // Tambahan: List Transaksi Terbaru (Untuk tabel preview)
-                $data['recent_payments'] = Pemasukan::with(['user', 'fasilitas'])
-                                                ->latest()
-                                                ->take(5)->get();
+                // 6. List Transaksi Terbaru (Filtered)
+                $data['recent_transactions'] = (clone $checkoutQuery)
+                                            ->with([
+                                                'user',
+                                                'jadwals.fasilitas',
+                                                'pemasukans'
+                                            ])
+                                            ->latest()
+                                            ->take(5)
+                                            ->get();
 
-                return view('Admin.Pembayaran.dashboard', compact('data'));
 
-            default:
-                abort(403);
+            return view('Admin.Pembayaran.dashboard', compact('data'));
+
+        default:
+            abort(403);
         }
     }
 }

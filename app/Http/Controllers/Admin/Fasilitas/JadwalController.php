@@ -44,37 +44,29 @@ class JadwalController extends Controller
      */
     public function generate(Request $request)
     {
-        // 1. Validasi Input 
+        // 1. Validasi Input
         $request->validate([
             'fasilitas_id' => 'required|exists:fasilitas,id',
-            'tgl_mulai' => 'required|date|after_or_equal:today',
-            'tgl_selesai' => 'required|date|after_or_equal:tgl_mulai',
-            'jam_buka' => 'required',
-            'jam_tutup' => 'required',
-            'durasi' => 'required|integer|min:1',
+            'tgl_mulai'    => 'required|date|after_or_equal:today',
+            'tgl_selesai'  => 'required|date|after_or_equal:tgl_mulai',
+            'jam_buka'     => 'required',
+            'jam_tutup'    => 'required',
+            'durasi'       => 'required|integer|min:1',
         ]);
 
-        // 2. Ambil Data Fasilitas
+        // 2. Ambil Data Fasilitas (Cukup sekali saja)
+        // Pastikan milik admin yang sedang login
         $fasilitas = Fasilitas::where('id', $request->fasilitas_id)
                         ->where('admin_fasilitas_id', Auth::id())
                         ->firstOrFail();
 
-        // === [LOGIC BARU] CEK STATUS FASILITAS ===
-        // Jika fasilitas NONAKTIF atau MAINTENANCE, tolak generate jadwal.
+        // 3. LOGIC STATUS (Hanya Cek Ketersediaan)
+        // Kita HAPUS pengecekan status_approval agar fasilitas yang 'pending' tapi 'aktif' tetap bisa dibuat jadwalnya.
         if ($fasilitas->ketersediaan !== 'aktif') {
-            return back()->with('error', 'Gagal Generate: Status fasilitas saat ini sedang ' . ucfirst($fasilitas->ketersediaan) . '. Silakan aktifkan fasilitas terlebih dahulu di menu Data Fasilitas.');
+            return back()->with('error', 'Gagal Generate: Status fasilitas saat ini sedang ' . ucfirst($fasilitas->ketersediaan) . '. Ubah ke Aktif dulu di menu Data Fasilitas.');
         }
 
-        // === [TAMBAHAN] CEK STATUS APPROVAL (Opsional tapi bagus) ===
-        if ($fasilitas->status_approval !== 'approved') {
-             return back()->with('error', 'Gagal Generate: Fasilitas belum disetujui oleh Kepala Dinas.');
-        }
-
-        // Pastikan fasilitas milik admin ini
-        $fasilitas = Fasilitas::where('id', $request->fasilitas_id)
-                        ->where('admin_fasilitas_id', Auth::id())
-                        ->firstOrFail();
-
+        // 4. Proses Loop Jadwal
         $start = Carbon::parse($request->tgl_mulai);
         $end   = Carbon::parse($request->tgl_selesai);
         $buka  = (int) substr($request->jam_buka, 0, 2);
@@ -85,11 +77,17 @@ class JadwalController extends Controller
         $dataInsert = [];
 
         for ($date = $start; $date->lte($end); $date->addDay()) {
+            // Loop Jam
             for ($h = $buka; $h < $tutup; $h += $durasi) {
-                $jamMulai = sprintf('%02d:00:00', $h);
+                // Pastikan jam selesai tidak melebihi jam tutup
+                if (($h + $durasi) > $tutup) {
+                    continue;
+                }
+
+                $jamMulai   = sprintf('%02d:00:00', $h);
                 $jamSelesai = sprintf('%02d:00:00', $h + $durasi);
 
-                // Cek duplikat
+                // Cek duplikat di DB (agar tidak double slot di jam yang sama)
                 $exists = Jadwal::where('fasilitas_id', $fasilitas->id)
                             ->where('tanggal', $date->format('Y-m-d'))
                             ->where('jam_mulai', $jamMulai)
@@ -110,14 +108,15 @@ class JadwalController extends Controller
             }
         }
 
+        // 5. Insert Batch
         if ($count > 0) {
-            // Insert batch biar cepat (maks 500 per batch)
             foreach (array_chunk($dataInsert, 500) as $chunk) {
                 Jadwal::insert($chunk);
             }
+            return back()->with('success', "Berhasil membuat $count slot jadwal.");
         }
 
-        return back()->with('success', "Berhasil membuat $count slot jadwal.");
+        return back()->with('warning', "Tidak ada jadwal baru yang dibuat (Mungkin slot sudah ada atau rentang waktu salah).");
     }
 
     /**

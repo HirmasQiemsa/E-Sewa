@@ -46,40 +46,62 @@
                 <div class="card-body">
                     <form id="filter-form" action="{{ route('admin.fasilitas.booking.index') }}" method="GET">
                         <div class="row">
-                            <div class="col-md-3">
+                            <div class="col-md-10">
                                 <div class="form-group">
                                     <label>Periode:</label>
                                     <select id="filter-type" name="filter_type" class="form-control">
-                                        <option value="today" {{ $filterType == 'today' ? 'selected' : '' }}>Hari Ini</option>
-                                        <option value="upcoming" {{ $filterType == 'upcoming' ? 'selected' : '' }}>Akan Datang</option>
-                                        <option value="custom" {{ $filterType == 'custom' ? 'selected' : '' }}>Periode Tertentu</option>
-                                        <option value="all" {{ $filterType == 'all' || !$filterType ? 'selected' : '' }}>Semua Tanggal</option>
+                                        <option value="today" {{ $filterType == 'today' ? 'selected' : '' }}>Hari Ini
+                                        </option>
+                                        {{-- <option value="upcoming" {{ $filterType == 'upcoming' ? 'selected' : '' }}>Akan
+                                            Datang</option> --}}
+                                        <option value="all" {{ $filterType == 'all' || !$filterType ? 'selected' : '' }}>
+                                            Semua Tanggal</option>
+                                        <option value="custom" {{ $filterType == 'custom' ? 'selected' : '' }}>Periode
+                                            Tertentu</option>
+
                                     </select>
                                 </div>
                             </div>
 
-                            <div class="col-md-4 custom-date-range {{ $filterType == 'custom' ? '' : 'd-none' }}">
+                            <div class="col-md-10 custom-date-range {{ $filterType == 'custom' ? '' : 'd-none' }}">
                                 <div class="form-group">
                                     <label>Rentang Tanggal:</label>
                                     <div class="input-group">
-                                        <input type="date" id="start-date" name="start_date" class="form-control" value="{{ $startDate ?? '' }}">
-                                        <div class="input-group-append input-group-prepend">
-                                            <span class="input-group-text">hingga</span>
+                                        {{-- Input Start --}}
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
                                         </div>
-                                        <input type="date" id="end-date" name="end_date" class="form-control" value="{{ $endDate ?? '' }}">
+                                        <input type="text" id="start-date" name="start_date"
+                                            class="form-control flatpickr-input bg-white" placeholder="Pilih Tanggal Awal"
+                                            value="{{ $startDate ?? '' }}" readonly>
+
+                                        <div class="input-group-append input-group-prepend">
+                                            <span class="input-group-text border-left-0 border-right-0 font-weight-bold">
+                                                Sampai Dengan </span>
+                                        </div>
+
+                                        {{-- Input End --}}
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                        </div>
+                                        <input type="text" id="end-date" name="end_date"
+                                            class="form-control flatpickr-input bg-white" placeholder="Pilih Tanggal Akhir"
+                                            value="{{ $endDate ?? '' }}" readonly>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="col-md-2">
+                            {{-- <div class="col-md-2">
                                 <div class="form-group">
                                     <label>Status:</label>
                                     <select id="status-filter" name="status" class="form-control">
-                                        <option value="all" {{ !$status || $status == 'all' ? 'selected' : '' }}>Semua</option>
+                                        <option value="all" {{ !$status || $status == 'all' ? 'selected' : '' }}>Semua
+                                        </option>
                                         <option value="fee" {{ $status == 'kompensasi' ? 'selected' : '' }}>DP</option>
                                         <option value="lunas" {{ $status == 'lunas' ? 'selected' : '' }}>Lunas</option>
                                         <option value="batal" {{ $status == 'batal' ? 'selected' : '' }}>Batal</option>
-                                        <option value="selesai" {{ $status == 'selesai' ? 'selected' : '' }}>Selesai</option>
+                                        <option value="selesai" {{ $status == 'selesai' ? 'selected' : '' }}>Selesai
+                                        </option>
                                     </select>
                                 </div>
                             </div>
@@ -97,14 +119,15 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
                         </div>
 
                         <div class="row">
                             <div class="col-12">
-                                <button type="submit" class="btn btn-primary">Terapkan Filter</button>
-                                <a href="{{ route('admin.fasilitas.booking.index') }}" class="btn btn-outline-secondary ml-2">
-                                    <i class="fas fa-redo-alt mr-1"></i>Reset
+                                <button type="submit" class="btn btn-primary col-md-10">Terapkan Filter</button>
+                                <a href="{{ route('admin.fasilitas.booking.index') }}"
+                                    class="btn btn-outline-secondary ml-2">
+                                    <i class="fas fa-redo-alt mr-1 "></i>Reset
                                 </a>
                             </div>
                         </div>
@@ -142,22 +165,23 @@
                                         <span class="badge bg-secondary">#{{ $booking->id }}</span>
                                     </td>
                                     <td>
-                                        @if($booking->jadwals->isNotEmpty())
+                                        @if ($booking->jadwals->isNotEmpty())
                                             {{ date('d-m-Y', strtotime($booking->jadwals->first()->tanggal)) }}
                                         @else
                                             -
                                         @endif
                                     </td>
                                     <td>
-                                        @if($booking->jadwals->isNotEmpty() && $booking->jadwals->first()->fasilitas)
+                                        @if ($booking->jadwals->isNotEmpty() && $booking->jadwals->first()->fasilitas)
                                             <strong>{{ $booking->jadwals->first()->fasilitas->nama_fasilitas }}</strong><br>
-                                            <small class="text-muted">{{ $booking->jadwals->first()->fasilitas->lokasi }}</small>
+                                            <small
+                                                class="text-muted">{{ $booking->jadwals->first()->fasilitas->lokasi }}</small>
                                         @else
                                             -
                                         @endif
                                     </td>
                                     <td>
-                                        @if($booking->user)
+                                        @if ($booking->user)
                                             <strong>{{ $booking->user->name }}</strong><br>
                                             <small class="text-muted">{{ $booking->user->no_hp }}</small>
                                         @else
@@ -166,64 +190,89 @@
                                     </td>
                                     <td>{{ $booking->totalDurasi ?? '-' }} jam</td>
                                     <td>Rp {{ number_format($booking->total_bayar, 0, ',', '.') }}</td>
-                                    <td>
+                                    <td class="text-center">
                                         @if ($booking->status == 'kompensasi')
-                                            <span class="badge badge-warning">DP</span>
+                                            <span class="badge badge-warning">DP Terbayar</span>
+                                        @elseif($booking->status == 'pending')
+                                            {{-- Status Pending: Artinya User sudah upload bukti pelunasan, menunggu Admin Keuangan --}}
+                                            <span class="badge badge-info">Verifikasi Pelunasan</span>
                                         @elseif($booking->status == 'lunas')
                                             <span class="badge badge-success">Lunas</span>
                                         @elseif($booking->status == 'batal')
                                             <span class="badge badge-danger">Batal</span>
                                         @elseif($booking->status == 'selesai')
-                                            <span class="badge badge-info">Selesai</span>
+                                            <span class="badge badge-secondary">Selesai</span>
+                                        @else
+                                            {{-- Fallback jika status kosong atau tidak dikenali --}}
+                                            <span
+                                                class="badge badge-dark">{{ ucfirst($booking->status ?? 'Unknown') }}</span>
                                         @endif
                                     </td>
                                     <td class="text-center">
                                         <div class="btn-group">
-                                            <a href="{{ route('admin.fasilitas.booking.detail', $booking->id) }}" class="btn btn-sm btn-info" title="Lihat Detail">
+                                            <a href="{{ route('admin.fasilitas.booking.detail', $booking->id) }}"
+                                                class="btn btn-sm btn-info" title="Lihat Detail">
                                                 <i class="fas fa-eye"></i>
                                             </a>
 
-                                            <button type="button" class="btn btn-sm btn-primary"
-                                                    data-toggle="modal" data-target="#statusModal{{ $booking->id }}" title="Ubah Status">
+                                            {{-- <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
+                                                data-target="#statusModal{{ $booking->id }}" title="Ubah Status">
                                                 <i class="fas fa-edit"></i>
                                             </button>
 
                                             @if ($booking->status == 'kompensasi')
-                                                <button type="button" class="btn btn-sm btn-danger"
-                                                        data-toggle="modal" data-target="#cancelModal{{ $booking->id }}" title="Batalkan Booking">
+                                                <button type="button" class="btn btn-sm btn-danger" data-toggle="modal"
+                                                    data-target="#cancelModal{{ $booking->id }}"
+                                                    title="Batalkan Booking">
                                                     <i class="fas fa-times"></i>
                                                 </button>
-                                            @endif
+                                            @endif --}}
                                         </div>
 
                                         <!-- Modal Ubah Status -->
-                                        <div class="modal fade" id="statusModal{{ $booking->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                        <div class="modal fade" id="statusModal{{ $booking->id }}" tabindex="-1"
+                                            role="dialog" aria-hidden="true">
                                             <div class="modal-dialog" role="document">
                                                 <div class="modal-content">
-                                                    <form action="{{ route('admin.fasilitas.booking.update-status', $booking->id) }}" method="POST">
+                                                    <form
+                                                        action="{{ route('admin.fasilitas.booking.update-status', $booking->id) }}"
+                                                        method="POST">
                                                         @csrf
                                                         @method('PUT')
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title">Ubah Status Booking #{{ $booking->id }}</h5>
-                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <h5 class="modal-title">Ubah Status Booking
+                                                                #{{ $booking->id }}</h5>
+                                                            <button type="button" class="close" data-dismiss="modal"
+                                                                aria-label="Close">
                                                                 <span aria-hidden="true">&times;</span>
                                                             </button>
                                                         </div>
                                                         <div class="modal-body">
                                                             <div class="form-group">
                                                                 <label>Status Saat Ini:</label>
-                                                                <input type="text" class="form-control" value="{{ ucfirst($booking->status) }}" readonly>
+                                                                <input type="text" class="form-control"
+                                                                    value="{{ ucfirst($booking->status) }}" readonly>
                                                             </div>
                                                             <div class="form-group">
                                                                 <label>Status Baru:</label>
                                                                 <select name="status" class="form-control" required>
-                                                                    <option value="fee" {{ $booking->status == 'kompensasi' ? 'selected' : '' }}>DP</option>
-                                                                    <option value="lunas" {{ $booking->status == 'lunas' ? 'selected' : '' }}>Lunas</option>
-                                                                    <option value="selesai" {{ $booking->status == 'selesai' ? 'selected' : '' }}>Selesai</option>
-                                                                    <option value="batal" {{ $booking->status == 'batal' ? 'selected' : '' }}>Batal</option>
+                                                                    <option value="fee"
+                                                                        {{ $booking->status == 'kompensasi' ? 'selected' : '' }}>
+                                                                        DP</option>
+                                                                    <option value="lunas"
+                                                                        {{ $booking->status == 'lunas' ? 'selected' : '' }}>
+                                                                        Lunas</option>
+                                                                    <option value="selesai"
+                                                                        {{ $booking->status == 'selesai' ? 'selected' : '' }}>
+                                                                        Selesai</option>
+                                                                    <option value="batal"
+                                                                        {{ $booking->status == 'batal' ? 'selected' : '' }}>
+                                                                        Batal</option>
                                                                 </select>
                                                                 <small class="form-text text-muted">
-                                                                    Perubahan ke status "Lunas" tidak akan memproses pembayaran baru. Gunakan untuk perubahan status administratif saja.
+                                                                    Perubahan ke status "Lunas" tidak akan memproses
+                                                                    pembayaran baru. Gunakan untuk perubahan status
+                                                                    administratif saja.
                                                                 </small>
                                                             </div>
                                                             <div class="form-group">
@@ -232,8 +281,10 @@
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                                                            <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                                                            <button type="button" class="btn btn-secondary"
+                                                                data-dismiss="modal">Batal</button>
+                                                            <button type="submit" class="btn btn-primary">Simpan
+                                                                Perubahan</button>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -241,48 +292,69 @@
                                         </div>
 
                                         <!-- Modal Pembatalan -->
-                                        <div class="modal fade" id="cancelModal{{ $booking->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                        <div class="modal fade" id="cancelModal{{ $booking->id }}" tabindex="-1"
+                                            role="dialog" aria-hidden="true">
                                             <div class="modal-dialog" role="document">
                                                 <div class="modal-content">
-                                                    <form action="{{ route('admin.fasilitas.booking.cancel', $booking->id) }}" method="POST">
+                                                    <form
+                                                        action="{{ route('admin.fasilitas.booking.cancel', $booking->id) }}"
+                                                        method="POST">
                                                         @csrf
                                                         @method('PUT')
                                                         <div class="modal-header bg-danger">
-                                                            <h5 class="modal-title">Batalkan Booking #{{ $booking->id }}</h5>
-                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                            <h5 class="modal-title">Batalkan Booking #{{ $booking->id }}
+                                                            </h5>
+                                                            <button type="button" class="close" data-dismiss="modal"
+                                                                aria-label="Close">
                                                                 <span aria-hidden="true">&times;</span>
                                                             </button>
                                                         </div>
                                                         <div class="modal-body">
                                                             <div class="alert alert-warning">
                                                                 <i class="fas fa-exclamation-triangle mr-2"></i>
-                                                                Perhatian! Tindakan ini akan membatalkan booking dan mengubah status jadwal menjadi tersedia kembali.
+                                                                Perhatian! Tindakan ini akan membatalkan booking dan
+                                                                mengubah status jadwal menjadi tersedia kembali.
                                                             </div>
 
                                                             <div class="form-group">
                                                                 <label>Alasan Pembatalan:</label>
-                                                                <textarea name="alasan_batal" class="form-control" rows="3" required placeholder="Masukkan alasan pembatalan..."></textarea>
+                                                                <textarea name="alasan_batal" class="form-control" rows="3" required
+                                                                    placeholder="Masukkan alasan pembatalan..."></textarea>
                                                             </div>
 
                                                             <div class="form-group">
                                                                 <label>Pengembalian DP:</label>
                                                                 <div class="custom-control custom-radio">
-                                                                    <input type="radio" id="refund-yes{{ $booking->id }}" name="refund_dp" value="1" class="custom-control-input">
-                                                                    <label class="custom-control-label" for="refund-yes{{ $booking->id }}">DP Dikembalikan</label>
+                                                                    <input type="radio"
+                                                                        id="refund-yes{{ $booking->id }}"
+                                                                        name="refund_dp" value="1"
+                                                                        class="custom-control-input">
+                                                                    <label class="custom-control-label"
+                                                                        for="refund-yes{{ $booking->id }}">DP
+                                                                        Dikembalikan</label>
                                                                 </div>
                                                                 <div class="custom-control custom-radio mt-2">
-                                                                    <input type="radio" id="refund-no{{ $booking->id }}" name="refund_dp" value="0" class="custom-control-input" checked>
-                                                                    <label class="custom-control-label" for="refund-no{{ $booking->id }}">DP Tidak Dikembalikan</label>
+                                                                    <input type="radio"
+                                                                        id="refund-no{{ $booking->id }}"
+                                                                        name="refund_dp" value="0"
+                                                                        class="custom-control-input" checked>
+                                                                    <label class="custom-control-label"
+                                                                        for="refund-no{{ $booking->id }}">DP Tidak
+                                                                        Dikembalikan</label>
                                                                 </div>
                                                                 <small class="form-text text-muted mt-2">
-                                                                    Pilih apakah DP yang telah dibayarkan oleh pemesan akan dikembalikan atau tidak.
-                                                                    <br>Catatan: Pembatalan oleh petugas dengan alasan teknis sebaiknya mengembalikan DP.
+                                                                    Pilih apakah DP yang telah dibayarkan oleh pemesan akan
+                                                                    dikembalikan atau tidak.
+                                                                    <br>Catatan: Pembatalan oleh petugas dengan alasan
+                                                                    teknis sebaiknya mengembalikan DP.
                                                                 </small>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
-                                                            <button type="submit" class="btn btn-danger">Batalkan Booking</button>
+                                                            <button type="button" class="btn btn-secondary"
+                                                                data-dismiss="modal">Tutup</button>
+                                                            <button type="submit" class="btn btn-danger">Batalkan
+                                                                Booking</button>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -320,29 +392,48 @@
     <!-- JavaScript untuk toggle custom date fields -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Toggle custom date fields
+            // 1. INISIALISASI FLATPICKR (Biar kalender ganteng & klik se-kolom)
+            flatpickr(".flatpickr-input", {
+                locale: "id", // Bahasa Indonesia
+                dateFormat: "Y-m-d", // Format kirim ke controller
+                altInput: true, // Tampilkan format cantik ke user
+                altFormat: "j F Y", // Contoh: 12 Januari 2026
+                allowInput: true, // Biar bisa diklik
+                disableMobile: "true", // Paksa pakai tampilan Flatpickr di HP (biar ga balik ke native kecil)
+                static: true // Biar posisi kalender pas (tidak ketutup scroll)
+            });
+
+            // 2. LOGIKA TOGGLE (Code lama Anda)
             const filterType = document.getElementById('filter-type');
             const customDateRange = document.querySelector('.custom-date-range');
 
-            filterType.addEventListener('change', function() {
-                if (this.value === 'custom') {
-                    customDateRange.classList.remove('d-none');
-                } else {
-                    customDateRange.classList.add('d-none');
-                }
-            });
+            // Trigger saat load (untuk menjaga state saat validasi/error)
+            toggleCustomDate(filterType.value);
 
-            // Auto-submit on filter change
-            document.getElementById('filter-type').addEventListener('change', function() {
+            filterType.addEventListener('change', function() {
+                toggleCustomDate(this.value);
+
+                // Auto submit selain custom
                 if (this.value !== 'custom') {
                     document.getElementById('filter-form').submit();
                 }
             });
 
+            function toggleCustomDate(value) {
+                if (value === 'custom') {
+                    customDateRange.classList.remove('d-none');
+                } else {
+                    customDateRange.classList.add('d-none');
+                }
+            }
+
             // Auto-submit on status change
-            document.getElementById('status-filter').addEventListener('change', function() {
-                document.getElementById('filter-form').submit();
-            });
+            const statusFilter = document.getElementById('status-filter');
+            if (statusFilter) {
+                statusFilter.addEventListener('change', function() {
+                    document.getElementById('filter-form').submit();
+                });
+            }
         });
     </script>
 @endsection

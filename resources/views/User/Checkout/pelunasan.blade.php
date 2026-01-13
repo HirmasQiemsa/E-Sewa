@@ -1,4 +1,4 @@
-@extends('User.user')
+@extends('User.component')
 @section('content')
     <!-- Content Header (Page header) -->
     <div class="content-header">
