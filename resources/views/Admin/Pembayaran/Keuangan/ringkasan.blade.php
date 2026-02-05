@@ -45,7 +45,7 @@
                                 <div class="ml-auto">
                                     <a href="{{ route('admin.keuangan.export_ringkasan', ['type' => 'csv', 'month' => $month, 'year' => $year]) }}"
                                         class="btn btn-success btn-sm">
-                                        <i class="fas fa-file-download mr-1"></i> CSV
+                                        <i class="fas fa-file-download mr-1"></i> Export CSV
                                     </a>
                                 </div>
                             </form>

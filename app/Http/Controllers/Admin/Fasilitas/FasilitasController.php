@@ -110,8 +110,9 @@ class FasilitasController extends Controller
         }
 
         $adminPembayaran = Admin::where('role', 'admin_pembayaran')->get();
+        $adminFasilitas = Admin::where('role', 'admin_fasilitas')->get();
 
-        return view('Admin.Fasilitas.Data.edit', compact('fasilitas', 'adminPembayaran'));
+        return view('Admin.Fasilitas.Data.edit', compact('fasilitas', 'adminPembayaran', 'adminFasilitas'));
     }
 
     /**
@@ -122,12 +123,12 @@ class FasilitasController extends Controller
         $fasilitas = Fasilitas::withTrashed()->findOrFail($id);
 
         // 1. OTORISASI (Cek Hak Akses)
+        // Hanya Super Admin ATAU pemilik fasilitas yang boleh edit
         if ($fasilitas->admin_fasilitas_id != Auth::id() && Auth::user()->role !== 'super_admin') {
             abort(403);
         }
 
-        // 2. SIAPKAN SEMUA ATURAN VALIDASI (VALIDATE ALL)
-        // Kita tampung dulu di array $rules agar bisa dimodifikasi dinamis
+        // 2. SIAPKAN RULES VALIDASI
         $rules = [
             'nama_fasilitas'      => 'required|string|max:255',
             'deskripsi'           => 'nullable|string',
@@ -135,66 +136,66 @@ class FasilitasController extends Controller
             'lokasi'              => 'required|string',
             'harga_sewa'          => 'required|numeric|min:0',
             'ketersediaan'        => 'required|in:aktif,nonaktif,maintenance',
-            'admin_pembayaran_id' => 'required|exists:admins,id', // <--- Wajib validasi ini
+            'admin_pembayaran_id' => 'required|exists:users,id', // Pastikan tabelnya users (bukan admins)
             'kategori_select'     => 'required|string',
-            'foto'                => 'nullable|image|max:2048',   // Nullable karena ini update (bisa tidak ganti foto)
+            'foto'                => 'nullable|image|max:2048',
         ];
 
-        // 3. LOGIKA TAMBAHAN KATEGORI
-        // Jika user pilih 'lainnya', maka 'kategori_baru' WAJIB diisi
+        // [LOGIC BARU] VALIDASI ADMIN FASILITAS (KHUSUS SUPER ADMIN)
+        if (Auth::user()->role == 'super_admin') {
+            // Jika Super Admin, boleh (dan wajib) ganti admin fasilitas jika inputnya ada
+            // 'sometimes' artinya validasi jalan HANYA JIKA input 'admin_fasilitas_id' ada di request
+            $rules['admin_fasilitas_id'] = 'sometimes|required|exists:users,id';
+        }
+
+        // LOGIKA KATEGORI LAINNYA
         if ($request->kategori_select == 'lainnya') {
             $rules['kategori_baru'] = 'required|string|max:50';
         }
 
-        // 4. JALANKAN VALIDASI (EKSEKUSI)
-        // Ini akan memvalidasi SEMUA field di atas sekaligus.
-        // Jika ada satu saja yang salah, Laravel otomatis stop dan redirect back with error.
+        // EKSEKUSI VALIDASI
         $request->validate($rules);
 
-        // 5. TENTUKAN KATEGORI FINAL
-        $kategoriFinal = ($request->kategori_select == 'lainnya')
-                            ? $request->kategori_baru
-                            : $request->kategori_select;
+        // 3. TENTUKAN DATA YANG AKAN DI-UPDATE
+        $dataUpdate = [
+            'nama_fasilitas'      => $request->nama_fasilitas,
+            'deskripsi'           => $request->deskripsi,
+            'kategori'            => ($request->kategori_select == 'lainnya') ? $request->kategori_baru : $request->kategori_select,
+            'tipe'                => $request->tipe,
+            'lokasi'              => $request->lokasi,
+            'harga_sewa'          => $request->harga_sewa,
+            'ketersediaan'        => $request->ketersediaan,
+            'admin_pembayaran_id' => $request->admin_pembayaran_id,
+        ];
+
+        // [LOGIC BARU] TAMBAHKAN ADMIN FASILITAS KE DATA UPDATE (KHUSUS SUPER ADMIN)
+        if (Auth::user()->role == 'super_admin' && $request->has('admin_fasilitas_id')) {
+            $dataUpdate['admin_fasilitas_id'] = $request->admin_fasilitas_id;
+        }
 
         try {
-            // 6. LOGIKA UPLOAD FOTO
-            // Simpan path lama dulu untuk dihapus nanti jika sukses upload baru
-            $pathFoto = $fasilitas->foto;
-
+            // 4. LOGIKA FOTO (Tidak Berubah)
             if ($request->hasFile('foto')) {
-                // Hapus foto lama fisik jika ada
                 if ($fasilitas->foto && Storage::disk('public')->exists($fasilitas->foto)) {
                     Storage::disk('public')->delete($fasilitas->foto);
                 }
-                // Upload foto baru
-                $pathFoto = $request->file('foto')->store('fasilitas', 'public');
+                $dataUpdate['foto'] = $request->file('foto')->store('fasilitas', 'public');
             }
 
-            // 7. UPDATE DATABASE
-            $fasilitas->update([
-                'nama_fasilitas'      => $request->nama_fasilitas,
-                'deskripsi'           => $request->deskripsi,
-                'kategori'            => $kategoriFinal, // Pakai hasil logika poin 5
-                'tipe'                => $request->tipe,
-                'lokasi'              => $request->lokasi,
-                'harga_sewa'          => $request->harga_sewa,
-                'ketersediaan'        => $request->ketersediaan,
-                'admin_pembayaran_id' => $request->admin_pembayaran_id,
-                'foto'                => $pathFoto, // Update path foto (baik berubah atau tetap)
-            ]);
+            // 5. UPDATE DATABASE (Pakai array $dataUpdate yang sudah dinamis)
+            $fasilitas->update($dataUpdate);
 
-            // 8. LOGIC CANCEL JADWAL (Jika Nonaktif)
+            // 6. LOGIC CANCEL JADWAL (Jika Nonaktif)
             if ($request->ketersediaan !== 'aktif') {
                 Jadwal::where('fasilitas_id', $id)
                     ->where('status', 'tersedia')
                     ->update(['status' => 'batal']);
             }
 
-            // 9. CATAT LOG
+            // 7. LOG
             $this->recordLog($fasilitas, 'UPDATE', 'Mengubah data fasilitas: ' . $fasilitas->nama_fasilitas);
 
-            return redirect()->route('admin.fasilitas.data.index')
-                            ->with('success', 'Fasilitas diperbarui.');
+            return redirect()->route('admin.fasilitas.data.index')->with('success', 'Fasilitas diperbarui.');
 
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal update: ' . $e->getMessage());

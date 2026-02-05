@@ -236,9 +236,14 @@
                             @empty
                                 <tr>
                                     <td colspan="7" class="text-center py-5">
-                                        <img src="{{ asset('img/no-data.svg') }}" alt="Kosong"
-                                            style="height: 100px; opacity: 0.5;">
-                                        <p class="text-muted mt-3">Belum ada riwayat pemesanan.</p>
+                                        <div class="text-muted">
+                                            {{-- Icon History Besar --}}
+                                            <i class="fas fa-history fa-4x mb-3"></i>
+                                            {{-- <i class="fas fa-folder-open fa-4x mb-3"></i> --}}
+
+                                            <p class="font-weight-bold mb-0">Belum ada riwayat pemesanan.</p>
+                                            <small>Yuk, booking fasilitas olahraga sekarang!</small>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforelse
@@ -286,7 +291,7 @@
 
             const calendarInput = document.getElementById("calendar-filter");
             const hiddenDateInput = document.getElementById(
-            "date-value"); // Pastikan ID ini ada di HTML input hidden
+                "date-value"); // Pastikan ID ini ada di HTML input hidden
             const filterForm = document.getElementById("filter-form");
 
             // 2. Konfigurasi Flatpickr

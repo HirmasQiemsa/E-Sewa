@@ -1,13 +1,32 @@
 @extends('Admin.component')
 
+@push('style')
+    <style>
+        /* Agar baris terlihat bisa diklik */
+        .jadwal-row {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        /* Warna saat baris dipilih/dicentang (Kuning muda biar kontras) */
+        .jadwal-row.row-selected {
+            background-color: #fff3cd !important;
+        }
+
+        /* Warna saat hover (sorot mouse) */
+        .jadwal-row:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+@endpush
+
 @section('content')
+    {{-- Header Content (Sama seperti sebelumnya) --}}
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <a href="#tabel-jadwal" class="btn btn-sm btn-outline-primary mt-2">
-                        <i class="fas fa-arrow-down"></i> Lihat Tabel Jadwal
-                    </a>
+                    <h1 class="m-0">Kelola Jadwal</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -21,12 +40,18 @@
 
     <section class="content">
         <div class="container-fluid">
+
+            {{-- BAGIAN 1: GENERATOR (Code Form Sama, cuma aku kasih ID buat JS) --}}
             <div class="row">
                 <div class="col-md-6">
                     <div class="card card-danger">
                         <div class="card-header">
-                            <h3 class="card-title">Generator Jadwal Otomatis</h3>
+                            <h3 class="card-title"><b>Generator Jadwal</b></h3>
                             <div class="card-tools">
+                                <button type="button" class="btn btn-success btn-sm mr-2" data-toggle="modal"
+                                    data-target="#modalTambahManual">
+                                    <i class="fas fa-plus"></i> Tambah Satuan
+                                </button>
                                 <button type="button" class="btn btn-tool" data-card-widget="collapse"><i
                                         class="fas fa-minus"></i></button>
                             </div>
@@ -40,34 +65,24 @@
                                         <option value="">-- Pilih Fasilitas --</option>
                                         @foreach ($myFasilitas as $f)
                                             @php
-                                                // LOGIC BARU: Hanya disable jika Nonaktif atau Maintenance
-                                                // Kita abaikan status_approval
                                                 $isDisabled = $f->ketersediaan !== 'aktif';
-
-                                                $statusText = '';
-                                                if ($isDisabled) {
-                                                    $statusText = ' (Status: ' . ucfirst($f->ketersediaan) . ')';
-                                                }
+                                                $statusText = $isDisabled
+                                                    ? ' (Status: ' . ucfirst($f->ketersediaan) . ')'
+                                                    : '';
                                             @endphp
-
                                             <option value="{{ $f->id }}" {{ $isDisabled ? 'disabled' : '' }}
                                                 class="{{ $isDisabled ? 'text-danger' : 'text-dark' }}">
                                                 {{ $f->nama_fasilitas }} - {{ $f->lokasi }} {{ $statusText }}
                                             </option>
                                         @endforeach
                                     </select>
-
-                                    <small class="text-muted">
-                                        <i class="fas fa-info-circle"></i> Fasilitas harus berstatus <b>Aktif</b> agar bisa
-                                        dibuatkan jadwal.
-                                    </small>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-6">
                                         <div class="form-group">
                                             <label>Mulai Tanggal</label>
-                                            {{-- Tambahkan atribut min="{{ date('Y-m-d') }}" --}}
+                                            {{-- ID tgl_mulai dipake di JS --}}
                                             <input type="date" name="tgl_mulai" id="tgl_mulai" class="form-control"
                                                 value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d') }}" required>
                                         </div>
@@ -75,7 +90,7 @@
                                     <div class="col-6">
                                         <div class="form-group">
                                             <label>Sampai Tanggal</label>
-                                            {{-- Tambahkan atribut min="{{ date('Y-m-d') }}" --}}
+                                            {{-- ID tgl_selesai dipake di JS --}}
                                             <input type="date" name="tgl_selesai" id="tgl_selesai" class="form-control"
                                                 value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d') }}" required>
                                         </div>
@@ -86,21 +101,35 @@
                                     <div class="col-6">
                                         <div class="form-group">
                                             <label>Jam Buka</label>
-                                            <input type="time" name="jam_buka" class="form-control" value="08:00" required>
+                                            <select name="jam_buka" class="form-control" required>
+                                                @for ($i = 0; $i <= 23; $i++)
+                                                    @php $jam = sprintf("%02d:00", $i); @endphp
+                                                    <option value="{{ $jam }}" {{ $i == 8 ? 'selected' : '' }}>
+                                                        {{ $jam }}
+                                                    </option>
+                                                @endfor
+                                            </select>
                                         </div>
                                     </div>
                                     <div class="col-6">
                                         <div class="form-group">
                                             <label>Jam Tutup</label>
-                                            <input type="time" name="jam_tutup" class="form-control" value="22:00" required>
+                                            <select name="jam_tutup" class="form-control" required>
+                                                @for ($i = 0; $i <= 23; $i++)
+                                                    @php $jam = sprintf("%02d:00", $i); @endphp
+                                                    <option value="{{ $jam }}" {{ $i == 22 ? 'selected' : '' }}>
+                                                        {{ $jam }}
+                                                    </option>
+                                                @endfor
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="form-group">
                                     <label>Durasi per Sesi (Jam)</label>
-                                    <input type="number" name="durasi" class="form-control" value="1" min="1" max="5"
-                                        required>
+                                    <input type="number" name="durasi" class="form-control" value="1" min="1"
+                                        max="5" required>
                                 </div>
 
                                 <div class="form-group">
@@ -113,6 +142,7 @@
                     </div>
                 </div>
 
+                {{-- Info Box --}}
                 <div class="col-md-6">
                     <div class="callout callout-info">
                         <h5><i class="fas fa-info-circle"></i> Cara Kerja Generator</h5>
@@ -128,182 +158,355 @@
                 </div>
             </div>
 
-            <div class="row mt-3" id="tabel-jadwal">
+            {{-- BAGIAN 2: DAFTAR SLOT JADWAL (TABEL DENGAN BULK ACTION) --}}
+            <div class="row" id="tabel-jadwal">
                 <div class="col-12">
-                    <div class="card card-outline card-primary">
+                    <div class="card card-primary card-outline">
                         <div class="card-header">
-                            <h3 class="card-title">Daftar Slot Jadwal</h3>
-
+                            <h3 class="card-title">
+                                <i class="fas fa-calendar-alt mr-1"></i> Daftar Slot Jadwal
+                            </h3>
                             <div class="card-tools">
-                                <button type="button" id="btnBulkDelete" class="btn btn-danger btn-sm mr-2"
-                                    style="display:none;">
-                                    <i class="fas fa-trash"></i> Hapus Terpilih (<span id="countSelected">0</span>)
-                                </button>
-
+                                {{-- Form Pencarian & Filter --}}
                                 <form action="{{ route('admin.fasilitas.jadwal.index') }}" method="GET"
-                                    class="d-inline-block">
-                                    <div class="input-group input-group-sm" style="width: 200px;">
-                                        <input type="date" name="tanggal" class="form-control"
-                                            value="{{ request('tanggal') }}" placeholder="Filter Tanggal">
-                                        <div class="input-group-append">
-                                            <button type="submit" class="btn btn-default"><i
-                                                    class="fas fa-search"></i></button>
+                                    class="form-inline input-group-sm">
+
+                                    {{-- 1. TOMBOL TOGGLE UNTUK MELIHAT DATA MASA LAMPAU --}}
+                                    <div class="mr-3">
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input" id="showExpired"
+                                                name="show_expired" value="1"
+                                                {{ request('show_expired') ? 'checked' : '' }}
+                                                onchange="this.form.submit()">
+                                            <label class="custom-control-label font-weight-normal" for="showExpired">
+                                                Tampilkan Jadwal Lewat
+                                            </label>
                                         </div>
                                     </div>
+
+                                    <input type="date" name="tanggal" class="form-control mr-2"
+                                        value="{{ request('tanggal') }}">
+
+                                    <select name="fasilitas_id" class="form-control mr-2">
+                                        <option value="">Semua Fasilitas</option>
+                                        @foreach ($myFasilitas as $f)
+                                            <option value="{{ $f->id }}"
+                                                {{ request('fasilitas_id') == $f->id ? 'selected' : '' }}>
+                                                {{ $f->nama_fasilitas }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
                                 </form>
                             </div>
                         </div>
 
-                        <div class="card-body table-responsive p-0">
-                            <table class="table table-hover text-nowrap">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 10px">
-                                            <input type="checkbox" id="checkAll">
-                                        </th>
-                                        <th>Fasilitas</th>
-                                        <th>Tanggal</th>
-                                        <th>Jam</th>
-                                        <th>Status</th>
-                                        <th>Penyewa</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($jadwals as $j)
-                                        <tr>
-                                            <td>
-                                                @if($j->status != 'terbooking')
-                                                    <input type="checkbox" class="checkItem" value="{{ $j->id }}">
-                                                @else
-                                                    <i class="fas fa-lock text-muted" title="Sedang dibooking"></i>
-                                                @endif
-                                            </td>
-                                            <td>{{ $j->fasilitas->nama_fasilitas }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($j->tanggal)->format('d M Y') }}</td>
-                                            <td>{{ substr($j->jam_mulai, 0, 5) }} - {{ substr($j->jam_selesai, 0, 5) }}</td>
-                                            <td>
-                                                {{-- 1. PRIORITAS TERTINGGI: Jika sudah terbooking, status fasilitas tidak
-                                                masalah (karena sudah laku) --}}
-                                                @if($j->status == 'terbooking')
-                                                    <span class="badge badge-warning text-white">
-                                                        <i class="fas fa-user-check mr-1"></i> Booked
-                                                    </span>
+                        {{-- Form Action --}}
+                        <form action="{{ route('admin.fasilitas.jadwal.bulkAction') }}" method="POST" id="formBulk">
+                            @csrf
+                            @method('PUT')
 
-                                                    {{-- 2. PRIORITAS KEDUA: Cek Status Fasilitas Induk --}}
-                                                    {{-- Jika Fasilitas Maintenance/Nonaktif, maka jadwal ini otomatis dianggap
-                                                    tidak valid --}}
-                                                @elseif($j->fasilitas->ketersediaan != 'aktif')
-                                                    <span class="badge badge-secondary"
-                                                        title="Fasilitas sedang {{ $j->fasilitas->ketersediaan }}">
-                                                        <i class="fas fa-ban mr-1"></i> {{ ucfirst($j->fasilitas->ketersediaan) }}
-                                                    </span>
+                            <div class="card-body p-0">
+                                <div class="p-3 bg-light border-bottom">
+                                    <span class="text-muted mr-2">Aksi Terpilih:</span>
+                                    <button type="submit" name="action" value="nonaktifkan"
+                                        class="btn btn-danger btn-sm"
+                                        onclick="return confirm('Yakin ingin menonaktifkan jadwal yang dipilih?')">
+                                        <i class="fas fa-ban"></i> Nonaktifkan
+                                    </button>
+                                    <button type="submit" name="action" value="aktifkan"
+                                        class="btn btn-success btn-sm">
+                                        <i class="fas fa-check"></i> Aktifkan (Tersedia)
+                                    </button>
+                                </div>
 
-                                                    {{-- 3. PRIORITAS KETIGA: Status Jadwal Normal --}}
-                                                @elseif($j->status == 'tersedia')
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-check-circle mr-1"></i> Tersedia
-                                                    </span>
+                                <div class="table-responsive">
+                                    <table class="table table-hover table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th class="text-center">
+                                                    <input type="checkbox" id="checkAll">
+                                                </th>
+                                                <th>Tanggal</th>
+                                                <th>Jam</th>
+                                                <th>Fasilitas</th>
+                                                <th>Status</th>
+                                                <th>Penyewa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @forelse($jadwals as $jadwal)
+                                                @php
+                                                    // Logika Expired (Sama seperti sebelumnya)
+                                                    $isPast = $jadwal->tanggal < date('Y-m-d');
+                                                    $isBooked = $jadwal->checkouts->isNotEmpty();
+                                                    $isAvailable = $jadwal->status == 'tersedia';
+                                                    $isExpired = $isPast && $isAvailable && !$isBooked;
 
-                                                @elseif($j->status == 'batal')
-                                                    <span class="badge badge-danger">
-                                                        <i class="fas fa-times-circle mr-1"></i> Dibatalkan
-                                                    </span>
+                                                    if ($isExpired && !request('show_expired')) {
+                                                        continue;
+                                                    }
+                                                @endphp
 
-                                                @else
-                                                    <span class="badge badge-info">{{ ucfirst($j->status) }}</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                {{ $j->checkouts->first()->user->name ?? '-' }}
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="6" class="text-center text-muted">Belum ada jadwal. Gunakan generator
-                                                di atas.</td>
-                                        </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="card-footer clearfix">
-                            {{ $jadwals->links('pagination::bootstrap-4') }}
-                        </div>
+                                                {{-- TAMBAHKAN CLASS 'jadwal-row' DI SINI --}}
+                                                <tr class="jadwal-row {{ $isExpired ? 'bg-secondary text-white disabled-row' : '' }}"
+                                                    style="{{ $isExpired ? 'opacity: 0.6; background-color: #e9ecef !important; color: #6c757d !important; cursor: not-allowed;' : '' }}">
+
+                                                    <td class="text-center">
+                                                        {{-- Checkbox Asli --}}
+                                                        <input type="checkbox" name="ids[]"
+                                                            value="{{ $jadwal->id }}" class="check-item"
+                                                            data-status="{{ $jadwal->status }}"
+                                                            {{ $isExpired ? 'disabled' : '' }}>
+                                                    </td>
+                                                    <td>
+                                                        {{ \Carbon\Carbon::parse($jadwal->tanggal)->translatedFormat('d F Y') }}
+                                                        @if ($isExpired)
+                                                            <br><small class="badge badge-secondary">Kadaluarsa</small>
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ substr($jadwal->jam_mulai, 0, 5) }} -
+                                                        {{ substr($jadwal->jam_selesai, 0, 5) }}</td>
+                                                    <td>{{ $jadwal->fasilitas->nama_fasilitas }}</td>
+                                                    <td>
+                                                        @if ($jadwal->status == 'tersedia')
+                                                            <span class="badge badge-success">Tersedia</span>
+                                                        @elseif($jadwal->status == 'nonaktif')
+                                                            <span class="badge badge-danger">Nonaktif</span>
+                                                        @else
+                                                            <span
+                                                                class="badge badge-warning">{{ ucfirst($jadwal->status) }}</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ $isBooked ? $jadwal->checkouts->first()->user->name ?? 'User' : '-' }}
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="6" class="text-center text-muted py-4">Belum ada data
+                                                        jadwal.</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer clearfix">
+                                {{ $jadwals->appends(request()->query())->links() }}
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+
+    {{-- MODAL TAMBAH JADWAL MANUAL --}}
+    <div class="modal fade" id="modalTambahManual" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Tambah Jadwal Satuan</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+                </div>
+                <form action="{{ route('admin.fasilitas.jadwal.store') }}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        {{-- Inputan lainnya sama --}}
+                        <div class="form-group">
+                            <label>Fasilitas</label>
+                            <select name="fasilitas_id" class="form-control" required>
+                                @foreach ($myFasilitas as $f)
+                                    @if ($f->ketersediaan == 'aktif')
+                                        <option value="{{ $f->id }}">{{ $f->nama_fasilitas }}</option>
+                                    @endif
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tanggal</label>
+                            {{-- Validasi HTML5 min hari ini --}}
+                            <input type="date" name="tanggal" class="form-control" value="{{ date('Y-m-d') }}"
+                                min="{{ date('Y-m-d') }}" required>
+                        </div>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label>Mulai</label>
+                                    <select name="jam_mulai" class="form-control" required>
+                                        <option value="">-- Jam --</option>
+                                        @for ($i = 6; $i <= 23; $i++)
+                                            @php $jam = sprintf("%02d:00", $i); @endphp
+                                            <option value="{{ $jam }}">{{ $jam }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group">
+                                    <label>Selesai</label>
+                                    <select name="jam_selesai" class="form-control" required>
+                                        <option value="">-- Jam --</option>
+                                        @for ($i = 7; $i <= 24; $i++)
+                                            @php $jam = sprintf("%02d:00", $i); @endphp
+                                            <option value="{{ $jam }}">{{ $jam }}</option>
+                                        @endfor
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-success">Simpan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const checkAll = document.getElementById('checkAll');
-            const btnBulkDelete = document.getElementById('btnBulkDelete');
-            const countSelected = document.getElementById('countSelected');
-            const tglMulai = document.getElementById('tgl_mulai');
-            const tglSelesai = document.getElementById('tgl_selesai');
+        $(document).ready(function() {
+            // -------------------------------------------------------------
+            // 1. LOGIKA GENERATOR JADWAL (DENGAN CONFIRMATION & KALKULASI)
+            // -------------------------------------------------------------
 
-            // Validasi Tanggal
-            tglMulai.addEventListener('change', function () {
-                tglSelesai.min = this.value;
+            // Saat tombol submit ditekan
+            $('#formGenerate').on('submit', function(e) {
+                e.preventDefault(); // Tahan dulu, jangan submit langsung
 
-                // Jika tanggal selesai sekarang lebih kecil dari mulai baru, reset
-                if (tglSelesai.value < this.value) {
-                    tglSelesai.value = this.value;
+                // Ambil nilai dari inputan
+                const fasilitasText = $('#fasilitas_id option:selected').text().trim();
+                const tglMulai = $('#tgl_mulai').val();
+                const tglSelesai = $('#tgl_selesai').val();
+                const jamBuka = $('select[name="jam_buka"]').val();
+                const jamTutup = $('select[name="jam_tutup"]').val();
+                const durasi = parseInt($('input[name="durasi"]').val()) || 1;
+
+                // Hitung Selisih Hari
+                const date1 = new Date(tglMulai);
+                const date2 = new Date(tglSelesai);
+                const diffTime = Math.abs(date2 - date1);
+                const totalHari = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+                // Hitung Selisih Jam (Slot per hari)
+                const jamBukaInt = parseInt(jamBuka.split(':')[0]);
+                const jamTutupInt = parseInt(jamTutup.split(':')[0]);
+                let totalJamOperasional = jamTutupInt - jamBukaInt;
+
+                // Validasi jam terbalik
+                if (totalJamOperasional <= 0) {
+                    Swal.fire('Error', 'Jam Tutup harus lebih besar dari Jam Buka!', 'error');
+                    return;
                 }
-            });
 
-            // Toggle All
-            checkAll.addEventListener('change', function () {
-                document.querySelectorAll('.checkItem').forEach(cb => cb.checked = this.checked);
-                updateBulkBtn();
-            });
+                const slotPerHari = Math.floor(totalJamOperasional / durasi);
+                const totalEstimasi = totalHari * slotPerHari;
 
-            // Toggle Item
-            document.addEventListener('change', function (e) {
-                if (e.target.classList.contains('checkItem')) updateBulkBtn();
-            });
-
-            function updateBulkBtn() {
-                const count = document.querySelectorAll('.checkItem:checked').length;
-                countSelected.innerText = count;
-                btnBulkDelete.style.display = count > 0 ? 'inline-block' : 'none';
-            }
-
-            // Action Delete
-            btnBulkDelete.addEventListener('click', function () {
-                const ids = Array.from(document.querySelectorAll('.checkItem:checked')).map(cb => cb.value);
-
+                // Tampilkan SweetAlert Konfirmasi
                 Swal.fire({
-                    title: 'Hapus ' + ids.length + ' Jadwal?',
-                    text: "Jadwal yang sudah dibooking tidak akan terhapus.",
-                    icon: 'warning',
+                    title: 'Konfirmasi Generate?',
+                    html: `
+                        <div class="text-left" style="font-size: 0.9em;">
+                            <p>Anda akan membuat jadwal untuk:</p>
+                            <ul>
+                                <li><b>Fasilitas:</b> ${fasilitasText}</li>
+                                <li><b>Periode:</b> ${totalHari} Hari (${tglMulai} s/d ${tglSelesai})</li>
+                                <li><b>Jam:</b> ${jamBuka} - ${jamTutup}</li>
+                                <li><b>Durasi:</b> ${durasi} Jam/Sesi</li>
+                            </ul>
+                            <div class="alert alert-info text-center">
+                                <b>Estimasi Total: ±${totalEstimasi} Slot Jadwal</b><br>
+                                <small>(Slot yang sudah ada akan dilewati)</small>
+                            </div>
+                        </div>
+                    `,
+                    icon: 'question',
                     showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    confirmButtonText: 'Ya, Hapus!'
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, Generate Sekarang!',
+                    cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        fetch("{{ route('admin.fasilitas.jadwal.bulk_destroy') }}", {
-                            method: 'DELETE',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                            },
-                            body: JSON.stringify({ ids: ids })
-                        })
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data.success) {
-                                    Swal.fire('Deleted!', data.success, 'success').then(() => location.reload());
-                                } else {
-                                    Swal.fire('Error', data.error, 'error');
-                                }
-                            });
+                        // Tampilkan Loading
+                        Swal.fire({
+                            title: 'Sedang Memproses...',
+                            html: 'Mohon tunggu sebentar.',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                        // Submit form secara manual via native DOM
+                        e.target.submit();
                     }
                 });
             });
+
+            // -------------------------------------------------------------
+            // 2. LOGIKA TANGGAL RESPONSIVE (GENERATOR) - SAMA SEPERTI SEBELUMNYA
+            // -------------------------------------------------------------
+            const $tglMulai = $('#tgl_mulai');
+            const $tglSelesai = $('#tgl_selesai');
+
+            $tglMulai.on('change', function() {
+                const minDate = $(this).val();
+                $tglSelesai.attr('min', minDate);
+                if ($tglSelesai.val() < minDate) {
+                    $tglSelesai.val(minDate);
+                }
+            });
+
+            // -------------------------------------------------------------
+            // 3. LOGIKA CLICKABLE ROW & CHECKBOX
+            // -------------------------------------------------------------
+
+            // A. Saat baris (TR) diklik
+            $(document).on('click', '.jadwal-row', function(e) {
+                // Cegah konflik jika user klik pas di checkbox-nya langsung
+                if ($(e.target).is('input[type="checkbox"]')) return;
+
+                // Cari checkbox di dalam baris ini
+                const $checkbox = $(this).find('.check-item');
+
+                // Jika checkbox tidak disabled (bukan expired), toggle statusnya
+                if (!$checkbox.prop('disabled')) {
+                    $checkbox.prop('checked', !$checkbox.prop('checked')).trigger('change');
+                }
+            });
+
+            // B. Saat Checkbox berubah (baik diklik manual atau via baris)
+            // Fungsi ini untuk Ganti Warna Background
+            $('.check-item').on('change', function() {
+                const $row = $(this).closest('tr');
+                if ($(this).is(':checked')) {
+                    $row.addClass('row-selected'); // Tambah warna kuning
+                } else {
+                    $row.removeClass('row-selected'); // Hapus warna
+                }
+
+                updateCheckAllState(); // Cek status tombol "Select All"
+            });
+
+            // C. Logika Select All (Diperbarui untuk Handle Warna)
+            $('#checkAll').click(function() {
+                const isChecked = $(this).is(':checked');
+
+                // Hanya pilih yang tidak disabled
+                $('.check-item:not(:disabled)').prop('checked', isChecked).trigger('change');
+            });
+
+            // Fungsi helper untuk update status checkbox "Select All"
+            function updateCheckAllState() {
+                const totalCheckbox = $('.check-item:not(:disabled)').length;
+                const totalChecked = $('.check-item:not(:disabled):checked').length;
+
+                // Jika semua tercentang, maka checkAll juga tercentang
+                $('#checkAll').prop('checked', totalCheckbox > 0 && totalCheckbox === totalChecked);
+            }
         });
     </script>
-@endsection
+@endpush

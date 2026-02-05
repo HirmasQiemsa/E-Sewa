@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Daftar Fasilitas</h1>
+                    <h1 class="m-0">Data Fasilitas</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -36,14 +36,14 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card collapsed-card">
-                        <div class="card-header bg-info">
+                        {{-- <div class="card-header bg-info">
                             <h3 class="card-title">Filter Status & Statistik</h3>
                             <div class="card-tools">
                                 <button type="button" class="btn btn-tool" data-card-widget="collapse">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
-                        </div>
+                        </div> --}}
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-3 col-sm-6 col-12">
@@ -93,7 +93,7 @@
                 <div class="col-12 mb-3">
                     <div class="card">
                         <div class="card-header bg-primary">
-                            <h3 class="card-title"><b>Data Fasilitas</b></h3>
+                            <h3 class="card-title"><b>Daftar Fasilitas</b></h3>
                             <div class="card-tools">
                                 <div class="input-group input-group-sm" style="width: 150px;">
                                     <input type="text" name="table_search" class="form-control float-right"
@@ -135,8 +135,8 @@
                                                         {{ $d->adminFasilitas->name ?? 'Admin Lain' }}
                                                     </small>
                                                 @else
-                                                    <small class="text-success"><i class="fas fa-user mr-1"></i> Milik
-                                                        Anda</small>
+                                                    <small class="text-success"><i class="fas fa-user mr-1"></i> Anda
+                                                        Kelola</small>
                                                 @endif
                                             </td>
 
@@ -160,12 +160,15 @@
                                                             @method('PUT')
                                                             <button type="submit"
                                                                 class="btn btn-xs btn-block font-weight-bold shadow-sm border-0
-                                                                                    {{ $d->ketersediaan == 'aktif'
-                                                                                        ? 'btn-success'
-                                                                                        : ($d->ketersediaan == 'maintenance'
-                                                                                            ? 'btn-warning'
-                                                                                            : 'btn-dark') }}"
-                                                                data-toggle="tooltip" title="Klik untuk ubah status">
+    {{ $d->ketersediaan == 'aktif'
+        ? 'btn-success'
+        : ($d->ketersediaan == 'maintenance'
+            ? 'btn-warning'
+            : 'btn-dark') }}"
+                                                                {{-- LOGIKA DISABLE: Jika BUKAN admin_fasilitas, tombol mati --}}
+                                                                {{ Auth::user()->role !== 'admin_fasilitas' ? 'disabled' : '' }}
+                                                                data-toggle="tooltip"
+                                                                title="{{ Auth::user()->role !== 'admin_fasilitas' ? 'Hanya Admin Fasilitas yang bisa mengubah' : 'Klik untuk ubah status' }}">
 
                                                                 @if ($d->ketersediaan == 'aktif')
                                                                     <i class="fas fa-check-circle mr-1"></i> AKTIF
@@ -174,7 +177,11 @@
                                                                 @else
                                                                     <i class="fas fa-ban mr-1"></i> NONAKTIF
                                                                 @endif
-                                                                <i class="fas fa-sync-alt fa-xs ml-1 opacity-50"></i>
+
+                                                                {{-- Icon refresh hanya muncul jika tombol aktif (biar ga bingung) --}}
+                                                                @if (Auth::user()->role === 'admin_fasilitas')
+                                                                    <i class="fas fa-sync-alt fa-xs ml-1 opacity-50"></i>
+                                                                @endif
                                                             </button>
                                                         </form>
                                                     @else
@@ -200,7 +207,6 @@
                                                                 method="POST"> {{-- Ubah ke POST --}}
                                                                 @csrf
                                                                 @method('PUT') {{-- Tambahkan directive ini untuk spoofing ke PUT --}}
-
                                                                 <button type="submit" class="btn btn-sm btn-warning"
                                                                     title="Pulihkan">
                                                                     <i class="fas fa-undo"></i>
@@ -216,7 +222,6 @@
                                                                 class="btn btn-sm btn-info" title="Edit Data">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
-
                                                             <form
                                                                 action="{{ route('admin.fasilitas.data.destroy', $d->id) }}"
                                                                 method="POST" class="d-inline">
@@ -256,6 +261,41 @@
             </div>
         </div>
     </section>
+    {{-- MODAL KONFIRMASI HAPUS --}}
+    <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel">
+                        <i class="fas fa-exclamation-triangle mr-2"></i> Konfirmasi Hapus
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div class="mb-3">
+                        <i class="fas fa-trash-alt fa-3x text-danger opacity-50"></i>
+                    </div>
+                    <h6 class="font-weight-bold">Apakah Anda yakin ingin menghapus fasilitas ini?</h6>
+                    <p class="text-muted small mb-0">
+                        Data fasilitas akan dipindahkan ke sampah yang dapat dipulihkan nanti.
+                    </p>
+                </div>
+                <div class="modal-footer justify-content-center bg-light">
+                    <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">Batal</button>
+
+                    {{-- Form ini akan di-inject action-nya via JS --}}
+                    <form id="delete-form" action="" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger px-4">Ya, Hapus</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')
@@ -264,11 +304,21 @@
             // Inisialisasi tooltip
             $('[data-toggle="tooltip"]').tooltip();
         });
-        // Tunggu 3 detik (3000ms), lalu fade out pelan-pelan
+
+        // Auto hide alert
         window.setTimeout(function() {
             $(".alert").fadeTo(500, 0).slideUp(500, function() {
                 $(this).remove();
             });
         }, 5000);
+
+        // --- FUNGSI MODAL DELETE ---
+        function confirmDelete(url) {
+            // 1. Isi attribute action pada form di dalam modal dengan URL delete spesifik ID
+            $('#delete-form').attr('action', url);
+
+            // 2. Tampilkan Modal
+            $('#deleteModal').modal('show');
+        }
     </script>
 @endsection

@@ -165,7 +165,9 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
         Route::prefix('jadwal')->name('jadwal.')->group(function () {
             Route::get('/', [JadwalController::class, 'index'])->name('index');
             Route::post('/generate', [JadwalController::class, 'generate'])->name('generate');
+            Route::post('/store', [JadwalController::class, 'store'])->name('store');
             Route::delete('/bulk-delete', [JadwalController::class, 'bulkDestroy'])->name('bulk_destroy');
+            Route::put('/bulk-action', [JadwalController::class, 'bulkAction'])->name('bulkAction');
         });
 
         // ROUTE BOOKING

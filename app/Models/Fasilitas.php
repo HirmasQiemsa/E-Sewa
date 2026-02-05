@@ -32,7 +32,7 @@ class Fasilitas extends Model
         'tenis' => ['icon' => 'ion ion-ios-tennisball', 'color' => 'bg-success'],
         'voli' => ['icon' => 'fas fa-volleyball-ball', 'color' => 'bg-warning'],
         'badminton' => ['icon' => 'fas fa-feather', 'color' => 'bg-orange'],
-        'basket' => ['icon' => 'fas fa-basketball-ball', 'color' => 'bg-danger'],
+        // 'basket' => ['icon' => 'fas fa-basketball-ball', 'color' => 'bg-danger'],
         'default' => ['icon' => 'fas fa-hockey-puck', 'color' => 'bg-primary']
     ];
 

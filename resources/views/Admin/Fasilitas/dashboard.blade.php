@@ -94,7 +94,7 @@
                                         <th>Fasilitas</th>
                                         <th>Jam</th>
                                         <th>Durasi</th>
-                                        <th>Penyewa</th>
+                                        {{-- <th>Penyewa</th> --}}
                                         <th>Status</th>
                                     </tr>
                                 </thead>
@@ -107,10 +107,10 @@
                                                 {{ substr($jadwal->jam_mulai, 0, 5) }} - {{ substr($jadwal->jam_selesai, 0, 5) }}
                                             </td>
                                             <td>{{ $jadwal->durasi }} jam</td>
-                                            <td>
-                                                {{-- Ambil nama user dari relasi checkout pertama --}}
+                                            {{-- <td>
+
                                                 {{ $jadwal->checkouts->first()->user->name ?? '-' }}
-                                            </td>
+                                            </td> --}}
                                             <td>
                                                 @if ($jadwal->status == 'tersedia')
                                                     <span class="badge badge-success">Tersedia</span>

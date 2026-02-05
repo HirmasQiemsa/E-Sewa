@@ -31,7 +31,7 @@
             <div class="card-body">
                 <form action="{{ route('admin.keuangan.verifikasi.index') }}" method="GET">
                     <div class="row">
-                        <div class="col-md-4">
+                        {{-- <div class="col-md-4">
                             <div class="form-group">
                                 <label>Status Pembayaran</label>
                                 <select name="status" class="form-control">
@@ -42,8 +42,8 @@
                                     <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                                 </select>
                             </div>
-                        </div>
-                        <div class="col-md-6">
+                        </div> --}}
+                        <div class="col-md-10">
                             <div class="form-group">
                                 <label>Cari (Kode / Nama User)</label>
                                 <input type="text" name="search" class="form-control"
@@ -81,7 +81,7 @@
                             <th>Fasilitas</th>
                             <th>Total Tagihan</th>
                             <th>Status Pembayaran</th>
-                            <th class="text-right">Aksi</th>
+                            <th class="text-center" style="width: 10%">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>

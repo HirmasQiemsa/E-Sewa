@@ -18,6 +18,7 @@
     {{-- Theme Gelap/Biru biar cocok sama AdminLTE --}}
     <link rel="stylesheet" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
 
+    @stack('style')
     <style>
         /* === CUSTOM NAVBAR MERAH (FIXED) === */
         /* Pastikan background merah menimpa style dark/light mode */
@@ -363,7 +364,7 @@
                                         <a href="{{ route('admin.fasilitas.jadwal.index') }}"
                                             class="nav-link {{ $isActiveJadwal ? 'active' : '' }}">
                                             <i class="far fa-circle nav-icon"></i>
-                                            <p>Jadwal & Ketersediaan</p>
+                                            <p>Jadwal Fasilitas</p>
                                         </a>
                                     </li>
                                 </ul>
@@ -463,6 +464,9 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     {{-- Bahasa Indonesia (Opsional) --}}
     <script src="https://npmcdn.com/flatpickr/dist/l10n/id.js"></script>
+        {{-- Select2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     <script>
         @if (session('success'))
             Swal.fire({

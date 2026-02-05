@@ -165,8 +165,8 @@
 
                             <div class="alert alert-warning mt-4">
                                 <h5><i class="icon fas fa-exclamation-triangle"></i> Perhatian!</h5>
-                                <p>Silakan lunasi pembayaran sebelum jadwal penggunaan fasilitas.</p>
-                                <p class="mb-0">Jika terlambat membayar, booking dapat dibatalkan oleh sistem.</p>
+                                <p>Silakan segera lunasi pembayaran ketika sudah menggunakan fasilitas.</p>
+                                <p class="mb-0">Jika tidak  membayar, akun dapat dinonaktifkan oleh staff.</p>
                             </div>
                         </div>
                     </div>

@@ -55,7 +55,7 @@ class UserController extends Controller
 
             $this->recordLog($admin, 'CREATE', 'Menambahkan staff baru: ' . $admin->name . ' (' . $admin->role . ')');
 
-            return redirect()->route('admin.super.users.index')->with('success', 'User staff berhasil ditambahkan.');
+            return redirect()->route('admin.super.users.index')->with('success', 'Staff baru berhasil ditambahkan.');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal: ' . $e->getMessage())->withInput();
         }

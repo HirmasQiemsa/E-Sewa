@@ -139,7 +139,7 @@
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">
-                        <i class="fas fa-calendar-check mr-2"></i>Daftar Booking
+                        <i class="fas fa-calendar-check mr-2"></i>Daftar Booking Fasilitas
                     </h3>
                 </div>
                 <div class="card-body table-responsive p-0">

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('tanggal');
             $table->time('jam_mulai');
             $table->time('jam_selesai');
-            $table->enum('status', ['tersedia', 'terbooking', 'selesai', 'batal'])->default('tersedia');
+            $table->enum('status', ['tersedia', 'terbooking', 'selesai', 'batal','nonaktif'])->default('tersedia');
             $table->softDeletes();
             $table->timestamps();
         });

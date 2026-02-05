@@ -29,6 +29,23 @@
             background-color: #17a589 !important;
         }
 
+        /* STYLE BARU: TANGGAL LAMPAU (Fake Disabled) */
+        .flatpickr-day.past-date {
+            color: #d6d6d6;
+            /* Warna abu-abu pudar */
+            background: transparent;
+            border-color: transparent;
+            cursor: not-allowed;
+            /* Kursor merah/larangan saat hover */
+        }
+
+        /* Pastikan saat di-hover tidak berubah warna jadi biru (seperti tanggal aktif) */
+        .flatpickr-day.past-date:hover {
+            background: transparent !important;
+            border-color: transparent !important;
+            color: #d6d6d6 !important;
+        }
+
         /* Tombol Tanggal */
         .date-trigger-btn {
             background-color: #007bff;
@@ -191,8 +208,8 @@
         }
 
         /* =========================
-                   HOW TO BOOK – UX IMPROVE
-                   ========================= */
+                       HOW TO BOOK – UX IMPROVE
+                       ========================= */
 
         .how-to-book {
             position: relative;
@@ -493,13 +510,15 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const dateTrigger = document.getElementById("dateTrigger");
-            const dateLabel = document.getElementById("dateLabel"); // Ambil elemen label teks tanggal
+            const dateLabel = document.getElementById("dateLabel");
             const dateInput = document.getElementById("datePickerInput");
 
-            // 1. DATA HISTORY (Biarkan seperti semula)
-            const historyData = @json($userHistoryData);
-            const bookedDates = Object.keys(historyData);
+            // 1. DATA HISTORY
+            const historyData = @json($userHistoryData ?? []);
             const now = new Date();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Normalisasi jam ke 00:00
+
             const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
             // 2. KONFIGURASI FLATPICKR
@@ -507,59 +526,92 @@
                 locale: "id",
                 dateFormat: "Y-m-d",
                 maxDate: endOfMonth,
-                minDate: null,
+                minDate: null, // PENTING: null agar semua tanggal aktif secara sistem
                 disableMobile: "true",
                 positionElement: dateTrigger,
                 clickOpens: false,
                 closeOnSelect: true,
 
-                // LOGIKA DISABLE (Sama seperti sebelumnya)
-                disable: [
-                    function(date) {
-                        const offset = date.getTimezoneOffset();
-                        const localDate = new Date(date.getTime() - (offset * 60 * 1000));
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        if (date >= today) return false;
-                        return true;
-                    }
-                ],
-
-                // LOGIKA VISUAL & KLIK
+                // 3. LOGIKA VISUAL (On Day Create)
                 onDayCreate: function(dObj, dStr, fp, dayElem) {
-                    // ... (Logika History & Invalid Date Anda biarkan sama, tidak perlu diubah) ...
-                    // Salin saja logika 'onDayCreate' yang lama ke sini jika ingin fitur klik history/invalid tetap jalan
-                    // Untuk ringkasnya, saya fokus ke bagian onChange di bawah ini.
+                    const date = dayElem.dateObj;
+                    date.setHours(0, 0, 0, 0);
+
+                    // LOGIKA BARU: GUNAKAN CLASS CUSTOM 'past-date'
+                    if (date < today) {
+                        // Jangan pakai 'flatpickr-disabled', pakai class kita sendiri
+                        dayElem.classList.add('past-date');
+                    }
+
+                    // Marker History (Warna Hijau/Tosca)
+                    const dateString = flatpickr.formatDate(date, "Y-m-d");
+                    if (historyData[dateString]) {
+                        dayElem.classList.add('user-booking-date');
+                        dayElem.title = "Anda punya jadwal main di sini";
+                    }
                 },
 
-                // --- [BAGIAN UTAMA PERBAIKAN] ---
+                // 4. LOGIKA KLIK (On Change)
                 onChange: function(selectedDates, dateStr, instance) {
-                    instance.close(); // Tutup kalender segera
+                    const selectedDate = selectedDates[0];
+                    selectedDate.setHours(0, 0, 0, 0);
 
-                    // 1. UBAH TEKS TOMBOL BIRU SECARA INSTANT (Biar terasa cepat)
-                    if (selectedDates.length > 0) {
-                        const options = {
-                            weekday: 'long',
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric'
-                        };
-                        // Contoh hasil: "Sabtu, 10 Januari 2026"
-                        dateLabel.innerText = selectedDates[0].toLocaleDateString('id-ID', options);
+                    // === CEK VALIDASI: JIKA TANGGAL LAMPAU ===
+                    if (selectedDate < today) {
+
+                        // 1. Tampilkan Pesan Error
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Tanggal Tidak Tersedia',
+                            text: 'Tanggal yang sudah berlalu tidak dapat dipilih.',
+                            confirmButtonColor: '#dc3545',
+                            confirmButtonText: 'OK',
+                            timer: 3000
+                        });
+
+                        // 2. RESET KE HARI INI (REAL TIME)
+                        // Gunakan variabel 'today' yang sudah didefinisikan di atas (new Date)
+                        // Parameter 'false' agar tidak memicu onChange lagi
+                        instance.setDate(today, false);
+
+                        // 3. Tutup Kalender
+                        instance.close();
+
+                        // Reload halaman ke Hari Ini?
+                        // Jika Anda ingin datanya juga ikut berubah jadi data hari ini,
+                        setTimeout(() => {
+                            const todayStr = flatpickr.formatDate(today, "Y-m-d");
+                            window.location.href = "{{ route('user.fasilitas') }}?date=" + todayStr;
+                        }, 1000);
+
+
+                        return; // BERHENTI
                     }
 
-                    // 2. TAMPILKAN LOADING (Menutupi delay reload)
+                    // === JIKA TANGGAL VALID (HARI INI / DEPAN) ===
+                    instance.close();
+
+                    // Update label tombol (Visual feedback langsung)
+                    const options = {
+                        weekday: 'long',
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                    };
+                    dateLabel.innerText = selectedDates[0].toLocaleDateString('id-ID', options);
+
+                    // Loading
                     Swal.fire({
                         title: 'Memuat Jadwal...',
                         text: 'Mohon tunggu sebentar',
-                        allowOutsideClick: false, // User gabisa klik luar
-                        showConfirmButton: false, // Hapus tombol OK
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
                         didOpen: () => {
-                            Swal.showLoading(); // Munculkan spinner
+                            Swal.showLoading();
                         }
                     });
 
-                    // 3. RELOAD HALAMAN (Beri jeda sedikit biar animasi smooth)
+                    // Reload Halaman ke tanggal baru
                     setTimeout(() => {
                         window.location.href = "{{ route('user.fasilitas') }}?date=" + dateStr;
                     }, 200);
@@ -573,7 +625,7 @@
                 else fp.open();
             });
 
-            // Widget Auto-Close (Biarkan sama)
+            // Widget Auto-Close
             const widget = document.getElementById('autoCloseWidget');
             if (widget) {
                 setTimeout(() => {

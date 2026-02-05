@@ -95,7 +95,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="text-center">Belum ada log aktivitas.</td>
+                                    <td colspan="5" class="text-center">Belum ada log aktivitas tercatat.</td>
                                 </tr>
                             @endforelse
                         </tbody>
