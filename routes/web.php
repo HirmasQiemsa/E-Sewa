@@ -14,6 +14,7 @@ use App\Http\Controllers\User\BookingController as UserBookingController;
 use App\Http\Controllers\User\CheckoutController as UserCheckoutController;
 use App\Http\Controllers\User\RiwayatController as UserRiwayatController;
 use App\Http\Controllers\User\ProfileController as UserProfileController;
+use App\Http\Controllers\User\PengajuanController as PengajuanController;
 
 // Admin General
 use App\Http\Controllers\Admin\DashboardController as SharedDashboard;
@@ -69,10 +70,13 @@ Route::post('/logout', [LogoutController::class, 'logout'])->name('logout');
 Route::middleware(['auth:web', 'role:user'])->name('user.')->group(function () {
 
     // Beranda User (Setelah Login)
-    Route::get('/beranda', [UserBerandaController::class, 'beranda'])->name('fasilitas');
+    Route::get('/beranda', [UserBerandaController::class, 'beranda'])->name('beranda');
 
     // Detail Fasilitas & Booking
+    Route::get('/fasilitas', [UserBerandaController::class, 'fasilitas'])->name('fasilitas');
     Route::get('/fasilitas/{id}/detail', [UserBookingController::class, 'show'])->name('fasilitas.detail');
+    Route::get('/fasilitas/{id}/', [UserBookingController::class, 'detail'])->name('booking.detail');
+    Route::post('/fasilitas/booking', [UserBookingController::class, 'store'])->name('booking.store');
 
     // Checkout & Pembayaran
     Route::get('/checkout', [UserCheckoutController::class, 'index'])->name('checkout');
@@ -90,8 +94,15 @@ Route::middleware(['auth:web', 'role:user'])->name('user.')->group(function () {
     Route::get('/api/check-jadwal/{fasilitasId}/{tanggal}', [UserCheckoutController::class, 'checkJadwal']);
 
     // Riwayat Pemesanan
+    Route::get('api/riwayat/booking', [UserRiwayatController::class, 'dataBooking'])->name('api.riwayat.booking');
+    Route::get('api/riwayat/event', [UserRiwayatController::class, 'dataEvent'])->name('api.riwayat.event');
     Route::get('/riwayat', [UserRiwayatController::class, 'index'])->name('riwayat');
-    // Route::get('/riwayat/receipt/{id}', [UserRiwayatController::class, 'downloadReceipt'])->name('riwayat.receipt'); // Diganti checkout.print
+
+    // Pengajuan Event
+    Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
+        Route::post('/pengajuan', [PengajuanController::class, 'index'])->name('index');
+        Route::post('/pengajuan/store', [PengajuanController::class, 'store'])->name('store');
+    });
 
     // Profile User
     Route::prefix('profile')->name('profile.')->group(function () {

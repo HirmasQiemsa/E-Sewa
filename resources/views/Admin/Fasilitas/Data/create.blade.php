@@ -62,12 +62,10 @@
                                                 <option value="futsal">Futsal</option>
                                                 <option value="tenis">Tenis</option>
                                                 <option value="voli">Voli</option>
-                                                <option value="badminton">Badminton</option>
-                                                <option value="basket">Basket</option>
+                                                <option value="bulutangkis">Bulu Tangkis</option>
+                                                <option value="sepak bola">Sepak Bola</option>
                                                 <option value="lainnya">Lainnya</option>
                                             </select>
-                                            <small class="text-muted">Ikon dan warna akan disesuaikan otomatis berdasarkan
-                                                kategori ini.</small>
                                         </div>
 
                                         <div class="form-group">
@@ -100,7 +98,7 @@
                                         <div class="form-group">
                                             <label for="lokasi">Lokasi Detail <span class="text-danger">*</span></label>
                                             <textarea name="lokasi" class="form-control" id="lokasi" rows="2"
-                                                placeholder="Gedung A, Lantai 2" required>{{ old('lokasi') }}</textarea>
+                                                placeholder="Jl M.H Thamrin.." required>{{ old('lokasi') }}</textarea>
                                             @error('lokasi')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror

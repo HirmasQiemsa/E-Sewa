@@ -21,7 +21,6 @@ class Fasilitas extends Model
         'foto',
         'harga_sewa',
         'ketersediaan',      // aktif, nonaktif, maintenance
-        // 'status_approval',   // fitur bagus, tapi di-skip dulu
         'admin_fasilitas_id', // FK ke Admin Pembuat
         'admin_pembayaran_id' // FK ke Admin Keuangan
     ];
@@ -31,7 +30,8 @@ class Fasilitas extends Model
         'futsal' => ['icon' => 'ion ion-ios-football', 'color' => 'bg-info'],
         'tenis' => ['icon' => 'ion ion-ios-tennisball', 'color' => 'bg-success'],
         'voli' => ['icon' => 'fas fa-volleyball-ball', 'color' => 'bg-warning'],
-        'badminton' => ['icon' => 'fas fa-feather', 'color' => 'bg-orange'],
+        'bulutangkis' => ['icon' => 'fas fa-feather', 'color' => 'bg-orange'],
+        'sepak bola' => ['icon' => 'fas fa-futbol', 'color' => 'bg-danger'],
         // 'basket' => ['icon' => 'fas fa-basketball-ball', 'color' => 'bg-danger'],
         'default' => ['icon' => 'fas fa-hockey-puck', 'color' => 'bg-primary']
     ];

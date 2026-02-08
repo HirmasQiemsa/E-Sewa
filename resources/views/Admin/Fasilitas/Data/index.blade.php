@@ -254,6 +254,9 @@
                                 <a href="{{ route('admin.fasilitas.data.create') }}" class="btn btn-success">
                                     <i class="fas fa-plus-circle mr-1"></i> Tambah Fasilitas
                                 </a>
+                                <a href="{{ route('admin.fasilitas.jadwal.index') }}" class="btn btn-success">
+                                    <i class="fas fa-plus-circle mr-1"></i> Buat Jadwal
+                                </a>
                             @endif
                         </div>
                     </div>

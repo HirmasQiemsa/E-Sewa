@@ -14,7 +14,7 @@ class Checkout extends Model
         'user_id',
         'jadwals_id', // ID Jadwal Utama (Referensi)
         'total_bayar',
-        'status',     // kompensasi, pending, lunas, batal
+        'status',     // pending, lunas, batal (HAPUS: kompensasi)
     ];
 
     public function user() {
@@ -37,19 +37,24 @@ class Checkout extends Model
         return $this->hasMany(Pemasukan::class, 'checkout_id');
     }
 
-    // --- HELPER ATTRIBUTES ---
+    // --- HELPER ATTRIBUTES (UPDATED) ---
 
     public function getSisaTagihanAttribute()
     {
         if ($this->status == 'lunas') return 0;
-        return $this->total_bayar * 0.5; // Asumsi sisa selalu 50%
+
+        $sudahBayar = $this->pemasukans()
+            ->where('status', 'lunas')
+            ->sum('jumlah_bayar');
+
+        return max(0, $this->total_bayar - $sudahBayar);
     }
 
     public function getStatusBadgeAttribute()
     {
         $badges = [
-            'kompensasi' => '<span class="badge badge-warning">Sudah DP (Belum Lunas)</span>',
-            'pending'    => '<span class="badge badge-info">Verifikasi Pelunasan</span>',
+            // 'kompensasi' => '<span class="badge badge-warning">Sudah DP (Belum Lunas)</span>', // DEPRECATED
+            'pending'    => '<span class="badge badge-info">Menunggu Verifikasi</span>',
             'lunas'      => '<span class="badge badge-success">Lunas</span>',
             'batal'      => '<span class="badge badge-danger">Batal</span>',
         ];

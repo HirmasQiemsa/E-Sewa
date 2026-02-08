@@ -8,12 +8,13 @@ use App\Models\Checkout;
 use App\Models\Jadwal;
 use Carbon\Carbon;
 use App\Models\Fasilitas;
+use App\Models\PengajuanEvent;
 use Illuminate\Support\Facades\Auth;
 
 
 class BerandaController extends Controller
 {
-    // View Blade Beranda
+    // View Beranda
     public function beranda(Request $request)
     {
         // 1. Logika Tanggal
@@ -52,7 +53,7 @@ class BerandaController extends Controller
                    ->orderBy('jam_mulai', 'asc');
         }]);
 
-        // 4. Mapping Data untuk View (MERGED VERSION)
+        // 4. Mapping Data untuk View
         $currentTime = Carbon::now()->format('H:i:s');
         $isToday = ($selectedDate == $today);
 
@@ -214,8 +215,17 @@ switch ($f->status_type) {
             }
         }
 
-        return view('User.Fasilitas.beranda', compact(
-            'selectedDate', 'fasilitas', 'pendingBooking', 'userHistoryData'
+        $lastPengajuan = null;
+if (Auth::check()) {
+    $lastPengajuan = PengajuanEvent::where('id_user', Auth::id())
+        ->latest()
+        ->first();
+}
+
+        return view('welcome', compact(
+            'selectedDate', 'fasilitas', 'pendingBooking', 'userHistoryData', 'lastPengajuan'
         ));
     }
+
+
 }

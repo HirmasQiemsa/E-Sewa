@@ -5,7 +5,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Dashboard Prasarana</h1>
+                    <h1 class="m-0">Dashboard Admin Fasilitas</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
@@ -64,7 +64,7 @@
                     <div class="small-box bg-primary">
                         <div class="inner">
                             <h3>{{ $data['total_user'] ?? 0 }}</h3>
-                            <p>User Terdaftar</p>
+                            <p>Masyarakat Terdaftar</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-users"></i>

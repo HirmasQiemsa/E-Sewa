@@ -7,12 +7,6 @@
                 <div class="col-sm-6">
                     <h1 class="m-0 font-weight-bold">Riwayat Pemesanan</h1>
                 </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('user.fasilitas') }}">Beranda</a></li>
-                        <li class="breadcrumb-item active">Riwayat</li>
-                    </ol>
-                </div>
             </div>
         </div>
     </div>
@@ -79,10 +73,6 @@
                                             Status</option>
 
                                         {{-- PERBAIKAN: Value harus sama dengan ENUM di database --}}
-                                        <option value="kompensasi"
-                                            {{ request('status') == 'kompensasi' ? 'selected' : '' }}>
-                                            Belum Lunas (DP)
-                                        </option>
                                         <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>
                                             Menunggu Verifikasi
                                         </option>
@@ -107,14 +97,12 @@
             </div>
 
             <div class="card shadow-sm border-0">
-                <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                    <h3 class="card-title font-weight-bold">Daftar Transaksi</h3>
-                </div>
+
                 <div class="card-body table-responsive p-0">
                     <table class="table table-hover align-middle text-nowrap">
                         <thead class="bg-light">
                             <tr>
-                                <th class="pl-4" style="width: 5%">No</th>
+
                                 <th>ID Booking</th>
                                 <th>Fasilitas & Lokasi</th>
                                 <th>Jadwal Main</th>
@@ -126,8 +114,6 @@
                         <tbody>
                             @forelse($checkouts as $index => $checkout)
                                 <tr>
-                                    <td class="pl-4 align-middle">{{ $checkouts->firstItem() + $index }}</td>
-
                                     {{-- ID BOOKING & TANGGAL --}}
                                     <td class="align-middle">
                                         <span class="font-weight-bold text-primary">#{{ $checkout->id }}</span>

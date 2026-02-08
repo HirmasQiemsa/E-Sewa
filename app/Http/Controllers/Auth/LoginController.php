@@ -48,7 +48,7 @@ class LoginController extends Controller
             }
 
             $request->session()->regenerate();
-            return redirect()->route('user.fasilitas')->with('success', 'Selamat Datang, ' . $user->name);
+            return redirect()->route('user.beranda')->with('success', 'Selamat Datang, ' . $user->name);
         }
 
         // 3. CEK ADMIN (STAFF)

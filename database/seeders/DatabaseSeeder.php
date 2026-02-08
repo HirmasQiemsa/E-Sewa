@@ -54,9 +54,9 @@ class DatabaseSeeder extends Seeder
         // 4. Buat Akun User (Masyarakat)
         User::create([
             'username' => 'user',
-            'name'     => 'Budi Santoso',
+            'name'     => 'Hinara Santoso',
             'email'    => 'user@example.com',
-            'password' => Hash::make('password'),
+            'password' => Hash::make('asd'),
             'role'     => 'user',
             'no_hp'    => '081234567890',
             'no_ktp'   => '3374010101010001',
@@ -68,35 +68,48 @@ class DatabaseSeeder extends Seeder
         // Kita gunakan ID dari admin yang baru saja dibuat di atas
 
         $listFasilitas = [
-            [
-                'nama_fasilitas' => 'GOR Futsal Manunggal Jati',
-                'lokasi'         => 'Pedurungan, Semarang',
-                'harga_sewa'     => 90000,
-                'ketersediaan'   => 'aktif',   // Wajib 'aktif' agar muncul di beranda
-                'kategori'       => 'futsal',  // Wajib diisi agar icon bola muncul
-                'admin_fasilitas_id'  => $adminFasilitas->id,
-                'admin_pembayaran_id' => $adminKeuangan->id,
-                // Kolom nullable (foto, deskripsi, tipe) kita biarkan kosong/default
-            ],
-            [
-                'nama_fasilitas' => 'Lapangan Tenis Tri Lomba Juang',
-                'lokasi'         => 'Mugassari, Semarang',
-                'harga_sewa'     => 75000,
-                'ketersediaan'   => 'aktif',
-                'kategori'       => 'tenis',
-                'admin_fasilitas_id'  => $adminFasilitas->id,
-                'admin_pembayaran_id' => $adminKeuangan->id,
-            ],
-            [
-                'nama_fasilitas' => 'GOR Badminton Tri Lomba Juang',
-                'lokasi'         => 'Semarang Tengah',
-                'harga_sewa'     => 40000,
-                'ketersediaan'   => 'aktif',
-                'kategori'       => 'badminton',
-                'admin_fasilitas_id'  => $adminFasilitas->id,
-                'admin_pembayaran_id' => $adminKeuangan->id,
-            ],
-        ];
+        [
+            'nama_fasilitas' => 'GOR Futsal Manunggal Jati',
+            'lokasi'         => ' Jl. Taman Majapahit Selatan No.1, Pedurungan Lor, Kec. Pedurungan',
+            'harga_sewa'     => 100000,
+            'ketersediaan'   => 'aktif',
+            'kategori'       => 'futsal',
+            'foto'           => 'img/fasilitas/futsal-m.jpg',
+            'admin_fasilitas_id'  => $adminFasilitas->id,
+            'admin_pembayaran_id' => $adminKeuangan->id,
+        ],
+        [
+            'nama_fasilitas' => 'Lapangan Tenis Tri Lomba Juang',
+            'lokasi'         => 'Mugassari, Kec. Semarang Sel., Kota Semarang',
+            'harga_sewa'     => 250000,
+            'ketersediaan'   => 'aktif',
+            'kategori'       => 'tenis',
+            'foto'           => 'img/fasilitas/tenis-tlj.jpeg',
+            'admin_fasilitas_id'  => $adminFasilitas->id,
+            'admin_pembayaran_id' => $adminKeuangan->id,
+        ],
+        [
+            'nama_fasilitas' => 'GOR Badminton Tri Lomba Juang',
+            'lokasi'         => 'Mugassari, Kec. Semarang Sel., Kota Semarang',
+            'harga_sewa'     => 100000,
+            'ketersediaan'   => 'aktif',
+            'kategori'       => 'bulu tangkis',
+            'foto'           => 'img/fasilitas/badminton.jpg',
+            'admin_fasilitas_id'  => $adminFasilitas->id,
+            'admin_pembayaran_id' => $adminKeuangan->id,
+        ],
+        [
+            'nama_fasilitas' => 'Lapangan Tenis Tambora',
+            'lokasi'         => 'Jl. Tambora, Tegalsari, Kec. Candisari, Kota Semarang',
+            'harga_sewa'     => 150000,
+            'ketersediaan'   => 'aktif',
+            'kategori'       => 'tenis',
+            'foto'           => 'img/fasilitas/tenis-tambora.jpg',
+            'admin_fasilitas_id'  => $adminFasilitas->id,
+            'admin_pembayaran_id' => $adminKeuangan->id,
+        ],
+    ];
+
 
         foreach ($listFasilitas as $data) {
             Fasilitas::create($data);

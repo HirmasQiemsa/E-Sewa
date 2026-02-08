@@ -28,11 +28,7 @@ class DashboardController extends Controller
                 $data['total_user'] = User::count();
                 $data['total_staff'] = Admin::where('role', '!=', 'super_admin')->count();
 
-                /// 2. [MODIFIKASI] Ganti "Pending Approval" dengan "Total Fasilitas Aktif"
-                // Agar dashboard tetap penuh tapi isinya relevan
-                // $data['pending_approvals'] = Fasilitas::where('status_approval', 'pending')->latest()->take(5)->get(); // HIDDEN
-                // $data['pending_count'] = Fasilitas::where('status_approval', 'pending')->count(); // HIDDEN
-
+                
                 $data['fasilitas_count'] = Fasilitas::count();
                 $data['fasilitas_aktif'] = Fasilitas::where('ketersediaan', 'aktif')->count();
 

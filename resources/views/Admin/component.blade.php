@@ -376,6 +376,13 @@
                                     <p>Daftar Booking</p>
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="#"
+                                    class="nav-link ">
+                                    <i class="nav-icon fas fa-comments"></i>
+                                    <p>Pesan Masyarakat</p>
+                                </a>
+                            </li>
                         @endif
 
                         @if ($user->role == 'admin_pembayaran')
@@ -447,7 +454,7 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-12">
-                        <strong>Copyright &copy; 2025 <a href="#">E-SEWA FASILITAS</a>.</strong> All rights
+                        <strong>Copyright &copy; 2026 <a href="#">E-SEWA FASILITAS</a>.</strong> All rights
                         reserved.
                     </div>
                 </div>

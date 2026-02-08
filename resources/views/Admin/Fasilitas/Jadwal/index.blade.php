@@ -375,7 +375,7 @@
 
             // Saat tombol submit ditekan
             $('#formGenerate').on('submit', function(e) {
-                e.preventDefault(); // Tahan dulu, jangan submit langsung
+                e.preventDefault(); 
 
                 // Ambil nilai dari inputan
                 const fasilitasText = $('#fasilitas_id option:selected').text().trim();
@@ -398,7 +398,7 @@
 
                 // Validasi jam terbalik
                 if (totalJamOperasional <= 0) {
-                    Swal.fire('Error', 'Jam Tutup harus lebih besar dari Jam Buka!', 'error');
+                    Swal.fire('Error', 'Jam Tutup harus lebih akhir dari Jam Buka!', 'error');
                     return;
                 }
 

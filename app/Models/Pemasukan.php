@@ -10,7 +10,7 @@ class Pemasukan extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $table = 'pemasukans'; // Sesuai migrasi baru
+    protected $table = 'pemasukans'; 
 
     protected $fillable = [
         'checkout_id',
