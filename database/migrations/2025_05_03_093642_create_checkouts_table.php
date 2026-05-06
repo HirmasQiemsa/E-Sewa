@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('jadwals_id')->nullable()->constrained()->onDelete('cascade');
             $table->bigInteger('total_bayar')->default(value: 0);
-            $table->enum('status', ['pending', 'lunas', 'batal',])->default('pending');
+            $table->enum('status', ['pending', 'lunas', 'batal','kompensasi','ditolak'])->default('pending');
             $table->softDeletes();
             $table->timestamps();
         });

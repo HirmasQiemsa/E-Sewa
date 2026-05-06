@@ -36,6 +36,43 @@ class Fasilitas extends Model
         'default' => ['icon' => 'fas fa-hockey-puck', 'color' => 'bg-primary']
     ];
 
+    public function getStatusUIAttribute($date = null)
+    {
+        $date = $date ?? now()->format('Y-m-d');
+        $isToday = $date == now()->format('Y-m-d');
+        $currentTime = now()->format('H:i:s');
+
+
+        $validJadwals = $this->jadwals->filter(function ($j) use ($isToday, $currentTime) {
+            return $isToday ? $j->jam_mulai > $currentTime : true;
+        });
+
+        $totalValid = $validJadwals->count();
+
+
+        if ($this->ketersediaan !== 'aktif') return 'closed';
+        if ($this->jadwals_count === 0) return 'closed'; // Pakai hasil withCount
+        if ($totalValid === 0) return 'full';
+
+        return 'available';
+    }
+
+    
+    public function getUiMetaData($statusType)
+    {
+        $catKey = strtolower($this->kategori ?? 'default');
+        $style = self::CATEGORY_ICONS[$catKey] ?? self::CATEGORY_ICONS['default'];
+
+        $meta = [
+            'closed' => ['class' => 'bg-secondary', 'text' => 'Tidak Tersedia', 'icon' => 'fas fa-ban'],
+            'locked' => ['class' => 'bg-secondary', 'text' => 'Terkunci', 'icon' => 'fas fa-lock'],
+            'full'   => ['class' => $style['color'], 'text' => 'Jadwal Habis', 'icon' => 'fas fa-calendar-times'],
+            'available' => ['class' => $style['color'], 'text' => 'Tersedia', 'icon' => 'far fa-clock'],
+        ];
+
+        return $meta[$statusType] ?? $meta['available'];
+    }
+
     public function getIconAttribute()
     {
         $kategori = strtolower($this->kategori ?? '');

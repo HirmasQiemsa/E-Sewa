@@ -50,27 +50,64 @@ class BookingController extends Controller
     // NEW METHOD UNTUK BOOKING
     public function detail(Request $request, $id)
 {
+    /* =====================================================
+     * 1. VALIDASI FASILITAS
+     * ===================================================== */
     $fasilitas = Fasilitas::findOrFail($id);
 
     if ($fasilitas->ketersediaan !== 'aktif') {
-        return redirect()->route('user.fasilitas')->with('error', 'Fasilitas tidak aktif.');
+        // Logika Code 1: Redirect ke 'user.beranda'
+        return redirect()
+            ->route('user.beranda')
+            ->with('error', 'Fasilitas tidak aktif.');
     }
 
-    // Ambil tanggal dari request atau default hari ini
+    /* =====================================================
+     * 2. SETUP TANGGAL
+     * ===================================================== */
     $date = $request->query('date', now()->format('Y-m-d'));
 
-    // Cek Range Harga untuk Badge
-    $minPrice = $fasilitas->harga_sewa; // Default
-    $maxPrice = $fasilitas->harga_sewa; // Default
+    /* =====================================================
+     * 3. AMBIL & OLAH JADWAL (URUT + HITUNG DURASI)
+     * ===================================================== */
+    $jadwals = Jadwal::where('fasilitas_id', $id)
+        ->whereDate('tanggal', $date)
+        ->orderBy('jam_mulai')
+        ->get()
+        ->map(function ($item) {
+            $start = \Carbon\Carbon::parse($item->jam_mulai);
+            $end   = \Carbon\Carbon::parse($item->jam_selesai);
 
-    $jadwals = Jadwal::where('fasilitas_id', $id)->whereDate('tanggal', $date)->get();
-    if($jadwals->isNotEmpty()) {
-       $minPrice = $jadwals->min('harga_per_slot') ?? $fasilitas->harga_sewa;
-       $maxPrice = $jadwals->max('harga_per_slot') ?? $fasilitas->harga_sewa;
+            // Logika Code 1: Pakai Minutes / 60 supaya support desimal (misal 1.5 jam)
+            // diffInHours cuma membulatkan ke integer (1 jam), jadi kita ubah.
+            $item->durasi_jam = $start->diffInMinutes($end) / 60;
+
+            return $item;
+        });
+
+    /* =====================================================
+     * 4. HITUNG RANGE HARGA (BADGE)
+     * ===================================================== */
+    $minPrice = $fasilitas->harga_sewa;
+    $maxPrice = $fasilitas->harga_sewa;
+
+    if ($jadwals->isNotEmpty()) {
+        $minPrice = $jadwals->min('harga_per_slot') ?? $fasilitas->harga_sewa;
+        $maxPrice = $jadwals->max('harga_per_slot') ?? $fasilitas->harga_sewa;
     }
 
-    return view('User.checkout', compact('fasilitas', 'date', 'minPrice', 'maxPrice'));
+    /* =====================================================
+     * 5. RETURN VIEW
+     * ===================================================== */
+    return view('User.checkout', compact(
+        'fasilitas',
+        'date',
+        'minPrice',
+        'maxPrice',
+        'jadwals'
+    ));
 }
+
 
     public function store(Request $request)
     {
@@ -130,8 +167,8 @@ class BookingController extends Controller
 
             DB::commit();
 
-            return redirect()->route('user.riwayat') // Pastikan route ini benar
-                ->with('success', 'Booking Berhasil Dikirim! <br>Admin akan mengecek bukti transfermu secepatnya.');
+            return redirect()->route('user.beranda') // Pastikan route ini benar
+                ->with('success', 'Booking Berhasil Dikirim! Admin akan mengecek bukti transfermu secepatnya.');
 
         } catch (\Exception $e) {
             DB::rollBack();

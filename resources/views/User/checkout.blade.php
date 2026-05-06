@@ -384,11 +384,6 @@
 @endpush
 
 @push('scripts')
-    {{-- Load Flatpickr & SweetAlert (Pastikan sudah include CDN di layout utama jika belum) --}}
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const fasilitasId = "{{ $fasilitas->id }}";
@@ -475,7 +470,7 @@
                                id="jadwal_${item.id}" class="jadwal-card-input ${statusClass}"
                                data-jam="${item.jam_mulai.substring(0,5)} - ${item.jam_selesai.substring(0,5)}"
                                data-harga="${hargaSlot}"
-                               data-durasi="${item.durasi_jam || 1}"
+                               data-durasi="${Number(item.durasi_jam || 1)}"
                                ${isDisabled ? 'disabled' : ''}
                                onchange="calculateTotal()"
                                ${onClickAttr}>
@@ -533,7 +528,7 @@
                 btnFinalSubmit.disabled = !this.checked;
             });
 
-            
+
 
         });
 

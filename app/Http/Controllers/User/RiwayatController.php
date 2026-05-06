@@ -106,70 +106,50 @@ class RiwayatController extends Controller
         return view('User.Riwayat.index', compact('checkouts', 'calendarData'));
     }
 
-    // 2. API Data Booking (JSON)
-    public function dataBooking(Request $request)
+    /**
+     * Menampilkan halaman riwayat (Blade View).
+     */
+    /**
+     * 1. Menampilkan Halaman View (Blade)
+     * Route: user.history
+     */
+    public function history()
     {
-        $query = Checkout::with(['jadwals.fasilitas', 'pemasukans'])
-            ->where('user_id', Auth::id());
-
-        // Filter Tanggal (Default Hari Ini jika tidak ada input)
-        if ($request->filled('date')) {
-            $date = $request->date;
-            // Filter jadwal yang memiliki tanggal tsb
-            $query->whereHas('jadwals', function($q) use ($date) {
-                $q->whereDate('tanggal', $date);
-            });
-        }
-
-        // Filter Status
-        if ($request->filled('status') && $request->status != 'all') {
-            $query->where('status', $request->status);
-        }
-
-        $data = $query->latest()->get()->map(function($item) {
-            // Ambil Fasilitas Pertama sebagai representasi
-            $firstJadwal = $item->jadwals->first();
-            return [
-                'id_booking' => 'BK-' . str_pad($item->id, 5, '0', STR_PAD_LEFT),
-                'fasilitas'  => $firstJadwal->fasilitas->nama_fasilitas ?? '-',
-                'lokasi'     => $firstJadwal->fasilitas->lokasi ?? '-',
-                'tanggal'    => Carbon::parse($firstJadwal->tanggal)->isoFormat('D MMM Y'),
-                'jam'        => substr($firstJadwal->jam_mulai, 0, 5) . ' - ' . substr($item->jadwals->last()->jam_selesai, 0, 5),
-                'total'      => 'Rp ' . number_format($item->total_bayar, 0, ',', '.'),
-                'status'     => $item->status,
-                'raw_id'     => $item->id // Untuk link detail
-            ];
-        });
-
-        return response()->json($data);
+        return view('user.riwayat');
     }
 
-    // 3. API Data Event (JSON)
-    public function dataEvent(Request $request)
+    /**
+     * 2. API List Booking (JSON)
+     * Route: user.api.riwayat.booking
+     */
+    public function getBookingData(Request $request)
     {
-        $query = PengajuanEvent::with('fasilitas')
-            ->where('id_user', Auth::id());
+        $user = Auth::user();
 
-        // Filter Nama Event
-        if ($request->filled('search')) {
-            $query->where('nama_event', 'like', '%' . $request->search . '%');
+        // Query Ambil Data
+        $query = Checkout::with(['jadwalUtama.fasilitas'])
+            ->where('user_id', $user->id)
+            ->latest();
+
+        // Logika Filter Tanggal (Range Datepicker)
+        if ($request->has('date') && !empty($request->date)) {
+            $dates = explode(' to ', $request->date);
+            if (count($dates) == 2) {
+                $query->whereBetween('created_at', [$dates[0] . ' 00:00:00', $dates[1] . ' 23:59:59']);
+            } else {
+                $query->whereDate('created_at', $dates[0]);
+            }
         }
 
-        // Filter Status
-        if ($request->filled('status') && $request->status != 'all') {
-            $query->where('status', $request->status);
-        }
-
-        $data = $query->latest()->get()->map(function($item) {
+        // Formatting JSON untuk Tabel
+        $data = $query->get()->map(function ($item) {
             return [
-                'id_pengajuan' => 'EV-' . str_pad($item->id, 5, '0', STR_PAD_LEFT),
-                'panitia'      => $item->nama_panitia,
-                'nama_event'   => $item->nama_event,
-                'tgl_event'    => Carbon::parse($item->tgl_mulai)->format('d/m') . ' - ' . Carbon::parse($item->tgl_selesai)->format('d/m/Y'),
-                'tgl_aju'      => Carbon::parse($item->created_at)->diffForHumans(),
-                'status'       => $item->status,
-                'alasan'       => $item->alasan_admin, // Untuk tooltip reject
-                'raw_id'       => $item->id
+                'id' => $item->id,
+                'fasilitas' => [
+                    'nama_fasilitas' => $item->jadwalUtama->fasilitas->nama_fasilitas ?? 'Fasilitas Tidak Ditemukan'
+                ],
+                'tanggal_indo' => Carbon::parse($item->created_at)->isoFormat('dddd, D MMMM Y'),
+                'status' => $item->status,
             ];
         });
 
@@ -177,16 +157,59 @@ class RiwayatController extends Controller
     }
 
     /**
-     * Print PDF
+     * 3. API List Event (JSON)
+     * Route: user.api.riwayat.event
      */
-    public function print($id)
+    public function getEventData(Request $request)
     {
-        // Gunakan 'jadwals'
-        $checkout = Checkout::with(['jadwals.fasilitas', 'user'])
-            ->where('user_id', Auth::id())
-            ->where('status', 'lunas')
-            ->findOrFail($id);
+        $user = Auth::user();
 
-        return view('User.Riwayat.cetak_tiket', compact('checkout'));
+        $query = PengajuanEvent::with(['fasilitas'])
+            ->where('id_user', $user->id)
+            ->latest();
+
+        // Logika Filter Tanggal (Berdasarkan Tgl Mulai Event)
+        if ($request->has('date') && !empty($request->date)) {
+            $dates = explode(' to ', $request->date);
+            if (count($dates) == 2) {
+                $query->whereBetween('tgl_mulai', [$dates[0], $dates[1]]);
+            } else {
+                $query->whereDate('tgl_mulai', $dates[0]);
+            }
+        }
+
+        // Formatting JSON untuk Tabel
+        $data = $query->get()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'nama_event' => $item->nama_event,
+                'fasilitas' => [
+                    'nama_fasilitas' => $item->fasilitas->nama_fasilitas ?? 'Fasilitas Tidak Ditemukan'
+                ],
+                'tgl_mulai_indo' => Carbon::parse($item->tgl_mulai)->isoFormat('D MMMM Y'),
+                'tgl_selesai_indo' => Carbon::parse($item->tgl_selesai)->isoFormat('D MMMM Y'),
+                'status' => $item->status,
+            ];
+        });
+
+        return response()->json($data);
     }
+
+    public function detailBooking($id)
+{
+    $checkout = Checkout::with(['jadwalUtama.fasilitas', 'jadwals', 'pemasukans'])
+        ->where('user_id', auth()->id())
+        ->findOrFail($id);
+
+    return view('User.riwayat_detail_booking', compact('checkout'));
+}
+
+public function detailEvent($id)
+{
+    $event = PengajuanEvent::with('fasilitas')
+        ->where('id_user', auth()->id())
+        ->findOrFail($id);
+
+    return view('User.riwayat_detail_event', compact('event'));
+}
 }

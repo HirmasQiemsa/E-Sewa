@@ -1,269 +1,352 @@
-@extends('User.component')
+@extends('layouts.landing')
+
 @section('content')
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0">Profile Pengguna</h1>
+    {{-- Header Section --}}
+    <div class="content-header bg-black shadow-sm mb-4" style="padding-top: 110px; padding-bottom: 20px;">
+        <div class="container bg-white p-4 rounded-lg shadow-sm">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="font-weight-bold text-dark" style="font-size: 1.8rem;">Pengaturan Profil</h1>
+                    <p class="text-muted mb-0">Kelola informasi pribadi dan keamanan akunmu di sini.</p>
+                </div>
+                <div class="col-md-6 text-md-right mt-3 mt-md-0">
+                    <a href="{{ route('user.beranda') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                        <i class="fas fa-arrow-left mr-2"></i> Kembali
+                    </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <section class="content">
-        <div class="container-fluid">
-            @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show">
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    {{ session('success') }}
+    <div class="container pb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+
+                {{-- Alert Messages --}}
+                @if (session('success'))
+                    <div class="alert alert-success shadow-sm mb-4 border-0">{{ session('success') }}</div>
+                @endif
+                @if (session('error'))
+                    <div class="alert alert-danger shadow-sm mb-4 border-0">{{ session('error') }}</div>
+                @endif
+
+                {{-- TAB NAVIGATION BUTTONS --}}
+                <div class="d-flex justify-content-center mb-5">
+                    <div class="custom-tab-container">
+                        <button type="button" onclick="switchTab('profile')" id="btn-profile" class="btn-tab active">
+                            <i class="fas fa-user mr-2"></i> Data Diri
+                        </button>
+
+                        <button type="button" onclick="switchTab('account')" id="btn-account" class="btn-tab">
+                            <i class="fas fa-shield-alt mr-2"></i> Akun & Keamanan
+                        </button>
+                    </div>
                 </div>
-            @endif
 
-            @if (session('error'))
-                <div class="alert alert-danger alert-dismissible fade show">
-                    <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    {{ session('error') }}
-                </div>
-            @endif
+                {{-- SINGLE FORM START --}}
+                <form action="{{ route('user.profile.update') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PUT')
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card card-primary card-outline">
-                        <div class="card-header">
-                            <h3 class="card-title"><i class="fas fa-user mr-2"></i> Biodata Diri</h3>
-                        </div>
+                    <div class="card border-0 shadow-lg rounded-lg overflow-hidden">
+                        <div class="card-body p-4 p-md-5">
 
-                        <form action="{{ route('user.profile.update') }}" method="POST" enctype="multipart/form-data">
-                            @csrf
-                            @method('PUT')
-                            <div class="card-body">
-                                <div class="text-center mb-4">
-                                    <div class="img-circle elevation-2 d-inline-block position-relative"
-                                        style="width: 150px; height: 150px; overflow: hidden; border: 3px solid #007bff;">
-                                        @if ($user->foto)
-                                            <img src="{{ asset('storage/' . $user->foto) }}" alt="Profile Photo"
-                                                class="img-fluid" style="object-fit: cover; width: 100%; height: 100%;">
-                                        @else
-                                            <img src="{{ asset('img/default-user.png') }}" alt="Profile Photo" class="img-fluid"
-                                                style="object-fit: cover; width: 100%; height: 100%;">
-                                        @endif
-                                    </div>
-                                    <div class="mt-3">
-                                        <div class="custom-file text-left" style="max-width: 80%; margin: 0 auto;">
-                                            <input type="file" name="foto" class="custom-file-input" id="foto" accept="image/*">
-                                            <label class="custom-file-label" for="foto">Ganti Foto</label>
+                            {{-- ================= TAB 1: DATA DIRI ================= --}}
+                            <div id="tab-profile" class="tab-section">
+                                <h5 class="font-weight-bold mb-4 text-dark border-bottom pb-2">Informasi Biodata</h5>
+
+                                <div class="row">
+                                    {{-- Foto Profil --}}
+                                    <div class="col-md-4 text-center mb-4">
+                                        <div class="position-relative d-inline-block">
+                                            <img src="{{ $user->foto ? asset('storage/' . $user->foto) : asset('images/default-user.png') }}"
+                                                class="img-fluid rounded-circle shadow-sm"
+                                                style="width:160px; height:160px; object-fit:cover; border: 4px solid #f8f9fa;">
+                                            <label for="foto-input"
+                                                class="position-absolute bg-primary text-white rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+                                                style="width: 40px; height: 40px; bottom: 10px; right: 10px; cursor: pointer;">
+                                                <i class="fas fa-camera"></i>
+                                            </label>
                                         </div>
+                                        <input type="file" id="foto-input" name="foto" class="d-none"
+                                            onchange="previewImage(this)">
+                                        <div class="mt-2 text-muted small">Klik ikon kamera untuk ubah</div>
                                         @error('foto')
-                                            <small class="text-danger d-block mt-1">{{ $message }}</small>
+                                            <small class="text-danger d-block">{{ $message }}</small>
                                         @enderror
                                     </div>
-                                </div>
 
-                                <div class="form-group">
-                                    <label>Nama Lengkap</label>
-                                    <input type="text" name="name" class="form-control"
-                                        value="{{ old('name', $user->name) }}" placeholder="Nama Lengkap" required>
-                                    @error('name') <small class="text-danger">{{ $message }}</small> @enderror
-                                </div>
+                                    {{-- Input Fields --}}
+                                    <div class="col-md-8">
+                                        <div class="form-group">
+                                            <label class="font-weight-bold small text-uppercase text-muted">Nama
+                                                Lengkap</label>
+                                            <input type="text" name="name"
+                                                class="form-control form-control-lg bg-light border-0"
+                                                value="{{ old('name', $user->name) }}" required>
+                                        </div>
 
-                                <div class="form-group">
-                                    <label>No. Handphone (WhatsApp)</label>
-                                    <input type="number" name="no_hp" class="form-control"
-                                        value="{{ old('no_hp', $user->no_hp) }}" placeholder="08..." required>
-                                    @error('no_hp') <small class="text-danger">{{ $message }}</small> @enderror
-                                </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="font-weight-bold small text-uppercase text-muted">No
+                                                        HP</label>
+                                                    <input type="text" name="no_hp"
+                                                        class="form-control form-control-lg bg-light border-0"
+                                                        value="{{ old('no_hp', $user->no_hp) }}" required>
+                                                    @error('no_hp')
+                                                        <small class="text-danger">{{ $message }}</small>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label class="font-weight-bold small text-uppercase text-muted">No KTP
+                                                        (Opsional)</label>
+                                                    <input type="text" name="no_ktp"
+                                                        class="form-control form-control-lg bg-light border-0"
+                                                        value="{{ old('no_ktp', $user->no_ktp) }}">
+                                                    @error('no_ktp')
+                                                        <small class="text-danger">{{ $message }}</small>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                        </div>
 
-                                <div class="form-group">
-                                    <label>No. KTP (NIK)</label>
-                                    <div class="input-group">
-                                        <input type="password" name="no_ktp" class="form-control" id="no_ktp"
-                                            value="{{ old('no_ktp', $user->no_ktp) }}" placeholder="16 digit NIK">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-outline-secondary" type="button" id="toggleKTP">
-                                                <i class="fas fa-eye" id="ktpIcon"></i>
-                                            </button>
+                                        <div class="form-group">
+                                            <label class="font-weight-bold small text-uppercase text-muted">Alamat</label>
+                                            <textarea name="alamat" class="form-control form-control-lg bg-light border-0" rows="3" required>{{ old('alamat', $user->alamat) }}</textarea>
                                         </div>
                                     </div>
-                                    @error('no_ktp') <small class="text-danger">{{ $message }}</small> @enderror
-                                </div>
-
-                                <div class="form-group">
-                                    <label>Alamat Lengkap</label>
-                                    <textarea name="alamat" class="form-control" rows="3" placeholder="Jalan, RT/RW, Kelurahan...">{{ old('alamat', $user->alamat) }}</textarea>
-                                    @error('alamat') <small class="text-danger">{{ $message }}</small> @enderror
                                 </div>
                             </div>
 
-                            <div class="card-footer bg-white">
-                                <button type="submit" class="btn btn-primary btn-block shadow-sm">
-                                    <i class="fas fa-save mr-1"></i> Simpan Perubahan Profil
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                            {{-- ================= TAB 2: AKUN & PASSWORD ================= --}}
+                            <div id="tab-account" class="tab-section" style="display: none;">
+                                <h5 class="font-weight-bold mb-4 text-dark border-bottom pb-2">Kredensial Login</h5>
 
-                <div class="col-md-6">
-                    <div class="card card-dark card-outline card-tabs">
-                        <div class="card-header p-0 pt-1 border-bottom-0">
-                            <ul class="nav nav-tabs" id="custom-tabs-three-tab" role="tablist">
-                                <li class="nav-item">
-                                    <a class="nav-link active" id="tab-akun" data-toggle="pill" href="#content-akun" role="tab">
-                                        <i class="fas fa-user-cog mr-1"></i> Akun Login
-                                    </a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" id="tab-password" data-toggle="pill" href="#content-password" role="tab">
-                                        <i class="fas fa-key mr-1"></i> Ganti Password
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div class="card-body">
-                            <div class="tab-content" id="custom-tabs-three-tabContent">
-                                <div class="tab-pane fade show active" id="content-akun" role="tabpanel">
-                                    <form action="{{ route('user.profile.account') }}" method="POST">
-                                        @csrf
-                                        @method('PUT')
-                                        <div class="form-group">
-                                            <label>Username</label>
-                                            <input type="text" name="username" class="form-control"
-                                                value="{{ old('username', $user->username) }}" required>
-                                            @error('username') <small class="text-danger">{{ $message }}</small> @enderror
+                                <div class="bg-light p-4 rounded-lg mb-4">
+                                    <h6 class="text-primary font-weight-bold mb-3"><i class="fas fa-id-card mr-2"></i>Data
+                                        Akun</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Username</label>
+                                                <input type="text" name="username"
+                                                    class="form-control border-0 shadow-sm"
+                                                    value="{{ old('username', $user->username) }}" required>
+                                                @error('username')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
+                                            </div>
                                         </div>
-
-                                        <div class="form-group">
-                                            <label>Email</label>
-                                            <input type="email" name="email" class="form-control"
-                                                value="{{ old('email', $user->email) }}" required>
-                                            @error('email') <small class="text-danger">{{ $message }}</small> @enderror
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Email</label>
+                                                <input type="email" name="email"
+                                                    class="form-control border-0 shadow-sm"
+                                                    value="{{ old('email', $user->email) }}" required>
+                                                @error('email')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
+                                            </div>
                                         </div>
-
-                                        <div class="alert alert-light border">
-                                            <small><i class="fas fa-info-circle text-info"></i> Username digunakan untuk login. Pastikan unik.</small>
-                                        </div>
-
-                                        <button type="submit" class="btn btn-dark btn-block">
-                                            Update Akun
-                                        </button>
-                                    </form>
+                                    </div>
                                 </div>
 
-                                <div class="tab-pane fade" id="content-password" role="tabpanel">
-                                    <form action="{{ route('user.profile.password') }}" method="POST">
-                                        @csrf
-                                        @method('PUT')
-                                        <div class="form-group">
-                                            <label>Password Saat Ini</label>
-                                            <div class="input-group">
-                                                <input type="password" name="current_password" class="form-control" id="current_password" required>
-                                                <div class="input-group-append">
-                                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="current_password">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
+                                <div class="bg-white border p-4 rounded-lg">
+                                    <h6 class="text-danger font-weight-bold mb-3"><i class="fas fa-lock mr-2"></i>Ubah
+                                        Password</h6>
+                                    <p class="small text-muted mb-3">Kosongkan jika tidak ingin mengubah password.</p>
+
+                                    {{-- 1. Password Lama --}}
+                                    <div class="form-group">
+                                        <label>Password Lama</label>
+                                        <div class="input-group">
+                                            <input type="password" name="current_password" id="current_password"
+                                                class="form-control bg-light border-right-0"
+                                                placeholder="Wajib diisi jika ganti password">
+                                            <div class="input-group-append">
+                                                <span class="input-group-text bg-light border-left-0"
+                                                    onclick="togglePassword('current_password')" style="cursor: pointer;">
+                                                    <i class="fas fa-eye" id="icon-current_password"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        @error('current_password')
+                                            <small class="text-danger">{{ $message }}</small>
+                                        @enderror
+                                    </div>
+
+                                    <div class="row">
+                                        {{-- 2. Password Baru --}}
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Password Baru</label>
+                                                <div class="input-group">
+                                                    <input type="password" name="password" id="new_password"
+                                                        class="form-control bg-light border-right-0">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-light border-left-0"
+                                                            onclick="togglePassword('new_password')"
+                                                            style="cursor: pointer;">
+                                                            <i class="fas fa-eye" id="icon-new_password"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                @error('password')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        {{-- 3. Konfirmasi Password --}}
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Konfirmasi Password Baru</label>
+                                                <div class="input-group">
+                                                    <input type="password" name="password_confirmation"
+                                                        id="confirm_password"
+                                                        class="form-control bg-light border-right-0">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text bg-light border-left-0"
+                                                            onclick="togglePassword('confirm_password')"
+                                                            style="cursor: pointer;">
+                                                            <i class="fas fa-eye" id="icon-confirm_password"></i>
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            @error('current_password') <small class="text-danger">{{ $message }}</small> @enderror
                                         </div>
-
-                                        <hr>
-
-                                        <div class="form-group">
-                                            <label>Password Baru</label>
-                                            <div class="input-group">
-                                                <input type="password" name="password" class="form-control" id="password" required>
-                                                <div class="input-group-append">
-                                                    <button class="btn btn-outline-secondary toggle-password" type="button" data-target="password">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            @error('password') <small class="text-danger">{{ $message }}</small> @enderror
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label>Konfirmasi Password Baru</label>
-                                            <input type="password" name="password_confirmation" class="form-control" required>
-                                        </div>
-
-                                        <div class="alert alert-warning py-2">
-                                            <small><i class="fas fa-lock"></i> Minimal 6 karakter.</small>
-                                        </div>
-
-                                        <button type="submit" class="btn btn-danger btn-block">
-                                            Ubah Password
-                                        </button>
-                                    </form>
+                                    </div>
                                 </div>
                             </div>
+
+                        </div>
+
+                        {{-- SINGLE FOOTER BUTTON --}}
+                        <div class="card-footer bg-white p-4 border-top-0 text-right">
+                            <button type="submit"
+                                class="btn btn-primary btn-lg rounded-pill px-5 shadow-sm font-weight-bold">
+                                <i class="fas fa-save mr-2"></i> Simpan Perubahan
+                            </button>
                         </div>
                     </div>
-                </div>
+                </form>
+                {{-- SINGLE FORM END --}}
+
             </div>
         </div>
-    </section>
+    </div>
 
+    {{-- Script Langsung Disatuin Disini (Tanpa @push) --}}
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // 1. Logic Nama File & Preview Foto
-            const fileInput = document.getElementById('foto');
-            if (fileInput) {
-                fileInput.addEventListener('change', function() {
-                    // Update Label
-                    const fileName = this.value.split('\\').pop();
-                    const label = this.nextElementSibling;
-                    if (label) label.innerHTML = fileName || 'Ganti Foto';
+        // Ganti fungsi switchTab yang lama dengan yang ini:
 
-                    // Preview Image
-                    if (this.files && this.files[0]) {
-                        const reader = new FileReader();
-                        // Cari img di dalam card-body terdekat
-                        const img = this.closest('.card-body').querySelector('.img-circle img');
-
-                        reader.onload = function(e) {
-                            if(img) img.src = e.target.result;
-                        }
-                        reader.readAsDataURL(this.files[0]);
-                    }
-                });
-            }
-
-            // 2. Toggle Visibility (Mata) - Generic
-            // Bisa dipakai untuk KTP maupun Password
-            document.querySelectorAll('#toggleKTP, .toggle-password').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    // Cek apakah tombol ini untuk KTP atau Password
-                    let targetInput;
-
-                    if(this.id === 'toggleKTP') {
-                        targetInput = document.getElementById('no_ktp');
-                    } else {
-                        const targetId = this.getAttribute('data-target');
-                        targetInput = document.getElementById(targetId);
-                    }
-
-                    const icon = this.querySelector('i');
-
-                    if (targetInput.type === 'password') {
-                        targetInput.type = 'text';
-                        icon.classList.replace('fa-eye', 'fa-eye-slash');
-                    } else {
-                        targetInput.type = 'password';
-                        icon.classList.replace('fa-eye-slash', 'fa-eye');
-                    }
-                });
+        function switchTab(tabName) {
+            // 1. Logic Hide/Show Form
+            document.querySelectorAll('.tab-section').forEach(el => {
+                el.style.opacity = '0'; // Efek fade out dikit
+                setTimeout(() => el.style.display = 'none', 200); // Tunggu animasi
             });
 
-            // 3. Tab Persistence (Agar saat reload tetap di tab terakhir)
-            $('a[data-toggle="pill"]').on('shown.bs.tab', function (e) {
-                localStorage.setItem('activeProfileTab', $(e.target).attr('href'));
+            // Tampilkan tab baru dengan sedikit delay biar smooth
+            setTimeout(() => {
+                let activeTab = document.getElementById('tab-' + tabName);
+                activeTab.style.display = 'block';
+                // Hack sedikit biar transisi opacity jalan (browser butuh waktu render display:block dulu)
+                setTimeout(() => activeTab.style.opacity = '1', 50);
+            }, 200);
+
+            // 2. Logic Ganti Style Tombol
+            // Reset semua tombol ke style "mati"
+            document.querySelectorAll('.btn-tab').forEach(btn => {
+                btn.classList.remove('active');
             });
 
-            const activeTab = localStorage.getItem('activeProfileTab');
-            if(activeTab){
-                $('.nav-tabs a[href="' + activeTab + '"]').tab('show');
+            // Set tombol yang diklik jadi "hidup"
+            document.getElementById('btn-' + tabName).classList.add('active');
+        }
+        // 2. Logic Preview Foto (Biar pas upload langsung keliatan fotonya)
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    input.previousElementSibling.querySelector('img').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
             }
-        });
+        }
+
+        // 3. Logic Toggle Password (Mata)
+        function togglePassword(fieldId) {
+            const input = document.getElementById(fieldId);
+            const icon = document.getElementById('icon-' + fieldId);
+
+            if (!input || !icon) return;
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
     </script>
 @endsection
+
+@push('css')
+    <style>
+        /* Container pembungkus tombol (Background abu-abu lembut) */
+        .custom-tab-container {
+            background-color: #f1f3f5;
+            /* Abu-abu muda modern */
+            padding: 6px;
+            border-radius: 50rem;
+            /* Bikin lonjong (Pill shape) */
+            display: inline-flex;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+            /* Shadow kedalam biar kesan 'tenggelam' */
+        }
+
+        /* Style dasar tombol */
+        .btn-tab {
+            border: none;
+            border-radius: 50rem;
+            padding: 10px 32px;
+            /* Padding kiri-kanan lebih lega */
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #868e96;
+            /* Warna text abu-abu kalau gak aktif */
+            background: transparent;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            /* Animasi smooth */
+            position: relative;
+        }
+
+        /* Efek Hover pas mouse lewat (sebelum diklik) */
+        .btn-tab:hover:not(.active) {
+            color: #343a40;
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Style tombol AKTIF (Hitam Elegan) */
+        .btn-tab.active {
+            background-color: #212529;
+            /* Hitam pekat */
+            color: #ffffff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            /* Shadow bayangan biar melayang */
+            transform: scale(1.02);
+            /* Sedikit membesar biar "pop" */
+        }
+
+        /* Fokus outline dihilangkan biar rapi */
+        .btn-tab:focus {
+            outline: none;
+        }
+    </style>
+@endpush

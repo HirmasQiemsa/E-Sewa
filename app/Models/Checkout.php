@@ -14,7 +14,7 @@ class Checkout extends Model
         'user_id',
         'jadwals_id', // ID Jadwal Utama (Referensi)
         'total_bayar',
-        'status',     // pending, lunas, batal (HAPUS: kompensasi)
+        'status',     // pending, lunas, batal 
     ];
 
     public function user() {

@@ -15,36 +15,37 @@ class PengajuanEvent extends Model
     protected $fillable = [
         'id_user',
         'id_fasilitas',
-        'nama_panitia',
         'nama_event',
-        'deskripsi_event',
+        'nama_panitia',
         'tgl_mulai',
         'tgl_selesai',
+        'deskripsi_event',
         'file_surat',
         'status',
-        'alasan_admin',
     ];
 
     protected $casts = [
-        'tgl_mulai' => 'date',
+        'tgl_mulai'   => 'date',
         'tgl_selesai' => 'date',
     ];
 
-    // Relasi ke User
+    /* ================= RELATION ================= */
+
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user');
     }
 
-    // Relasi ke Fasilitas
     public function fasilitas()
     {
         return $this->belongsTo(Fasilitas::class, 'id_fasilitas');
     }
 
-    // Helper untuk cek apakah event masih aktif/berjalan
+    /* ================= HELPER ================= */
+
     public function isOngoing()
     {
-        return $this->status === 'approved' && $this->tgl_selesai->greaterThanOrEqualTo(Carbon::today());
+        return $this->status === 'approved'
+            && $this->tgl_selesai->greaterThanOrEqualTo(Carbon::today());
     }
 }

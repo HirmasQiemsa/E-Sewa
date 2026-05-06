@@ -377,10 +377,10 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a href="#"
-                                    class="nav-link ">
-                                    <i class="nav-icon fas fa-comments"></i>
-                                    <p>Pesan Masyarakat</p>
+                                <a href="{{ route('admin.fasilitas.validasi.index') }}"
+                                    class="nav-link {{ request()->routeIs('admin.fasilitas.pengajuan.*') ? 'active' : '' }}">
+                                    <i class="nav-icon fas fa-check-circle"></i>
+                                    <p>Validasi Pengajuan</p>
                                 </a>
                             </li>
                         @endif

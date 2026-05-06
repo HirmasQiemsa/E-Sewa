@@ -31,18 +31,7 @@
             <div class="card-body">
                 <form action="{{ route('admin.keuangan.verifikasi.index') }}" method="GET">
                     <div class="row">
-                        {{-- <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Status Pembayaran</label>
-                                <select name="status" class="form-control">
-                                    <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>Semua Status</option>
-                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu Verifikasi (Pending)</option>
-                                    <option value="kompensasi" {{ request('status') == 'kompensasi' ? 'selected' : '' }}>DP / Kompensasi</option>
-                                    <option value="lunas" {{ request('status') == 'lunas' ? 'selected' : '' }}>Lunas</option>
-                                    <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
-                                </select>
-                            </div>
-                        </div> --}}
+                    
                         <div class="col-md-10">
                             <div class="form-group">
                                 <label>Cari (Kode / Nama User)</label>

@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\ProfileController as SharedProfile;
 use App\Http\Controllers\Admin\Fasilitas\FasilitasController;
 use App\Http\Controllers\Admin\Fasilitas\JadwalController;
 use App\Http\Controllers\Admin\Fasilitas\BookingController;
+use App\Http\Controllers\Admin\Fasilitas\ValidasiController;
 
 // Admin Pembayaran
 use App\Http\Controllers\Admin\Pembayaran\VerifikasiController;
@@ -47,7 +48,7 @@ use App\Http\Controllers\Admin\Super\LaporanController;
 // 1. GUEST ROUTES (Landing Page & Auth)
 // ============================================================================
 
-Route::get('/', [BerandaController::class, 'index'])->name('landing');
+Route::get('/', [BerandaController::class, 'index'])->name('beranda');
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'login'])->name('login');
@@ -92,22 +93,30 @@ Route::middleware(['auth:web', 'role:user'])->name('user.')->group(function () {
 
     // API Helper untuk Cek Jadwal (AJAX)
     Route::get('/api/check-jadwal/{fasilitasId}/{tanggal}', [UserCheckoutController::class, 'checkJadwal']);
+    Route::get('/api/check-sesi/{fasilitasId}/{tanggal}', [UserCheckoutController::class, 'checkSesi']);
 
     // Riwayat Pemesanan
-    Route::get('api/riwayat/booking', [UserRiwayatController::class, 'dataBooking'])->name('api.riwayat.booking');
-    Route::get('api/riwayat/event', [UserRiwayatController::class, 'dataEvent'])->name('api.riwayat.event');
-    Route::get('/riwayat', [UserRiwayatController::class, 'index'])->name('riwayat');
+    // 1. Route buat nampilin Halaman (View)
+    Route::get('/riwayat', [UserRiwayatController::class, 'history'])->name('history');
+    // 2. Route API buat data Booking (AJAX)
+    Route::get('/api/riwayat/booking', [UserRiwayatController::class, 'getBookingData'])->name('api.riwayat.booking');
+    // 3. Route API buat data Event (AJAX)
+    Route::get('/api/riwayat/event', [UserRiwayatController::class, 'getEventData'])->name('api.riwayat.event');
+    // Detail Riwayat (GET)
+    Route::get('/user/riwayat/booking/{id}', [UserRiwayatController::class, 'detailBooking'])->name('riwayat.detail.booking');
+    Route::get('/user/riwayat/event/{id}', [UserRiwayatController::class, 'detailEvent'])->name('riwayat.detail.event');
+    Route::get('/history', [UserRiwayatController::class, 'index'])->name('riwayat');
 
     // Pengajuan Event
     Route::prefix('pengajuan')->name('pengajuan.')->group(function () {
-        Route::post('/pengajuan', [PengajuanController::class, 'index'])->name('index');
+        Route::get('/', [PengajuanController::class, 'index'])->name('index');
         Route::post('/pengajuan/store', [PengajuanController::class, 'store'])->name('store');
     });
 
     // Profile User
     Route::prefix('profile')->name('profile.')->group(function () {
         Route::get('/', [UserProfileController::class, 'index'])->name('index');
-        Route::put('/update', [UserProfileController::class, 'updateProfile'])->name('update');
+        Route::put('/update', [UserProfileController::class, 'update'])->name('update');
         Route::put('/account', [UserProfileController::class, 'updateAccount'])->name('account');
         Route::put('/password', [UserProfileController::class, 'updatePassword'])->name('password');
     });
@@ -187,6 +196,14 @@ Route::middleware(['auth:admin'])->prefix('admin')->name('admin.')->group(functi
             Route::get('/{id}', 'show')->name('detail');
             Route::put('/{id}/cancel', 'cancelBooking')->name('cancel');
             Route::put('/{id}/update-status', 'updateStatus')->name('update-status');
+        });
+
+        // VALIDASI PENGAJUAN EVENT DARI MASYARAKAT
+        Route::controller(ValidasiController::class)->prefix('validasi')->name('validasi.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/{id}', 'show')->name('show');
+            Route::put('/{id}/approve', 'validasi')->name('approve');
+            Route::put('/{id}/reject', 'tolak')->name('reject');
         });
     });
 

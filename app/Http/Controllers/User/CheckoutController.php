@@ -32,7 +32,7 @@ class CheckoutController extends Controller
 
         // Hitung durasi untuk tampilan history
         foreach ($checkouts as $checkout) {
-            $checkout->totalDurasi = $checkout->jadwals->count(); 
+            $checkout->totalDurasi = $checkout->jadwals->count();
         }
 
         return view('User.Riwayat.index', compact('fasilitas', 'checkouts'));
@@ -158,4 +158,30 @@ class CheckoutController extends Controller
             ->get();
         return response()->json($jadwals);
     }
+    //
+    public function checkSesi($id, $date)
+{
+    $jadwals = Jadwal::where('fasilitas_id', $id)
+        ->whereDate('tanggal', $date)
+        ->orderBy('jam_mulai')
+        ->get()
+        ->map(function ($item) {
+
+            // --- INI YANG HARUS DITAMBAHKAN ---
+            $start = \Carbon\Carbon::parse($item->jam_mulai);
+            $end   = \Carbon\Carbon::parse($item->jam_selesai);
+
+            // Inject durasi ke JSON response
+            $item->durasi_jam = max(1, $end->diffInHours($start));
+            // ----------------------------------
+
+            // (Opsional) Inject harga fix juga kalau perlu
+            $item->harga_per_slot = $item->harga_per_slot ?? $item->fasilitas->harga_sewa ?? 0;
+
+            return $item;
+        });
+
+    return response()->json($jadwals);
+}
+
 }

@@ -85,16 +85,16 @@
                                     <th class="text-right bg-light">Rp {{ number_format($checkout->total_bayar, 0, ',', '.') }}</th>
                                 </tr>
                                 <tr>
-                                    <th colspan="2" class="text-right text-success">Sudah Dibayar (DP):</th>
+                                    <th colspan="2" class="text-right text-success">Sudah Dibayar:</th>
                                     <th class="text-right text-success">
                                         {{-- Calculate DP (50%) --}}
-                                        Rp {{ number_format($checkout->total_bayar * 0.5, 0, ',', '.') }}
+                                        Rp {{ number_format($checkout->total_bayar , 0, ',', '.') }}
                                     </th>
                                 </tr>
                                 <tr style="font-size: 1.1rem">
-                                    <th colspan="2" class="text-right">Sisa Pelunasan:</th>
+                                    <th colspan="2" class="text-right">Sisa Kekurangan:</th>
                                     <th class="text-right bg-warning">
-                                        Rp {{ number_format($checkout->total_bayar * 0.5, 0, ',', '.') }}
+                                        Rp {{ number_format($checkout->total_bayar - ($checkout->total_bayar), 0, ',', '.') }}
                                     </th>
                                 </tr>
                             </tfoot>
@@ -165,7 +165,7 @@
                     <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <p>Konfirmasi bahwa dana pelunasan sebesar <b>Rp {{ number_format($checkout->total_bayar * 0.5, 0, ',', '.') }}</b> telah diterima?</p>
+                    <p>Konfirmasi bahwa dana pelunasan sebesar <b>Rp {{ number_format($checkout->total_bayar , 0, ',', '.') }}</b> telah diterima?</p>
                     <div class="form-group">
                         <label>Catatan Admin (Opsional)</label>
                         <textarea name="catatan" class="form-control" rows="2" placeholder="Contoh: Dana masuk ke BCA"></textarea>
