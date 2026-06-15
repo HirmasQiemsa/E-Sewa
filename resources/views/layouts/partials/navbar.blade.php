@@ -56,7 +56,7 @@
                     {{-- Lokasi Riwayat yang nantinya jadi notifikasi --}}
                     {{-- @future: Pindahkan ke sistem notifikasi --}}
                     <li class="nav-item">
-                        <a href="{{ route('user.history') }}" class="nav-link active-border">Riwayat</a>
+                        <a href="{{ route('user.riwayat') }}" class="nav-link active-border">Riwayat</a>
                     </li>
 
                     <li class="nav-item">

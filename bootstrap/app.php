@@ -16,10 +16,6 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
 
-        // Middleware Global
-        // Laravel 11 biasanya sudah otomatis memuat StartSession dll.
-        // Cek dulu apakah perlu di-append manual. Jika session jalan, hapus blok ini.
-
         $middleware->append([
             \Illuminate\Session\Middleware\StartSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,

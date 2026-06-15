@@ -223,9 +223,9 @@
 
                                 {{-- LOGIKA TOMBOL DINAMIS --}}
                                 @if (
-                                    !$lastPengajuan ||
-                                        $lastPengajuan->status === 'rejected' ||
-                                        ($lastPengajuan->status === 'approved' && $lastPengajuan->tgl_selesai->lessThan($today)))
+                                    empty($lastPengajuan) ||
+                                    $lastPengajuan->status === 'ditolak' ||
+                                    ($lastPengajuan->status === 'disetujui' && $lastPengajuan->tgl_selesai->isPast()))
                                     {{-- Kondisi: Belum pernah mengajukan, atau ditolak, atau sudah selesai --}}
                                     <a href="{{ route('user.pengajuan.index') }}"
                                         class="btn btn-light btn-lg rounded-pill font-weight-bold text-danger px-5 shadow-sm">
@@ -239,9 +239,9 @@
                                         <i class="fas fa-hourglass-half mr-2"></i> Tunggu Konfirmasi
                                     </button>
 
-                                @elseif($lastPengajuan->status === 'approved' && $lastPengajuan->tgl_selesai->greaterThanOrEqualTo($today))
+                                @elseif($lastPengajuan->status === 'disetujui' && !$lastPengajuan->tgl_selesai->isPast())
                                     {{-- Kondisi: Disetujui dan event belum berakhir --}}
-                                    <a href="{{ route('user.history') }}" onclick="loadRiwayat('event')"
+                                    <a href="{{ route('user.riwayat') }}" onclick="loadRiwayat('event')"
                                         class="btn btn-success btn-lg rounded-pill font-weight-bold text-white px-5 shadow-sm">
                                         <i class="fas fa-calendar-check mr-2"></i> Event Saya
                                     </a>

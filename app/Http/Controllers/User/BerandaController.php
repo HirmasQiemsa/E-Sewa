@@ -22,31 +22,20 @@ class BerandaController extends Controller
         $today        = $now->format('Y-m-d');
         $currentTime  = $now->format('H:i:s');
 
-        $selectedDate = Carbon::parse(
-            $request->query('date', $today)
-        )->format('Y-m-d');
+        $selectedDate = $request->query('date', $today);
 
         /* =====================================================
          * 2. LOGIKA HITUNG SLOT (PURE – TANPA USER)
          * ===================================================== */
         $fasilitas = Fasilitas::where('ketersediaan', 'aktif')
-            ->withCount(['jadwals' => function ($query) use (
-                $selectedDate,
-                $today,
-                $currentTime
-            ) {
+            ->withCount(['jadwals' => function ($query) use ($selectedDate, $today, $currentTime) {
                 $query->whereDate('tanggal', $selectedDate)
                       ->where('status', 'tersedia')
                       ->when($selectedDate === $today, function ($q) use ($currentTime) {
-                          // SLOT YANG JAM-NYA SUDAH LEWAT TIDAK DIHITUNG
                           $q->where('jam_mulai', '>', $currentTime);
                       });
             }])
-            ->with(['jadwals' => function ($query) use (
-                $selectedDate,
-                $today,
-                $currentTime
-            ) {
+            ->with(['jadwals' => function ($query) use ($selectedDate, $today, $currentTime) {
                 $query->whereDate('tanggal', $selectedDate)
                       ->where('status', 'tersedia')
                       ->when($selectedDate === $today, function ($q) use ($currentTime) {
@@ -56,103 +45,68 @@ class BerandaController extends Controller
             }])
             ->get()
             ->map(function ($f) use ($selectedDate, $today) {
-
-                /* ============================
-                 * SLOT RESULT
-                 * ============================ */
-                $f->sisa_slot = $f->jadwals_count;
-
-                /* ============================
-                 * STATUS UI (SAMA DENGAN GUEST)
-                 * ============================ */
-                if ($selectedDate < $today) {
-                    $f->status_type = 'locked';
-                } elseif ($f->sisa_slot > 0) {
-                    $f->status_type = 'available';
-                } else {
-                    $f->status_type = 'full';
-                }
-
-                /* ============================
-                 * UI METADATA
-                 * ============================ */
-                switch ($f->status_type) {
-                    case 'available':
-                        $f->box_class   = 'border-success';
-                        $f->status_text = 'Buka';
-                        $f->status_icon = 'fa-check-circle';
-                        break;
-
-                    case 'full':
-                        $f->box_class   = 'border-danger';
-                        $f->status_text = 'Habis';
-                        $f->status_icon = 'fa-times-circle';
-                        break;
-
-                    default:
-                        $f->box_class   = 'border-secondary';
-                        $f->status_text = 'Tutup';
-                        $f->status_icon = 'fa-lock';
-                        break;
-                }
-
-                return $f;
+                return $this->formatFacilityUi($f, $selectedDate, $today);
             });
 
         /* =====================================================
-        * 3. LOGIKA KHUSUS USER LOGIN (OPTIMIZED)
+        * 3. LOGIKA USER DATA (ALWAYS INITIALIZED)
         * ===================================================== */
-        $userSpecificData = [
+        $viewData = [
+            'selectedDate'    => $selectedDate,
+            'fasilitas'       => $fasilitas,
             'pendingBooking'  => null,
-            'userHistoryData' => collect([]), // Pakai collection kosong agar safe di view
+            'userHistoryData' => collect([]),
             'lastPengajuan'   => null,
-            'activeTab'       => $request->query('tab', 'booking'), // Default ke tab booking
+            'activeTab'       => $request->query('tab', 'booking'),
         ];
 
         if (Auth::check()) {
             $userId = Auth::id();
-
-            // 1. Booking yang belum selesai (Peringatan Kompensasi)
-            $userSpecificData['pendingBooking'] = Checkout::with(['jadwals.fasilitas'])
-                ->where('user_id', $userId)
+            $viewData['pendingBooking'] = Checkout::where('user_id', $userId)
                 ->where('status', 'kompensasi')
-                ->latest()
-                ->first();
+                ->with('jadwals.fasilitas')
+                ->latest()->first();
 
-            // 2. Pengajuan event terakhir (Untuk status banner)
-            $userSpecificData['lastPengajuan'] = PengajuanEvent::where('id_user', $userId)
-                ->latest()
-                ->first();
+            $viewData['lastPengajuan'] = PengajuanEvent::where('id_user', $userId)
+                ->latest()->first();
 
-            // 3. Logika Filter Riwayat Berdasarkan Tab
-            if ($userSpecificData['activeTab'] === 'event') {
-                // AMBIL RIWAYAT EVENT
-                $userSpecificData['userHistoryData'] = PengajuanEvent::where('id_user', $userId)
-                    ->whereIn('status', ['disetujui', 'selesai', 'ditolak']) // Sesuaikan status event-mu
-                    ->latest()
-                    ->get()
-                    ->groupBy(function($item) {
-                        return $item->tanggal_event->format('Y-m-d'); // Pastikan tgl_event di-cast ke Carbon
-                    });
-            } else {
-                // AMBIL RIWAYAT BOOKING REGULER
-                $userSpecificData['userHistoryData'] = Jadwal::whereHas('checkouts', function ($q) use ($userId) {
-                        $q->where('user_id', $userId)
-                        ->whereIn('status', ['lunas', 'selesai']);
-                    })
-                    ->with('fasilitas')
-                    ->latest('tanggal')
-                    ->get()
-                    ->groupBy('tanggal');
-            }
+            $viewData['userHistoryData'] = $this->getUserHistory($userId, $viewData['activeTab']);
         }
 
-        /* =====================================================
-         * 4. RETURN VIEW
-         * ===================================================== */
-        return view('welcome', array_merge([
-            'selectedDate' => $selectedDate,
-            'fasilitas'    => $fasilitas,
-        ], $userSpecificData));
+        return view('welcome', $viewData);
+    }
+
+    private function formatFacilityUi($f, $selectedDate, $today)
+    {
+        $f->sisa_slot = $f->jadwals_count;
+
+        if ($selectedDate < $today) {
+            $f->status_type = 'locked';
+        } elseif ($f->sisa_slot > 0) {
+            $f->status_type = 'available';
+        } else {
+            $f->status_type = 'full';
+        }
+
+        $config = [
+            'available' => ['border-success', 'Buka', 'fa-check-circle'],
+            'full'      => ['border-danger', 'Habis', 'fa-times-circle'],
+            'locked'    => ['border-secondary', 'Tutup', 'fa-lock']
+        ];
+
+        [$f->box_class, $f->status_text, $f->status_icon] = $config[$f->status_type] ?? $config['locked'];
+        return $f;
+    }
+
+    private function getUserHistory($userId, $tab)
+    {
+        if ($tab === 'event') {
+            return PengajuanEvent::where('id_user', $userId)
+                ->whereIn('status', ['disetujui', 'selesai', 'ditolak'])
+                ->latest()->get()->groupBy(fn($item) => $item->tgl_mulai->format('Y-m-d'));
+        }
+
+        return Jadwal::whereHas('checkouts', fn($q) => $q->where('user_id', $userId)->whereIn('status', ['lunas', 'selesai']))
+            ->with('fasilitas')->latest('tanggal')->get()->groupBy('tanggal');
     }
 }

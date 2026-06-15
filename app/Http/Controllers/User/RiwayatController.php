@@ -111,7 +111,7 @@ class RiwayatController extends Controller
      */
     /**
      * 1. Menampilkan Halaman View (Blade)
-     * Route: user.history
+     * Route: user.riwayat
      */
     public function history()
     {

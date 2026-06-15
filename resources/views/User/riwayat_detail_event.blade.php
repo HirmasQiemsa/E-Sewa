@@ -14,7 +14,7 @@
                     </p>
                 </div>
                 <div class="col-md-6 text-md-right mt-3 mt-md-0">
-                    <a href="{{ route('user.history') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                    <a href="{{ route('user.riwayat') }}" class="btn btn-outline-secondary rounded-pill px-4">
                         <i class="fas fa-arrow-left mr-2"></i> Kembali
                     </a>
                 </div>
