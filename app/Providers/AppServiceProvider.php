@@ -41,11 +41,11 @@ class AppServiceProvider extends ServiceProvider
         ]);
 
         // ✅ foreign key constraint khusus untuk SQLite
-        if (DB::getDriverName() === 'sqlite') {
-        DB::statement('PRAGMA foreign_keys = ON;');
-        }
+        // if (DB::getDriverName() === 'sqlite') {
+        // DB::statement('PRAGMA foreign_keys = ON;');
+        // }
 
-        // Daftarkan middleware role
+        // Daftarkan middleware role Versi Lama
         // $this->app->router->aliasMiddleware('admin', AdminMiddleware::class);
         // $this->app->router->aliasMiddleware('user', UserMiddleware::class);
     }
