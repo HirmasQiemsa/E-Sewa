@@ -5,7 +5,6 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
@@ -40,10 +39,8 @@ class AppServiceProvider extends ServiceProvider
             // Tambahkan middleware API lain jika perlu
         ]);
 
-        // ✅ foreign key constraint khusus untuk SQLite
-        if (DB::getDriverName() === 'sqlite') {
-        DB::statement('PRAGMA foreign_keys = ON;');
-        }
+        // Foreign key constraints for SQLite are handled by
+        // 'foreign_key_constraints' => true in config/database.php
 
         // Daftarkan middleware role
         // $this->app->router->aliasMiddleware('admin', AdminMiddleware::class);
