@@ -5,8 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Foundation\Http\Middleware\HandlePrecognitiveRequests;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\URL;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +25,11 @@ class AppServiceProvider extends ServiceProvider
     {
         // Use Bootstrap for pagination
         Paginator::useBootstrap();
+
+        // Set the URL for the application
+        if (env('APP_ENV') !== 'local') {
+            URL::forceScheme('https');
+        }
 
         // Middleware global untuk web
         $this->app->router->middlewareGroup('web', [
