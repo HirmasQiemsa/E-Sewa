@@ -241,7 +241,7 @@
 
                                 @elseif($lastPengajuan->status === 'disetujui' && !$lastPengajuan->tgl_selesai->isPast())
                                     {{-- Kondisi: Disetujui dan event belum berakhir --}}
-                                    <a href="{{ route('user.riwayat') }}" onclick="loadRiwayat('event')"
+                                    <a href="{{ route('user.history') }}" onclick="loadRiwayat('event')"
                                         class="btn btn-success btn-lg rounded-pill font-weight-bold text-white px-5 shadow-sm">
                                         <i class="fas fa-calendar-check mr-2"></i> Event Saya
                                     </a>
