@@ -115,7 +115,7 @@ class RiwayatController extends Controller
      */
     public function history()
     {
-        return view('user.riwayat');
+        return view('User.riwayat');
     }
 
     /**
